@@ -78,7 +78,7 @@
         <label for="rg-u">Correo</label><input id="rg-u" name="email" type="email" autocomplete="username" required>
         <label for="rg-p">Contraseña</label><input id="rg-p" name="password" type="password" autocomplete="current-password" required>
         <button type="submit">Entrar</button><div class="e" id="rg-e"></div>
-        <p style="margin:6px 0 0;text-align:center"><a href="#" id="rg-forgot" style="color:#0B66C3;font-size:13px">¿Has olvidado la contraseña?</a></p></form>`;
+        <button type="button" id="rg-forgot" style="background:#fff;color:#0B66C3;border:1px solid #0B66C3;margin-top:10px">¿Has olvidado la contraseña?</button></form>`;
       document.body.appendChild(d);
       if (msg) d.querySelector('#rg-e').textContent = msg;
       d.querySelector('#rg-u').focus();
