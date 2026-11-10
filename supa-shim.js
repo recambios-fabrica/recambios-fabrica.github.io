@@ -160,7 +160,7 @@
       else { b.style.cssText += ';position:fixed;right:14px;top:10px;z-index:9999;background:#0B66C3'; document.body.appendChild(b); }
     };
     mk('Salir', 'Cerrar sesión', async () => {
-      try { await realFetch(URL0 + '/auth/v1/logout', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token } }); } catch (e) {}
+      try { await realFetch(URL0 + '/auth/v1/logout?scope=local', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token } }); } catch (e) {}
       saveSession(null); location.reload();
     });
     mk('Contraseña', 'Cambiar mi contraseña', () => showNewPassword(false));
