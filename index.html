@@ -936,7 +936,9 @@ async function init(){
 let _rt=null,_rk=new Set();
 function scheduleRender(k){ _rk.add(k); if(_rt) return; _rt=setTimeout(()=>{ _rt=null; const ks=_rk; _rk=new Set();
   if(S.tab!=='procedimiento' && S.tab!=='precios' && ks.has(S.tab) && !(S.imp.running&&S.tab!=='procedimiento'&&false)){
-    const a=document.activeElement; if(a&&(a.id==='q'||a.tagName==='SELECT')){renderNav();renderKpisOnly();renderBody();} else render(); }
+    const a=document.activeElement; const tw=document.querySelector('#view .tablewrap'), st=tw?tw.scrollTop:0, sl=tw?tw.scrollLeft:0, wy=window.scrollY;
+    if(a&&(a.id==='q'||a.tagName==='SELECT')){renderNav();renderKpisOnly();renderBody();} else render();
+    const tw2=document.querySelector('#view .tablewrap'); if(tw2){tw2.scrollTop=st;tw2.scrollLeft=sl;} window.scrollTo(0,wy); }
   else renderNav(); }, S.imp.running?700:60); }
 let _bfDone=false;
 async function backfillTextos(){

@@ -173,8 +173,12 @@
     const touched = new Set();
     for (const c of rows) {
       const m = cols[c.col] || (cols[c.col] = new Map());
-      if (c.deleted) m.delete(c.id); else m.set(c.id, { data: freeze(c.data), version: c.version });
-      touched.add(c.col); if (c.seq > seq) seq = c.seq;
+      if (c.seq > seq) seq = c.seq;
+      const cur = m.get(c.id);
+      // las filas que ya teníamos (mismo número de versión) no cuentan como cambio: así no se repinta la página
+      if (c.deleted) { if (!cur) continue; m.delete(c.id); }
+      else { if (cur && cur.version === c.version) continue; m.set(c.id, { data: freeze(c.data), version: c.version }); }
+      touched.add(c.col);
     }
     return touched;
   }
