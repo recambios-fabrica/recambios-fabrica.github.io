@@ -21,6 +21,8 @@
 
   // Fechas siempre en día laborable: sábado o domingo pasan al lunes siguiente
   const lab = d => { const r = new Date(d); const w = r.getDay(); if (w === 6) r.setDate(r.getDate() + 2); else if (w === 0) r.setDate(r.getDate() + 1); return r; };
+  // Próxima: si aún no se ha hecho la primera, la que viene después de la primera
+  const sig = it => { const f = +it.frecuencia || 0, ini = parse(it.inicio); if (!it.ultima && ini && f) return iso(lab(addM(ini, f))); return it._c ? it._c.prox : calc(it).prox; };
   function calc(it) {
     const u = parse(it.ultima), f = +it.frecuencia || 0, ini = parse(it.inicio);
     if (!(u && f) && !ini) return { prox: null, est: 'pend', dias: null };
@@ -134,11 +136,11 @@
   function lista(rows) {
     if (!P.items.length) return `<div class="rgp-tw"><div class="rgp-empty">Todavía no hay elementos.<br>Pulsa <b>+ Nuevo elemento</b> para añadir la primera puerta, tejado, extintor…</div></div>`;
     if (!rows.length) return `<div class="rgp-tw"><div class="rgp-empty">Nada con este filtro.</div></div>`;
-    return `<div class="rgp-tw"><table><thead><tr><th>Estado</th><th>Elemento</th><th>Ubicación</th><th>Tipo</th><th>Qué hay que hacer</th><th>Frecuencia</th><th>Última</th><th>Próxima</th><th>Responsable / empresa</th><th></th></tr></thead><tbody>
+    return `<div class="rgp-tw"><table><thead><tr><th>Estado</th><th>Elemento</th><th>Ubicación</th><th>Tipo</th><th>Qué hay que hacer</th><th>Frecuencia</th><th>Primera revisión</th><th>Última hecha</th><th>Próxima</th><th>Responsable / empresa</th><th></th></tr></thead><tbody>
       ${rows.map(it => { const [t, c, bg] = EST[it._c.est]; const dd = it._c.dias;
         return `<tr data-id="${esc(it.id)}" class="${it._c.est}"><td><span class="rgp-pill" style="color:${c};background:${bg}">${t}</span>${dd != null ? `<div style="font-size:11px;color:#55595e;margin-top:3px">${dd < 0 ? `hace ${-dd} días` : dd === 0 ? 'hoy' : `en ${dd} días`}</div>` : ''}</td>
         <td><b>${esc(it.nombre)}</b></td><td>${esc(it.zona)}</td><td>${esc(it.tipo)}</td><td style="max-width:320px">${esc(it.tarea)}</td>
-        <td>${esc(freqTxt(it.frecuencia))}</td><td>${fmt(it.ultima)}</td><td><b>${fmt(it._c.prox)}</b></td>
+        <td>${esc(freqTxt(it.frecuencia))}</td><td>${fmt(it.inicio)}</td><td>${fmt(it.ultima)}</td><td><b>${fmt(sig(it))}</b></td>
         <td>${esc(it.responsable)}${it.externa ? `<div style="font-size:12px;color:#55595e">${esc(it.externa)}</div>` : ''}</td>
         <td><button class="rgp-btn ok" data-done="${esc(it.id)}" title="Marcar revisión hecha">✓ Hecho</button></td></tr>`; }).join('')}
     </tbody></table></div>`;
