@@ -164,6 +164,7 @@
       saveSession(null); location.reload();
     });
     mk('Contraseña', 'Cambiar mi contraseña', () => showNewPassword(false));
+    if (me && me.admin && window.RG_PLAN) mk('🛠 Plan mant.', 'Plan de mantenimiento de instalaciones (solo administradores)', () => window.RG_PLAN.open());
     mk('↻ Sincronizar', 'Traer las OT de Fixner y los cambios del Excel', openSyncHelp);
     if (me && me.admin) mk('Importar copia', 'Cargar la copia descargada de la web de Claude', openImport);
   }
@@ -302,6 +303,13 @@
     }
     return realFetch(input, init);
   };
+  // archivos privados (p. ej. certificados del plan de mantenimiento, solo administradores)
+  window.RG_PRIV = Object.freeze({
+    async upload(bucket, blob, type) { const id = hex(16); await rest('POST', `/storage/v1/object/${bucket}/${id}`, blob, { 'Content-Type': type || blob.type || 'application/octet-stream', 'x-upsert': 'true' }); return id; },
+    async get(bucket, id) { const t = await token(); const r = await realFetch(`${URL0}/storage/v1/object/authenticated/${bucket}/${id}`, { headers: { apikey: KEY, Authorization: 'Bearer ' + t } }); if (!r.ok) throw new Error('No se pudo abrir el archivo'); return r.blob(); },
+    isAdmin: () => !!(me && me.admin),
+    me: () => (me ? { id: me.id, name: me.name } : null),
+  });
   const downloadsNs = Object.freeze({
     async save({ filename, data }) {
       const blob = data instanceof Blob ? data : new Blob([data]);
