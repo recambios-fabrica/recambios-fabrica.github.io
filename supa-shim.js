@@ -106,6 +106,7 @@
       try { await realFetch(URL0 + '/auth/v1/logout', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token } }); } catch (e) {}
       saveSession(null); location.reload();
     });
+    mk('↻ Sincronizar', 'Traer las OT de Fixner y los cambios del Excel', openSyncHelp);
     if (me && me.admin) mk('Importar copia', 'Cargar la copia descargada de la web de Claude', openImport);
   }
 
@@ -254,6 +255,34 @@
       return { db: dbNs, user: userNs, assets: assetsNs, downloads: downloadsNs }[name] || null;
     },
   });
+
+  /* ---------- ayuda del botón de sincronizar ---------- */
+  function openSyncHelp() {
+    if (document.getElementById('rg-sh')) return;
+    const fx = 'https://app3.fixner.com/fixner.html#ordenTrabajoList:';
+    const xl = 'https://garciadepou0-my.sharepoint.com/:x:/r/personal/electrico_fabrica02_garciadepou_com/_layouts/15/Doc.aspx?sourcedoc=%7BCD8987E5-3CF6-49B5-8285-38FFEED9F8BD%7D&action=default';
+    let last = '';
+    const meta = cols.fixner_ots && cols.fixner_ots.get('_meta');
+    if (meta && meta.data && meta.data.sincronizado) last = new Date(meta.data.sincronizado).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+    const d = document.createElement('div'); d.id = 'rg-sh';
+    d.innerHTML = `<div style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:14px/1.5 'IBM Plex Sans',system-ui,sans-serif">
+      <div style="background:#fff;color:#1c1f22;border-radius:12px;padding:22px 24px;width:min(560px,94vw)">
+      <h3 style="margin:0 0 6px">Sincronizar con Fixner y el Excel</h3>
+      ${last ? `<p style="margin:0 0 12px;color:#55595e">Última lectura de Fixner: <b>${last}</b></p>` : ''}
+      <p style="margin:0 0 8px"><b>1. Una sola vez:</b> arrastra este botón a la barra de marcadores de Chrome (si no la ves: Ctrl+Mayús+B).</p>
+      <p style="margin:0 0 14px;text-align:center"><a id="rg-bm" style="display:inline-block;background:#0B66C3;color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:600;cursor:grab">↻ Recambios</a></p>
+      <p style="margin:0 0 6px"><b>2. Cuando quieras actualizar:</b></p>
+      <ul style="margin:0 0 14px;padding-left:20px">
+        <li>Abre <a href="${fx}" target="_blank" rel="noopener">Fixner</a> (listado de órdenes de trabajo) y pulsa <b>↻ Recambios</b> en la barra de marcadores: trae las OT bloqueadas y de material almacén.</li>
+        <li>Abre <a href="${xl}" target="_blank" rel="noopener">el Excel</a> y pulsa <b>↻ Recambios</b>: trae las filas nuevas o cambiadas.</li>
+      </ul>
+      <p style="margin:0 0 14px;color:#55595e;font-size:13px">Nunca se borra ni se pisa lo que ya está en la web: solo se añaden pedidos nuevos y se rellenan los huecos.</p>
+      <div style="text-align:right"><button id="rg-sh-c" style="padding:8px 14px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer">Cerrar</button></div></div></div>`;
+    document.body.appendChild(d);
+    const a = d.querySelector('#rg-bm'); a.href = window.RG_BOOKMARKLET || '#';
+    a.onclick = e => { e.preventDefault(); alert('Arrástralo a la barra de marcadores (no hace falta pulsarlo aquí).'); };
+    d.querySelector('#rg-sh-c').onclick = () => d.remove();
+  }
 
   /* ---------- importar la copia de la web de Claude (solo administradores) ---------- */
   function openImport() {
