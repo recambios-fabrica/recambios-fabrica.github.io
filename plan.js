@@ -19,10 +19,12 @@
   const freqTxt = n => (FREQ.find(f => f[0] === +n) || [0, n ? `Cada ${n} meses` : '—'])[1];
   const newId = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+  // Fechas siempre en día laborable: sábado o domingo pasan al lunes siguiente
+  const lab = d => { const r = new Date(d); const w = r.getDay(); if (w === 6) r.setDate(r.getDate() + 2); else if (w === 0) r.setDate(r.getDate() + 1); return r; };
   function calc(it) {
-    const u = parse(it.ultima), f = +it.frecuencia || 0;
-    if (!u || !f) return { prox: null, est: 'pend', dias: null };
-    const p = addM(u, f); const dias = Math.round((p - parse(hoy())) / 864e5);
+    const u = parse(it.ultima), f = +it.frecuencia || 0, ini = parse(it.inicio);
+    if (!(u && f) && !ini) return { prox: null, est: 'pend', dias: null };
+    const p = lab(u && f ? addM(u, f) : ini); const dias = Math.round((p - parse(hoy())) / 864e5);
     return { prox: iso(p), dias, est: dias < 0 ? 'venc' : dias <= 30 ? 'toca' : 'ok' };
   }
   const EST = { venc: ['Vencida', '#b42318', '#fde8e6'], toca: ['Toca ya', '#b54708', '#fff1e0'], ok: ['Al día', '#1a7f37', '#e6f4ea'], pend: ['Sin fecha', '#55595e', '#ecebe7'] };
@@ -115,6 +117,7 @@
         <input id="rgp-q" placeholder="Buscar (puerta, nave, empresa…)" value="${esc(P.q)}" style="min-width:240px">
         <select id="rgp-t"><option value="">Todos los tipos</option>${tipos.map(t => `<option ${P.tipo === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
         <span style="flex:1"></span>
+        <button class="rgp-btn sec" id="rgp-pl">🗺 Plano de puertas</button>
         <button class="rgp-btn sec" id="rgp-v">${P.vista === 'lista' ? '📅 Ver calendario' : '📋 Ver lista'}</button>
       </div>
       ${P.vista === 'lista' ? lista(rows) : calendario(rows)}`;
@@ -122,6 +125,7 @@
     m.querySelector('#rgp-new').onclick = () => edit(null);
     const q = m.querySelector('#rgp-q'); q.oninput = () => { P.q = q.value; const pos = q.selectionStart; draw(); const q2 = document.getElementById('rgp-q'); q2.focus(); q2.setSelectionRange(pos, pos); };
     m.querySelector('#rgp-t').onchange = e => { P.tipo = e.target.value; draw(); };
+    m.querySelector('#rgp-pl').onclick = () => plano();
     m.querySelector('#rgp-v').onclick = () => { P.vista = P.vista === 'lista' ? 'cal' : 'lista'; draw(); };
     m.querySelectorAll('[data-id]').forEach(el => el.onclick = ev => { if (ev.target.closest('[data-done]')) return; edit(el.dataset.id); });
     m.querySelectorAll('[data-done]').forEach(b => b.onclick = ev => { ev.stopPropagation(); hecho(b.dataset.done); });
@@ -147,17 +151,18 @@
     const venc = [];
     for (const it of rows) {
       const c = it._c; if (!c.prox) continue;
-      let p = parse(c.prox); const f = +it.frecuencia || 0;
-      if (p < start) { venc.push(it); p = start; }
-      for (let k = 0; k < 60 && f; k++) {
-        const idx = (p.getFullYear() - start.getFullYear()) * 12 + p.getMonth() - start.getMonth();
-        if (idx > 11) break; if (idx >= 0) by[idx].push(it);
-        p = addM(p, f);
+      const p0 = parse(c.prox); const f = +it.frecuencia || 0; let p = p0;
+      if (p0 < start) venc.push(it);
+      for (let k = 0; k < 60; k++) {
+        const q = k ? lab(p) : p;
+        const idx = (q.getFullYear() - start.getFullYear()) * 12 + q.getMonth() - start.getMonth();
+        if (idx > 11) break; if (idx >= 0 && q >= start) by[idx].push({ it, d: iso(q) });
+        if (!f) break; p = addM(p0, f * (k + 1));
       }
     }
     return `${venc.length ? `<div class="rgp-tw" style="padding:10px 14px;margin-bottom:12px;border-color:#f5c2bd;background:#fff6f5"><b style="color:#b42318">Vencidas (${venc.length}):</b> ${venc.map(it => `<a data-id="${esc(it.id)}" style="cursor:pointer;color:#b42318;text-decoration:underline;margin-right:10px">${esc(it.nombre)}</a>`).join('')}</div>` : ''}
       <div class="rgp-cal">${months.map((d, i) => `<div class="m"><h4><span>${MESES[d.getMonth()]} ${d.getFullYear()}</span><span style="color:#55595e;font-weight:400">${by[i].length}</span></h4>
-        ${by[i].length ? `<ul>${by[i].map(it => `<li data-id="${esc(it.id)}">${esc(it.nombre)}${it.externa ? ` <span style="color:#55595e">· ${esc(it.externa)}</span>` : ''}</li>`).join('')}</ul>` : '<div style="color:#9a9a92;font-size:13px">Nada</div>'}</div>`).join('')}</div>`;
+        ${by[i].length ? `<ul>${by[i].sort((a, b) => a.d.localeCompare(b.d) || String(a.it.nombre).localeCompare(String(b.it.nombre))).map(({ it, d }) => `<li data-id="${esc(it.id)}"><b style="color:#55595e">${d.slice(8)}/${d.slice(5, 7)}</b> ${esc(it.nombre)}${it.externa ? ` <span style="color:#55595e">· ${esc(it.externa)}</span>` : ''}</li>`).join('')}</ul>` : '<div style="color:#9a9a92;font-size:13px">Nada</div>'}</div>`).join('')}</div>`;
   }
 
   function modal(html) {
@@ -179,6 +184,7 @@
         <div class="full"><label>Qué hay que hacer</label><textarea name="tarea" placeholder="Revisar motor, fotocélulas y finales de carrera…">${esc(it.tarea)}</textarea></div>
         <div><label>Frecuencia</label><select name="frecuencia">${FREQ.map(([v, t]) => `<option value="${v}" ${+it.frecuencia === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
         <div><label>Última revisión</label><input type="date" name="ultima" value="${esc(it.ultima || '')}"></div>
+        <div><label>Primera revisión (si aún no hay ninguna)</label><input type="date" name="inicio" value="${esc(it.inicio || '')}"></div><div></div>
         <div><label>Responsable</label><input name="responsable" value="${esc(it.responsable)}" placeholder="Jose, Joan…"></div>
         <div><label>Empresa externa</label><input name="externa" value="${esc(it.externa)}" placeholder="Mantenedor autorizado…"></div>
         <div class="full"><label>Notas</label><textarea name="notas">${esc(it.notas)}</textarea></div>
@@ -195,7 +201,7 @@
     d.querySelector('form').onsubmit = async ev => {
       ev.preventDefault();
       const f = new FormData(ev.target); const o = {};
-      for (const k of ['nombre', 'zona', 'tipo', 'tarea', 'ultima', 'responsable', 'externa', 'notas']) o[k] = String(f.get(k) || '').trim();
+      for (const k of ['nombre', 'zona', 'tipo', 'tarea', 'ultima', 'inicio', 'responsable', 'externa', 'notas']) o[k] = String(f.get(k) || '').trim();
       o.frecuencia = +f.get('frecuencia') || 12;
       if (!o.nombre) return;
       if (id) await P.db.collection(COL).doc(id).update(o);
@@ -223,6 +229,27 @@
         const ultima = !it.ultima || fecha >= it.ultima ? fecha : it.ultima;
         await P.db.collection(COL).doc(id).update({ ultima, historial: [...(it.historial || []), h] });
         d.remove();
+      } catch (e) { msg.style.color = '#b42318'; msg.textContent = e.message || String(e); }
+    };
+  }
+
+  async function plano() {
+    let cfg = null; try { const g = await P.db.collection('plan_config').doc('plano').get(); cfg = g.exists ? g.data() : null; } catch (e) {}
+    const d = modal(`<h3>🗺 Plano de puertas</h3>
+      ${cfg && cfg.file ? `<p style="margin:6px 0 14px">Plano actual: <b>${esc(cfg.file.nombre)}</b> <span style="color:#55595e;font-size:12px">(${fmt(cfg.fecha)})</span></p>
+        <button type="button" class="rgp-btn" id="rgp-ab">Abrir plano</button>` : '<p style="color:#55595e">Todavía no hay plano subido.</p>'}
+      <div style="margin-top:16px"><label>${cfg && cfg.file ? 'Cambiar por otro plano' : 'Subir plano'} (PDF o imagen)</label><input type="file" name="file" id="rgp-plf" accept=".pdf,image/*"></div>
+      <div id="rgp-m" style="min-height:18px;font-size:13px;color:#55595e;margin-top:8px"></div>
+      <div class="acts"><button type="button" class="rgp-btn sec" id="rgp-c">Cerrar</button><button type="submit" class="rgp-btn">Subir</button></div>`);
+    d.querySelector('#rgp-c').onclick = () => d.remove();
+    const ab = d.querySelector('#rgp-ab'); if (ab) ab.onclick = () => verArchivo(cfg.file.id, cfg.file.nombre);
+    d.querySelector('form').onsubmit = async ev => {
+      ev.preventDefault(); const file = d.querySelector('#rgp-plf').files[0]; const msg = d.querySelector('#rgp-m');
+      if (!file) { msg.textContent = 'Elige un archivo.'; return; }
+      try { msg.textContent = 'Subiendo…'; if (file.size > 20 * 1024 * 1024) throw new Error('Archivo demasiado grande (máx. 20 MB)');
+        const id = await RG_PRIV.upload('plan', file, file.type);
+        await P.db.collection('plan_config').doc('plano').set({ file: { id, nombre: file.name, type: file.type }, fecha: hoy() });
+        d.remove(); plano();
       } catch (e) { msg.style.color = '#b42318'; msg.textContent = e.message || String(e); }
     };
   }
