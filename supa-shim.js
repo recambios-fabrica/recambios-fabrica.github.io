@@ -77,10 +77,12 @@
         <h1>Recambios y reparaciones · Mantenimiento</h1>
         <label for="rg-u">Correo</label><input id="rg-u" name="email" type="email" autocomplete="username" required>
         <label for="rg-p">Contraseña</label><input id="rg-p" name="password" type="password" autocomplete="current-password" required>
-        <button type="submit">Entrar</button><div class="e" id="rg-e"></div></form>`;
+        <button type="submit">Entrar</button><div class="e" id="rg-e"></div>
+        <p style="margin:6px 0 0;text-align:center"><a href="#" id="rg-forgot" style="color:#0B66C3;font-size:13px">¿Has olvidado la contraseña?</a></p></form>`;
       document.body.appendChild(d);
       if (msg) d.querySelector('#rg-e').textContent = msg;
       d.querySelector('#rg-u').focus();
+      d.querySelector('#rg-forgot').onclick = ev => { ev.preventDefault(); showForgot(d.querySelector('#rg-u').value.trim()); };
       d.querySelector('form').onsubmit = async ev => {
         ev.preventDefault();
         const e = d.querySelector('#rg-e'); e.textContent = '';
@@ -91,6 +93,61 @@
       };
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  }
+
+  /* ---------- recuperar / cambiar contraseña ---------- */
+  const SITE = location.origin + location.pathname;
+  function modal(html) {
+    const old = document.getElementById('rg-pw'); if (old) old.remove();
+    const d = document.createElement('div'); d.id = 'rg-pw';
+    d.innerHTML = `<div style="position:fixed;inset:0;z-index:100001;background:rgba(11,102,195,.75);display:flex;align-items:center;justify-content:center;font:15px 'IBM Plex Sans',system-ui,sans-serif">
+      <form style="background:#fff;color:#1c1f22;border-radius:14px;padding:26px 26px;width:min(380px,92vw);box-shadow:0 10px 40px rgba(0,0,0,.25)">${html}</form></div>`;
+    document.body.appendChild(d);
+    d.querySelectorAll('input').forEach(i => i.style.cssText = 'width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #dddbd4;border-radius:8px;font:inherit;margin:4px 0 8px');
+    d.querySelectorAll('button').forEach(b => b.style.cssText = 'padding:10px 14px;border:0;border-radius:8px;font:600 14px inherit;cursor:pointer;' + (b.dataset.sec ? 'background:#fff;color:#1c1f22;border:1px solid #dddbd4' : 'background:#e8590c;color:#fff'));
+    return d;
+  }
+  function showForgot(email) {
+    const d = modal(`<h3 style="margin:0 0 8px">Recuperar la contraseña</h3>
+      <p style="margin:0 0 10px;color:#55595e;font-size:14px">Escribe tu correo y te enviaremos un enlace para poner una contraseña nueva (puede ser la misma de antes).</p>
+      <label style="font-size:13px;color:#55595e">Correo</label><input id="rg-f-e" type="email" required value="${String(email || '').replace(/"/g, '')}">
+      <div id="rg-f-m" style="min-height:18px;font-size:13px;margin:4px 0 10px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-sec="1" id="rg-f-c">Volver</button><button type="submit">Enviar enlace</button></div>`);
+    d.querySelector('#rg-f-c').onclick = () => d.remove();
+    d.querySelector('form').onsubmit = async ev => {
+      ev.preventDefault(); const m = d.querySelector('#rg-f-m');
+      try {
+        const r = await realFetch(`${URL0}/auth/v1/recover?redirect_to=${encodeURIComponent(SITE)}`, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: d.querySelector('#rg-f-e').value.trim() }) });
+        if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.msg || j.message || j.error_description || ('Error ' + r.status)); }
+        m.style.color = '#1a7f37'; m.textContent = 'Listo. Si el correo está dado de alta, en unos minutos te llegará un correo con el enlace. Revisa también el correo no deseado.';
+      } catch (x) {
+        m.style.color = '#b42318';
+        m.textContent = /rate|limit/i.test(x.message) ? 'Se han pedido demasiados enlaces. Espera un rato y vuelve a intentarlo.' : /not authorized/i.test(x.message) ? 'El envío de correos aún no está configurado. Pide a Jowel que te cambie la contraseña.' : 'No se pudo enviar: ' + x.message;
+      }
+    };
+  }
+  function showNewPassword(fromRecovery) {
+    const d = modal(`<h3 style="margin:0 0 8px">${fromRecovery ? 'Pon tu contraseña' : 'Cambiar contraseña'}</h3>
+      <p style="margin:0 0 10px;color:#55595e;font-size:14px">Mínimo 6 caracteres. Puedes volver a poner la misma de antes.</p>
+      <label style="font-size:13px;color:#55595e">Contraseña nueva</label><input id="rg-n-1" type="password" autocomplete="new-password" minlength="6" required>
+      <label style="font-size:13px;color:#55595e">Repítela</label><input id="rg-n-2" type="password" autocomplete="new-password" minlength="6" required>
+      <div id="rg-n-m" style="min-height:18px;font-size:13px;margin:4px 0 10px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">${fromRecovery ? '' : '<button type="button" data-sec="1" id="rg-n-c">Cancelar</button>'}<button type="submit">Guardar</button></div>`);
+    const c = d.querySelector('#rg-n-c'); if (c) c.onclick = () => d.remove();
+    d.querySelector('form').onsubmit = async ev => {
+      ev.preventDefault(); const m = d.querySelector('#rg-n-m'); m.style.color = '#b42318';
+      const p1 = d.querySelector('#rg-n-1').value, p2 = d.querySelector('#rg-n-2').value;
+      if (p1 !== p2) { m.textContent = 'Las dos contraseñas no coinciden.'; return; }
+      try {
+        const t = await token();
+        const r = await realFetch(URL0 + '/auth/v1/user', { method: 'PUT', headers: { apikey: KEY, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: JSON.stringify({ password: p1 }) });
+        const j = await r.json().catch(() => ({}));
+        // si es la misma que ya tenía, Supabase lo indica: se da por buena igualmente
+        if (!r.ok && !(j.error_code === 'same_password' || /same|different from the old/i.test(j.msg || j.message || ''))) throw new Error(j.msg || j.message || ('Error ' + r.status));
+        m.style.color = '#1a7f37'; m.textContent = 'Contraseña guardada. Ya puedes usarla.';
+        setTimeout(() => { d.remove(); if (fromRecovery) location.replace(SITE); }, 1200);
+      } catch (x) { m.textContent = /weak|least/i.test(x.message) ? 'Contraseña demasiado corta (mínimo 6 caracteres).' : 'No se pudo guardar: ' + x.message; }
+    };
   }
 
   function addHeaderButtons() {
@@ -106,6 +163,7 @@
       try { await realFetch(URL0 + '/auth/v1/logout', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token } }); } catch (e) {}
       saveSession(null); location.reload();
     });
+    mk('Contraseña', 'Cambiar mi contraseña', () => showNewPassword(false));
     mk('↻ Sincronizar', 'Traer las OT de Fixner y los cambios del Excel', openSyncHelp);
     if (me && me.admin) mk('Importar copia', 'Cargar la copia descargada de la web de Claude', openImport);
   }
@@ -330,6 +388,21 @@
   /* ---------- arranque ---------- */
   (async () => {
     loadSession();
+    // vuelta desde el enlace de "recuperar contraseña" (#access_token=…&type=recovery)
+    let recovering = false;
+    if (/access_token=/.test(location.hash)) {
+      const h = new URLSearchParams(location.hash.slice(1));
+      if (h.get('access_token')) {
+        let user = null;
+        try { user = await (await realFetch(URL0 + '/auth/v1/user', { headers: { apikey: KEY, Authorization: 'Bearer ' + h.get('access_token') } })).json(); } catch (e) {}
+        keepSession({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_at: +h.get('expires_at') || 0, expires_in: +h.get('expires_in') || 3600, user });
+        recovering = h.get('type') === 'recovery';
+      }
+      history.replaceState(null, '', location.pathname + location.search);
+    } else if (/error_description=/.test(location.hash)) {
+      const h = new URLSearchParams(location.hash.slice(1)); history.replaceState(null, '', location.pathname + location.search);
+      showLogin('El enlace no es válido o ha caducado. Pide uno nuevo con «¿Has olvidado la contraseña?».'); return;
+    }
     if (!URL0 || !KEY) { showLogin('Falta configurar config.js (dirección y clave pública de Supabase).'); return; }
     if (!session) { showLogin(); return; }
     try { await token(); } catch (e) { showLogin('La sesión ha caducado. Vuelve a entrar.'); return; }
@@ -346,6 +419,7 @@
       else await rest('POST', '/rest/v1/people', { id: u.id, name, email }, { Prefer: 'resolution=merge-duplicates,return=minimal' });
     } catch (e) { /* no es imprescindible */ }
     readyResolve();
+    if (recovering) { const go = () => showNewPassword(true); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go(); }
     const start = () => { addHeaderButtons(); setInterval(sync, POLL_MS); document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); }); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   })();
