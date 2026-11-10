@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedidos de recambios · Mantenimiento</title>
+<link rel="icon" href="logo.png">
+<script src="config.js"></script>
+<script src="supa-shim.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f3f2ee; --panel:#ffffff; --ink:#1c1f22; --ink2:#55595e; --ink3:#8a8e93;
+  --line:#dddbd4; --line2:#ebe9e3; --accent:#e8590c; --accent-ink:#ffffff;
+  --blue:#1d5fa8; --blue-bg:#e6eef8; --amber:#9a6300; --amber-bg:#fbefd5;
+  --red:#b42318; --red-bg:#fde7e5; --green:#2b7a3d; --green-bg:#e3f2e6;
+  --grey-bg:#ecebe7; --purple:#6a3fc2; --purple-bg:#efe7fc; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#16181a; --panel:#1f2225; --ink:#ecebe7; --ink2:#a9adb2; --ink3:#767a80;
+  --line:#33373b; --line2:#2a2d31; --accent:#f76b1c;
+  --blue:#7fb0ea; --blue-bg:#1d2a3a; --amber:#e8b44f; --amber-bg:#352a14;
+  --red:#f1867b; --red-bg:#3a1f1c; --green:#7ccf8e; --green-bg:#1c3122; --grey-bg:#2a2d31; --purple:#c4a6ff; --purple-bg:#2c2242;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.3);
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "IBM Plex Sans",system-ui,sans-serif}
+body{background:linear-gradient(rgba(243,242,238,.84),rgba(243,242,238,.84)),url(fondo.jpg) center/cover fixed no-repeat,var(--bg)}
+@media (prefers-color-scheme:dark){body{background:linear-gradient(rgba(22,24,26,.86),rgba(22,24,26,.86)),url(fondo.jpg) center/cover fixed no-repeat,var(--bg)}}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:20;background:#0B66C3;color:#fff}
+@media (prefers-color-scheme:dark){header{background:#0a58a8}}
+.hbar{display:flex;align-items:center;gap:18px;padding:12px 22px 0;max-width:1600px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.brand .logo{height:26px;width:auto;display:block}
+.brand .bsep{width:1px;height:22px;background:rgba(255,255,255,.35);margin:0 4px}
+.brand small{font-weight:400;color:#cfe0f4;margin-left:4px}
+.who{margin-left:auto;font-size:12px;color:#d6e6f7}
+nav{display:flex;gap:2px;padding:10px 22px 0;max-width:1600px;margin:0 auto;overflow-x:auto}
+nav button{background:none;border:0;color:#d6e6f7;padding:9px 14px 11px;cursor:pointer;border-radius:6px 6px 0 0;white-space:nowrap;font-weight:500}
+nav button:hover{color:#fff}
+nav button.on{background:var(--bg);color:var(--ink)}
+nav button .n{font:500 11px "IBM Plex Mono",monospace;margin-left:6px;padding:1px 6px;border-radius:9px;background:rgba(255,255,255,.2)}
+nav button.on .n{background:#0B66C3;color:#fff}
+main{max-width:1600px;margin:0 auto;padding:18px 22px 60px}
+.notice{padding:10px 14px;border-radius:8px;background:var(--amber-bg);color:var(--amber);margin-bottom:14px;display:none}
+.notice.show{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;text-align:left;transition:border-color .15s}
+.kpi:hover{border-color:var(--ink3)}
+.kpi.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.kpi b{display:block;font:600 26px/1.1 "IBM Plex Sans Condensed",sans-serif}
+.kpi span{font-size:12px;color:var(--ink2)}
+.kpi.warn b{color:var(--red)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.search{flex:1 1 260px;position:relative}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+select.f{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);max-width:190px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.danger{color:var(--red)}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:default}
+label.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);cursor:pointer;user-select:none}
+.tablewrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:calc(100vh - 290px);min-height:240px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:13.5px}
+thead th{position:sticky;top:0;background:var(--panel);text-align:left;font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;z-index:1}
+thead th:hover{color:var(--ink)}
+thead th.cmp{width:1%}
+thead th.wide{width:30%}
+td.date,td.mono,td.np{width:1%;white-space:nowrap}
+td.mono{max-width:130px;overflow:hidden;text-overflow:ellipsis}
+td.strong{min-width:170px}
+thead th .ar{color:var(--accent);margin-left:3px}
+tbody td{padding:8px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--bg)}
+td.mono{font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:nowrap}
+td.date{white-space:nowrap;color:var(--ink2)}
+td.date.late{color:var(--red);font-weight:600}
+td.wrap{min-width:180px;color:var(--ink2)}
+td.strong{font-weight:600}
+.clip{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font:600 11px "IBM Plex Sans",sans-serif;white-space:nowrap}
+.p-pend{background:var(--amber-bg);color:var(--amber)}
+.p-ped{background:var(--blue-bg);color:var(--blue)}
+.p-late{background:var(--red-bg);color:var(--red)}
+.p-rec{background:var(--green-bg);color:var(--green)}
+.p-presu{background:var(--purple-bg);color:var(--purple)}
+.p-ok{background:var(--grey-bg);color:var(--ink2)}
+.p-nook{background:var(--red);color:#fff}
+.p-anul{background:var(--grey-bg);color:var(--ink3);text-decoration:line-through}
+.empty{padding:50px 20px;text-align:center;color:var(--ink3)}
+.foot{display:flex;justify-content:space-between;color:var(--ink3);font-size:12px;margin-top:8px}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,12,14,.38);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.scrim.show{opacity:1;pointer-events:auto}
+aside{position:fixed;top:0;right:0;bottom:0;width:min(620px,100vw);background:var(--panel);z-index:50;transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+aside.show{transform:none}
+.dh{padding:18px 22px 12px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.dh h2{margin:0;font-size:18px;line-height:1.25}
+.dh .sub{color:var(--ink3);font-size:12px;margin-top:3px}
+.dh .x{margin-left:auto;background:none;border:0;font-size:22px;line-height:1;cursor:pointer;color:var(--ink2);padding:2px 6px}
+.quick{display:flex;flex-wrap:wrap;gap:6px;padding:12px 22px;border-bottom:1px solid var(--line);background:var(--bg)}
+.quick span{font-size:12px;color:var(--ink2);align-self:center;margin-right:4px}
+.db{flex:1;overflow:auto;padding:16px 22px 22px}
+fieldset{border:0;margin:0 0 16px;padding:0}
+legend{font:600 11px "IBM Plex Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;padding:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld.full{grid-column:1/-1}
+.fld label{font-size:12px;color:var(--ink2);font-weight:500}
+.fld input,.fld textarea,.fld select{border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--panel);width:100%}
+.fld textarea{min-height:64px;resize:vertical}
+.fld input:focus,.fld textarea:focus,.fld select:focus,.search input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.dwrap{display:flex;gap:6px}
+.dwrap input{flex:1}
+.dwrap button{flex:none}
+.hint{font-size:11px;color:var(--ink3)}
+.df{border-top:1px solid var(--line);padding:12px 22px;display:flex;gap:8px;align-items:center}
+.df .sp{flex:1}
+.meta{font-size:11.5px;color:var(--ink3)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;transition:all .2s;z-index:60;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.confirm{display:none;gap:8px;align-items:center;font-size:13px}
+.confirm.show{display:flex}
+/* procedure */
+.proc{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.card h3{margin:0 0 10px;font-size:15px}
+.card ol{margin:0;padding-left:0;list-style:none;counter-reset:s}
+.card li{counter-increment:s;position:relative;padding:6px 0 6px 38px;border-top:1px solid var(--line2)}
+.card li:first-child{border-top:0}
+.card li::before{content:counter(s);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:var(--grey-bg);display:grid;place-items:center;font-weight:600;font-size:12px}
+.card li b{display:block}
+.card li em{font-style:normal;color:var(--ink2);font-size:13px}
+.card ol.legend li{padding-left:0}.card ol.legend li::before{display:none}.card ol.legend .pill{min-width:112px;text-align:center;margin-right:8px}
+.imp p{color:var(--ink2);font-size:13px;margin:0 0 10px}.bar{display:none;height:6px;background:var(--grey-bg);border-radius:4px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.ot{display:inline-block;font:500 11.5px "IBM Plex Mono",monospace;padding:1px 6px;border-radius:5px;margin:1px 0;white-space:nowrap}
+td.ots{max-width:120px}
+.clip-n{display:inline-flex;align-items:center;gap:3px;font:600 12px "IBM Plex Sans",sans-serif;color:var(--purple);background:var(--purple-bg);padding:2px 8px;border-radius:20px}
+.nop{color:var(--ink3)}
+.presu{margin:12px 22px 0;border:1px dashed var(--purple);border-radius:9px;padding:10px 12px;background:var(--purple-bg)}
+.presu.drag{outline:2px solid var(--purple)}
+.presu h4{margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);display:flex;justify-content:space-between;align-items:center}
+.pz{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(106,63,194,.15);font-size:13px}
+.pz:last-of-type{border-bottom:0}
+.pz a{color:var(--ink);font-weight:500;text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz a:hover{text-decoration:underline;color:var(--purple)}
+.pz .hint{white-space:nowrap}
+.pz button{background:none;border:0;color:var(--ink3);cursor:pointer;font-size:16px;padding:0 4px}.pz button:hover{color:var(--red)}
+.pbtn{display:inline-flex;align-items:center;gap:6px;background:var(--purple);color:#fff;border:0;border-radius:7px;padding:5px 11px;font:600 12px "IBM Plex Sans",sans-serif;cursor:pointer}
+.pbtn:disabled{opacity:.5}
+.fix{margin:12px 22px 0;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--bg)}
+.fixrow{padding:6px 0;border-bottom:1px solid var(--line2)}.fixrow:last-of-type{border-bottom:0}
+.otlink{color:inherit;text-decoration:none}.otlink:hover b{color:var(--blue);text-decoration:underline}
+.fixd{margin:3px 0 2px;font-size:13px}
+.fixfoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}.fixfoot a{color:var(--blue);font-weight:500;font-size:13px;text-decoration:none}
+.auto{font:600 9.5px "IBM Plex Sans",sans-serif;letter-spacing:.05em;background:var(--blue);color:#fff;padding:1px 5px;border-radius:3px;vertical-align:2px}
+.viewer{position:fixed;inset:0;z-index:70;background:rgba(10,12,14,.82);display:none;flex-direction:column}
+.viewer.show{display:flex}
+.vh{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.vh b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vh .sp{flex:1}
+.vb{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.vb canvas,.vb img{max-width:min(1000px,100%);height:auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.vb .vmsg{color:#fff;margin-top:40px;text-align:center}
+@keyframes urgblink{0%,100%{background:var(--red-bg)}50%{background:transparent}}
+@keyframes urgpill{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes navblink{0%,100%{background:var(--red);color:#fff}50%{background:transparent;color:#ff9b91}}
+tbody tr.urg td{animation:urgblink 1.1s ease-in-out infinite}
+tbody tr.urg td:first-child{box-shadow:inset 4px 0 0 var(--red)}
+.p-urg{background:var(--red);color:#fff;margin-left:4px;animation:urgpill 1.1s ease-in-out infinite}
+nav button.navurg{animation:navblink 1.1s ease-in-out infinite}
+nav button.navurg.on{animation:none;box-shadow:inset 0 -3px 0 var(--red)}
+.kpi.urgk{border-color:var(--red)}.kpi.urgk b{color:var(--red)}
+.kpi.urgk.blink{animation:urgblink 1.1s ease-in-out infinite}
+@keyframes presublink{0%,100%{background:var(--purple-bg);border-color:var(--purple)}50%{background:var(--panel);border-color:var(--line)}}
+.kpi.presuk{animation:presublink 1.4s ease-in-out infinite}
+.kpi.presuk b{color:var(--purple)}
+.urgchk{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-weight:700;color:var(--ink2)}
+.urgchk input{width:18px;height:18px;accent-color:var(--red)}
+.urgchk em{font-style:normal;font-weight:400;font-size:12px;color:var(--ink3)}
+.urgchk.on{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+@media (prefers-reduced-motion:reduce){tbody tr.urg td,.p-urg,nav button.navurg,.kpi.urgk.blink,.kpi.presuk{animation-duration:2.4s}}
+.hist{margin:0 22px 18px;font-size:12.5px;color:var(--ink2)}
+.hist summary{cursor:pointer;font-weight:600;color:var(--ink2);padding:6px 0}
+.hrow{display:grid;grid-template-columns:112px 120px 1fr auto;gap:8px;align-items:center;padding:5px 0;border-top:1px solid var(--line2);font-size:12.5px}
+.prow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:7px 0;border-top:1px solid var(--line2);font-size:12.5px}.prow span:first-child{color:var(--ink3)}.prow b{grid-column:1}.prow span:nth-of-type(2){grid-column:1}.prow button{grid-column:2;grid-row:1/4}
+.hrow em{font-style:normal;color:var(--ink3)}
+.arow{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line2)}
+.arow.rev{opacity:.55}
+.arr{font:600 12.5px "IBM Plex Mono",monospace;white-space:nowrap}
+.arr.up{color:var(--red)}.arr.down{color:var(--green)}
+.aact{display:flex;gap:6px;align-items:center}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:12px}
+tr.prod{cursor:pointer}
+nav button.navalert .n{background:#ffcf33;color:#3a2a00}
+.who-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue);margin-left:6px}
+.warnbox{border-left:3px solid var(--red);padding:8px 12px;background:var(--red-bg);color:var(--red);border-radius:0 6px 6px 0;margin-top:10px;font-size:13px}
+@media (max-width:720px){
+  .hbar,nav,main{padding-left:12px;padding-right:12px}
+  .grid{grid-template-columns:1fr}
+  .tablewrap{max-height:none}
+  .brand small{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="brand"><img src="logo.png" alt="Garcia de Pou" class="logo"><span class="bsep"></span>Recambios y reparaciones <small>· Mantenimiento</small></div>
+    <div class="who" id="who"></div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <div class="notice" id="notice"></div>
+  <div id="view"></div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside id="drawer" aria-hidden="true">
+  <div class="dh"><div><h2 id="dTitle"></h2><div class="sub" id="dSub"></div></div><button class="x" id="dClose" aria-label="Cerrar">×</button></div>
+  <div class="quick" id="dQuick"></div><div id="dPresu"></div><div id="dFix"></div>
+  <form class="db" id="dForm" autocomplete="off"></form><div id="dHist"></div>
+  <div class="df">
+    <button class="btn danger" id="dDel" type="button">Eliminar</button>
+    <div class="confirm" id="dConfirm">¿Seguro? <button class="btn sm danger" id="dDelYes" type="button">Sí, eliminar</button><button class="btn sm" id="dDelNo" type="button">No</button></div>
+    <span class="meta" id="dMeta"></span>
+    <span class="sp"></span>
+    <button class="btn" id="dCancel" type="button">Cancelar</button>
+    <button class="btn primary" id="dSave" type="button">Guardar</button>
+  </div>
+</aside>
+<div class="viewer" id="viewer" aria-hidden="true"><div class="vh"><b id="vName"></b><span class="sp"></span><button class="btn sm" id="vDl" type="button">Descargar</button><button class="btn sm" id="vClose" type="button">Cerrar ✕</button></div><div class="vb" id="vBody"></div></div>
+<div class="toast" id="toast"></div>
+<datalist id="dl-maquina"></datalist><datalist id="dl-proveedor"></datalist><datalist id="dl-solicitante"></datalist><datalist id="dl-autorizadoPor"></datalist><datalist id="dl-tipo"></datalist><datalist id="dl-empresa"></datalist>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const isISO=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'');
+function fmtDate(s){ if(!s) return ''; if(isISO(s)){const [y,m,d]=s.split('-');return `${d}/${m}/${y.slice(2)}`;} return s; }
+function parseDate(s){ s=(s||'').trim(); if(!s) return '';
+  if(isISO(s)) return s;
+  const m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/);
+  if(m){let y=m[3]?+m[3]:new Date().getFullYear(); if(y<100)y+=2000; const d=new Date(Date.UTC(y,+m[2]-1,+m[1]));
+    if(d.getUTCDate()==+m[1]&&d.getUTCMonth()==+m[2]-1) return d.toISOString().slice(0,10);}
+  return s; }
+const norm=s=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+function notice(msg){const n=$('#notice'); n.textContent=msg||''; n.classList.toggle('show',!!msg);}
+
+/* ---------- phases ---------- */
+const PH={
+  pend:{t:'Pendiente pedir',c:'p-pend'}, presu:{t:'Presupuestado',c:'p-presu'}, ped:{t:'Pedido',c:'p-ped'}, late:{t:'Retrasado',c:'p-late'},
+  rec:{t:'Recibido',c:'p-rec'}, ok:{t:'OK',c:'p-ok'}, nook:{t:'NO OK',c:'p-nook'}, anul:{t:'Anulado',c:'p-anul'},
+  env:{t:'En proveedor',c:'p-ped'}, sinEnv:{t:'Pendiente enviar',c:'p-pend'},
+  abierta:{t:'Abierta',c:'p-pend'}, fin:{t:'Finalizada',c:'p-ok'},
+};
+const isLate=prev=>isISO(prev)&&prev<today();
+function phasePedido(r){
+  const e=(r.estado||'').toUpperCase();
+  if(e==='ANULADO') return 'anul';
+  if(e==='NO OK') return 'nook';
+  if(e==='OK') return 'ok';
+  if(r.fechaRecepcion) return 'rec';
+  if(r.numPedido||r.fechaPedido) return isLate(r.fechaPrevista)?'late':'ped';
+  return nPresu(r)?'presu':'pend';
+}
+function nPresu(r){ return Array.isArray(r.presupuestos)?r.presupuestos.length:0; }
+function phaseRepar(r){
+  const e=(r.estado||'').toUpperCase();
+  if(e==='ANULADO') return 'anul';
+  if(e==='NO OK') return 'nook';
+  if(e==='OK') return 'ok';
+  if(r.fechaRecepcion) return 'rec';
+  if(r.fechaOK||r.numPedido||r.proveedor) return isLate(r.fechaPrevista)?'late':'ped';
+  return nPresu(r)?'presu':'pend';
+}
+function phaseRodillo(r){
+  if(r.fechaLlegada && r.fechaLlegada!=='?') return 'rec';
+  if(r.fechaSalida) return isLate(r.fechaPrevista)?'late':'env';
+  return 'sinEnv';
+}
+const phaseAsist=r=>r.finalizado?'fin':'abierta';
+const PH_ALT={reparaciones:{presu:'Presupuestada',pend:'Pendiente autorizar',ped:'En curso',rec:'Recibida'}};
+const phT=(k,p)=>(PH_ALT[k]&&PH_ALT[k][p])||PH[p].t;
+const FIXNER_URL='https://app3.fixner.com/fixner.html#ordenTrabajoList:';
+const fxUrl=o=>o&&o.fxid?'https://app3.fixner.com/fixner.html#ordenTrabajo:'+encodeURIComponent(o.fxid):FIXNER_URL;
+function otsOf(r){ const t=[r.ot,r.reparacion,r.explicacion,r.comentarios,r.otros].join(' '); const out=[];
+  for(const m of t.matchAll(/OT\s*(\d{2})\s*\/\s*(\d{3,6})/gi)){ const c=`OT${m[1]}/${m[2].padStart(5,'0')}`; if(!out.includes(c)) out.push(c); } return out; }
+const otKey=c=>c.replace('/','-');
+function otInfo(c){ return S.ots[otKey(c)]||null; }
+function otCls(o){ if(!o) return 'p-ok'; const e=norm(o.estado); if(/finaliz|cerrad|anulad|cancel/.test(e)) return 'p-ok'; if(/bloque/.test(e)) return 'p-late'; if(/abiert/.test(e)) return 'p-pend'; return 'p-ped'; }
+function isUrg(r){ if(r.urgente===false) return false; if(r.urgente===true) return true; return /\burgent/i.test([r.descripcion,r.explicacion,r.comentarios,r.trabajo].join(' ')); }
+const OPEN=new Set(['pend','presu','ped','late','nook','env','sinEnv','abierta']);
+
+/* ---------- sheet configs ---------- */
+const ESTADOS=['','OK','NO OK','ANULADO'];
+const SHEETS={
+  recambios:{
+    label:'Recambios', single:'recambio', phase:phasePedido, titleField:'descripcion',
+    kpis:[['open','Abiertos'],['pend','Pendiente pedir'],['presu','Con presupuesto'],['ped','Pedidos en camino'],['late','Retrasados',1],['rec','Recibidos sin validar'],['nook','NO OK',1]],
+    cols:[['_ph','Estado'],['_np','Presup.','presu'],['_ot','OT Fixner','ot'],['fecha','Fecha','date'],['descripcion','Descripción','strong'],['maquina','Máquina'],['solicitante','Pide'],['explicacion','Explicación','wrap'],['proveedor','Proveedor'],['numPedido','Nº pedido','mono'],['fechaPrevista','Prevista','prev'],['fechaRecepcion','Recepción','date']],
+    filters:['maquina','proveedor','solicitante'],
+    groups:[
+      ['Solicitud',[['urgente','URGENTE','check',1],['fecha','Fecha','date'],['solicitante','Quién pide','list'],['descripcion','Descripción genérica','text',1],['maquina','Máquina','list'],['ot','OT Fixner','text',0,'OT25/16340'],['compra','Compra material nuevo','text',0,'X, Oferta…'],['reparacion','Reparación / OT','text',0,'X u OT25/…'],['explicacion','Explicación larga','area',1]]],
+      ['Pedido',[['fechaMail','Fecha mail para pedido','date'],['proveedor','Proveedor','list'],['numPedido','Nº pedido','text'],['fechaPedido','Fecha pedido','date'],['enviadoFirmar','Enviado a firmar','text',0,'SI / fecha / Contrato'],['fechaPrevista','Fecha prevista llegada','date']]],
+      ['Recepción',[['fechaRecepcion','Fecha recepción','date'],['estado','Estado','select',0,ESTADOS],['comentarios','Comentarios (si NO OK recepción…)','area',1],['otros','Otros','area',1]]],
+    ],
+    quick:r=>[
+      !r.fechaPedido&&['Pedido hoy',{fechaPedido:today()}],
+      !r.fechaRecepcion&&['Recibido hoy',{fechaRecepcion:today()}],
+      ['Recibido OK',{fechaRecepcion:r.fechaRecepcion||today(),estado:'OK'}],
+      ['NO OK',{fechaRecepcion:r.fechaRecepcion||today(),estado:'NO OK'}],
+    ],
+    defaults:()=>({fecha:today(),compra:'X'}),
+  },
+  reparaciones:{
+    label:'Reparaciones', single:'reparación', phase:phaseRepar, titleField:'descripcion',
+    kpis:[['open','Abiertas'],['pend','Pendiente autorizar'],['presu','Con presupuesto'],['ped','En curso'],['late','Retrasadas',1],['rec','Recibidas sin validar'],['nook','NO OK',1]],
+    cols:[['_ph','Estado'],['_np','Presup.','presu'],['_ot','OT Fixner','ot'],['fecha','Fecha','date'],['descripcion','Descripción','strong'],['maquina','Máquina'],['solicitante','Pide'],['explicacion','Explicación','wrap'],['proveedor','Proveedor'],['autorizadoPor','Autoriza'],['fechaPrevista','Prevista','prev'],['fechaRecepcion','Recepción','date']],
+    filters:['maquina','proveedor','solicitante'],
+    groups:[
+      ['Solicitud',[['urgente','URGENTE','check',1],['fecha','Fecha','date'],['solicitante','Quién pide','list'],['descripcion','Descripción genérica','text',1],['maquina','Máquina','list'],['ot','OT Fixner','text',0,'OT25/16340'],['reparacion','Reparación','text',0,'X u OT25/…'],['fabricacion','Fabricación','text',0,'X'],['explicacion','Explicación larga','area',1]]],
+      ['Autorización y pedido',[['fechaOK','Fecha de OK','date'],['autorizadoPor','Autorizado por','list'],['proveedor','Proveedor','list'],['numPedido','Nº pedido','text'],['fechaPedido','Fecha pedido','date'],['fechaPrevista','Fecha prevista llegada','date']]],
+      ['Recepción',[['fechaRecepcion','Fecha recepción','date'],['estado','Estado','select',0,ESTADOS],['comentarios','Comentarios (si NO OK recepción…)','area',1],['otros','Otros','area',1]]],
+    ],
+    quick:r=>[
+      !r.fechaOK&&['Autorizada hoy',{fechaOK:today()}],
+      !r.fechaRecepcion&&['Recibida hoy',{fechaRecepcion:today()}],
+      ['Recibida OK',{fechaRecepcion:r.fechaRecepcion||today(),estado:'OK'}],
+      ['NO OK',{fechaRecepcion:r.fechaRecepcion||today(),estado:'NO OK'}],
+    ],
+    defaults:()=>({fecha:today(),reparacion:'X'}),
+  },
+  rodillos:{
+    label:'Rodillos', single:'rodillo', phase:phaseRodillo, titleField:'tipo',
+    kpis:[['open','Abiertos'],['sinEnv','Pendiente enviar'],['env','En proveedor'],['late','Retrasados',1],['rec','Recibidos']],
+    cols:[['_ph','Estado'],['maquina','Máquina','strong'],['tipo','Tipo'],['cantidad','Uds.'],['trabajo','Trabajo','wrap'],['proveedor','Proveedor'],['fechaSalida','Salida','date'],['fechaPrevista','Prevista','prev'],['fechaLlegada','Llegada','date'],['numPedido','Nº pedido','mono']],
+    filters:['maquina','proveedor','tipo'],
+    groups:[
+      ['Rodillo',[['urgente','URGENTE','check',1],['maquina','Máquina','list'],['tipo','Tipo','list'],['cantidad','Cantidad','number'],['proveedor','Proveedor','list'],['trabajo','Trabajo a realizar','area',1,'RECAUCHUTAR, RECTIFICAR…']]],
+      ['Seguimiento',[['fechaSalida','Fecha salida','date'],['fechaPrevista','Fecha prevista entrega','date'],['fechaLlegada','Fecha llegada','date'],['numPedido','Nº pedido','text'],['comentarios','Comentarios','area',1]]],
+    ],
+    quick:r=>[ !r.fechaSalida&&['Sale hoy',{fechaSalida:today()}], !r.fechaLlegada&&['Llega hoy',{fechaLlegada:today()}] ],
+    defaults:()=>({cantidad:1,proveedor:'FCI'}),
+  },
+  asistencias:{
+    label:'Asistencias', single:'asistencia', phase:phaseAsist, titleField:'trabajo',
+    kpis:[['open','Abiertas'],['late','Con fecha vencida',1],['fin','Finalizadas']],
+    cols:[['_ph','Estado'],['fechaSolicitud','Solicitud','date'],['empresa','Empresa','strong'],['contacto','Técnico / contacto'],['trabajo','Trabajo','wrap'],['fechaPrevista','Prevista','prev'],['comentarios','Comentarios','wrap']],
+    filters:['empresa'],
+    groups:[
+      ['Asistencia técnica',[['urgente','URGENTE','check',1],['empresa','Empresa','list'],['contacto','Técnico / contacto','text'],['datosContacto','Teléfono / email','text',1],['fechaSolicitud','Fecha solicitud','date'],['fechaPrevista','Fecha prevista','date'],['trabajo','Trabajo a hacer','area',1],['finalizado','Finalizado','text',0,'Fecha o SI'],['comentarios','Comentarios','area',1]]],
+    ],
+    quick:r=>[ !r.finalizado&&['Finalizada hoy',{finalizado:today()}] ],
+    defaults:()=>({fechaSolicitud:today()}),
+  },
+};
+const ORDER=['recambios','reparaciones','rodillos','asistencias'];
+
+/* ---------- state ---------- */
+const S={isOwner:false,ots:{},otsSync:null,tab:'recambios',data:{},loaded:{},q:'',kpi:'open',fil:{},sort:{},editing:null,db:null,user:null,canWrite:true,uid:null};
+ORDER.forEach(k=>{S.data[k]=[];S.loaded[k]=false;S.sort[k]=k==='rodillos'?{f:'fechaSalida',d:-1}:k==='asistencias'?{f:'fechaSolicitud',d:-1}:{f:'fecha',d:-1};});
+try{const h=location.hash.slice(1); if(SHEETS[h]||h==='procedimiento'||h==='precios') S.tab=h;}catch(e){}
+
+function rowsWithPhase(k){const c=SHEETS[k];return S.data[k].map(r=>{let p=c.phase(r); if(k==='asistencias'&&p==='abierta'&&isLate(r.fechaPrevista))p='late';const _u=OPEN.has(p)&&isUrg(r); return {...r,_ph:p,_ot:otsOf(r).join(' '),_np:nPresu(r),_urg:_u};});}
+function kpiMatchR(r,key){ return key==='urg'?r._urg:kpiMatch(r._ph,key); }
+function kpiMatch(p,key){ if(key==='open') return OPEN.has(p); if(key==='ped') return p==='ped'||p==='late'; if(key==='env') return p==='env'||p==='late'; return p===key; }
+
+/* ---------- render ---------- */
+function renderNav(){
+  const tabs=[...ORDER,'precios','procedimiento'];
+  $('#nav').innerHTML=tabs.map(k=>{
+    if(k==='procedimiento') return `<button data-t="${k}" class="${S.tab===k?'on':''}">Procedimiento</button>`;
+    if(k==='precios'){ const na=(S.alertas||[]).filter(a=>!a.revisada).length; return `<button data-t="${k}" class="${S.tab===k?'on':''} ${na?'navalert':''}">Precios${na?`<span class="n">${na}</span>`:''}</button>`; }
+    const rw=rowsWithPhase(k), open=rw.filter(r=>OPEN.has(r._ph)).length, nu=rw.filter(r=>r._urg).length;
+    return `<button data-t="${k}" class="${S.tab===k?'on':''} ${nu?'navurg':''}" title="${nu?nu+' urgente'+(nu>1?'s':''):''}">${SHEETS[k].label}<span class="n">${S.loaded[k]?open:'…'}</span></button>`;
+  }).join('');
+}
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.tab=b.dataset.t;S.kpi='open';S.q='';S.fil={};try{history.replaceState(null,'','#'+S.tab)}catch(_){location.hash=S.tab}render();});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if((SHEETS[h]||h==='procedimiento'||h==='precios')&&h!==S.tab){S.tab=h;render();}});
+
+function render(){ renderNav(); if(S.tab==='procedimiento') return renderProc(); if(S.tab==='precios') return renderPrecios(); renderSheet(); }
+
+function uniq(k,f){return [...new Set(S.data[k].map(r=>r[f]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'es'));}
+
+function renderSheet(){
+  const k=S.tab,c=SHEETS[k],all=rowsWithPhase(k);
+  const counts={}; c.kpis.forEach(([key])=>counts[key]=all.filter(r=>kpiMatchR(r,key)).length); counts.urg=all.filter(r=>r._urg).length;
+  counts.all=all.length;
+  const fl=c.filters.map(f=>{const lbl=(c.cols.find(x=>x[0]===f)||[f,f])[1];const opts=uniq(k,f);
+    return `<select class="f" data-f="${f}"><option value="">${esc(lbl)}: todos</option>${opts.map(o=>`<option ${S.fil[f]===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`}).join('');
+  $('#view').innerHTML=`
+   <div class="kpis">${counts.urg||S.kpi==='urg'?`<button class="kpi urgk ${S.kpi==='urg'?'on':''} ${counts.urg?'blink':''}" data-k="urg"><b>${counts.urg}</b><span>Urgentes</span></button>`:''}${c.kpis.map(([key,lbl,w])=>`<button class="kpi ${S.kpi===key?'on':''} ${w&&counts[key]?'warn':''} ${key==='presu'&&counts[key]?'presuk':''}" data-k="${key}"><b>${S.loaded[k]?counts[key]:'–'}</b><span>${lbl}</span></button>`).join('')}
+     <button class="kpi ${S.kpi==='all'?'on':''}" data-k="all"><b>${S.loaded[k]?counts.all:'–'}</b><span>Todo el histórico</span></button></div>
+   <div class="tools">
+     <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+       <input id="q" placeholder="Buscar descripción, máquina, nº pedido, proveedor…" value="${esc(S.q)}"></div>
+     ${fl}
+     <button class="btn" id="exp" title="Descargar lo que se ve en la tabla">Exportar Excel</button>
+     <button class="btn primary" id="new" ${S.canWrite?'':'disabled'}>+ Nuevo ${c.single}</button>
+   </div>
+   <div class="tablewrap"><table><thead><tr>${c.cols.map(([f,l,t])=>`<th data-s="${f}" class="${['date','prev','mono','ot','presu'].includes(t)||f==='_ph'?'cmp':t==='wrap'?'wide':''}">${l}${S.sort[k].f===f?`<span class="ar">${S.sort[k].d>0?'▲':'▼'}</span>`:''}</th>`).join('')}</tr></thead><tbody id="tb"></tbody></table></div>
+   <div class="foot"><span id="cnt"></span><span>Pulsa una fila para ver o editar</span></div>
+   ${S.canWrite&&(S.imp.running||S.imp.text||ORDER.every(x=>S.loaded[x])&&!ORDER.some(x=>S.data[x].some(r=>String(r.id).startsWith('xl-'))))?'<div style="margin-top:16px">'+impPanel()+'</div>':''}`;
+  bindImp();
+  $('#view').querySelectorAll('.kpi').forEach(b=>b.onclick=()=>{S.kpi=b.dataset.k;renderSheet();});
+  $('#view').querySelectorAll('select.f').forEach(s=>s.onchange=()=>{S.fil[s.dataset.f]=s.value;renderBody();});
+  $('#view').querySelectorAll('th').forEach(th=>th.onclick=()=>{const f=th.dataset.s,so=S.sort[k];if(so.f===f)so.d*=-1;else{so.f=f;so.d=/fecha|^_/.test(f)?-1:1;}renderSheet();});
+  const q=$('#q'); q.oninput=()=>{S.q=q.value;renderBody();};
+  $('#new').onclick=()=>openDrawer(null);
+  $('#exp').onclick=exportXlsx;
+  renderBody();
+}
+const PH_ORDER={late:0,nook:1,pend:2,presu:2.5,sinEnv:2,abierta:2,ped:3,env:3,rec:4,ok:5,fin:5,anul:6};
+function visibleRows(){
+  const k=S.tab,c=SHEETS[k]; let rows=rowsWithPhase(k);
+  if(S.kpi!=='all') rows=rows.filter(r=>kpiMatchR(r,S.kpi));
+  for(const [f,v] of Object.entries(S.fil)) if(v) rows=rows.filter(r=>r[f]===v);
+  if(S.q){const terms=norm(S.q).split(/\s+/).filter(Boolean);rows=rows.filter(r=>{const hay=norm(Object.entries(r).filter(([f])=>f!=='_ph'&&f!=='orden').map(([,v])=>v).join(' ')+' '+fmtDate(r.fecha));return terms.every(t=>hay.includes(t));});}
+  const {f,d}=S.sort[k];
+  rows.sort((a,b)=>{ if(a._urg!==b._urg) return a._urg?-1:1; let x=a[f],y=b[f];
+    if(f==='_ph'){x=PH_ORDER[x];y=PH_ORDER[y];}
+    else if(/^fecha/.test(f)){x=isISO(x)?x:(x?'0':'');y=isISO(y)?y:(y?'0':'');if(!x&&y)return 1;if(x&&!y)return -1;}
+    if(typeof x==='number'&&typeof y==='number') return (x-y)*d;
+    const r=String(x??'').localeCompare(String(y??''),'es',{numeric:true});
+    return r?r*d:((b.orden??0)-(a.orden??0));});
+  return rows;
+}
+let LIMIT=300;
+function renderBody(){
+  const k=S.tab,c=SHEETS[k],rows=visibleRows();
+  const tb=$('#tb'); if(!tb) return;
+  if(!S.loaded[k]){tb.innerHTML=`<tr><td colspan="${c.cols.length}" class="empty">Cargando…</td></tr>`;$('#cnt').textContent='';return;}
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="${c.cols.length}" class="empty">${S.data[k].length?'Nada coincide con estos filtros.':'Todavía no hay registros. Importa tu Excel aquí debajo o pulsa “+ Nuevo”.'}</td></tr>`;$('#cnt').textContent='';return;}
+  const shown=rows.slice(0,LIMIT);
+  tb.innerHTML=shown.map(r=>`<tr data-id="${esc(r.id)}" class="${r._urg?'urg':''}">${c.cols.map(([f,,t])=>{
+    const v=r[f];
+    if(f==='_ph') return `<td><span class="pill ${PH[v].c}">${phT(k,v)}</span>${r._urg?'<span class="pill p-urg">URGENTE</span>':''}</td>`;
+    if(t==='presu') return `<td class="np">${v?`<span class="clip-n" title="${v} presupuesto${v>1?'s':''} adjunto${v>1?'s':''}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 01-7.8-7.8l9-9a3.7 3.7 0 015.2 5.2l-9 9a1.8 1.8 0 01-2.6-2.6l8.3-8.3"/></svg>${v}</span>`:'<span class="nop">—</span>'}</td>`;
+    if(t==='ot') return `<td class="ots">${otsOf(r).map(c=>{const o=otInfo(c);return `<span class="ot ${otCls(o)}" title="${esc(o?o.estado+' · '+o.descripcion:'Sin datos de Fixner')}">${esc(c.slice(5))}</span>`;}).join(' ')}</td>`;
+    if(t==='date') return `<td class="date">${esc(fmtDate(v))}</td>`;
+    if(t==='prev'){const late=OPEN.has(r._ph)&&isLate(v);return `<td class="date ${late?'late':''}">${esc(fmtDate(v))}</td>`;}
+    if(t==='wrap') return `<td class="wrap"><div class="clip">${esc(v)}</div></td>`;
+    return `<td class="${t||''}"${t==='mono'&&v&&String(v).length>14?` title="${esc(v)}"`:''}>${esc(v)}${f===c.titleField&&r.origen==='fixner'?' <span class="auto" title="Creado automáticamente desde una OT de Fixner">FIXNER</span>':''}</td>`;}).join('')}</tr>`).join('')
+    +(rows.length>LIMIT?`<tr><td colspan="${c.cols.length}" class="empty"><button class="btn" id="more">Mostrar ${Math.min(300,rows.length-LIMIT)} más</button></td></tr>`:'');
+  $('#cnt').textContent=`${rows.length} de ${S.data[k].length} registros`;
+  const m=$('#more'); if(m) m.onclick=()=>{LIMIT+=300;renderBody();};
+}
+$('#view').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(tr)openDrawer(tr.dataset.id);});
+
+/* ---------- drawer ---------- */
+function fieldHtml([f,l,type,full,extra],r){
+  const v=r[f]??'';
+  let inp;
+  if(type==='area') inp=`<textarea name="${f}" placeholder="${esc(extra||'')}">${esc(v)}</textarea>`;
+  else if(type==='select') inp=`<select name="${f}">${extra.map(o=>`<option value="${o}" ${String(v).toUpperCase()===o?'selected':''}>${o||'— sin validar —'}</option>`).join('')}</select>`;
+  else if(type==='date') inp=`<div class="dwrap"><input name="${f}" value="${esc(fmtDate(v).length===8&&isISO(v)?fmtDate(v).replace(/(\d\d)$/,'20$1'):v)}" placeholder="dd/mm/aaaa o texto (p. ej. SEMANA 45)"><button type="button" class="btn sm" data-today="${f}">Hoy</button></div>`;
+  else if(type==='list') inp=`<input name="${f}" value="${esc(v)}" list="dl-${f}" placeholder="Escribe o elige">`;
+  else if(type==='check'){ const on=isUrg(r)&&r.urgente!==false; return `<div class="fld full"><label class="urgchk ${on?'on':''}"><input type="checkbox" name="${f}" ${on?'checked':''} onchange="this.parentNode.classList.toggle('on',this.checked)"> <span>URGENTE</span> <em>${/\burgent/i.test([r.descripcion,r.explicacion,r.comentarios,r.trabajo].join(' '))&&r.urgente===undefined?'(detectado por la palabra «urgente»)':'El pedido parpadeará en rojo hasta que se reciba'}</em></label></div>`; }
+  else if(type==='number') inp=`<input name="${f}" type="number" min="0" value="${esc(v)}">`;
+  else inp=`<input name="${f}" value="${esc(v)}" placeholder="${esc(extra||'')}">`;
+  return `<div class="fld ${full?'full':''}"><label>${l}</label>${inp}</div>`;
+}
+function fillDatalists(k){
+  ['maquina','proveedor','solicitante','autorizadoPor','tipo','empresa'].forEach(f=>{const dl=$('#dl-'+f);if(dl)dl.innerHTML=uniq(k,f).map(o=>`<option value="${esc(o)}">`).join('');});
+}
+function openDrawer(id){
+  const k=S.tab,c=SHEETS[k];
+  const r=id?S.data[k].find(x=>x.id===id):c.defaults();
+  if(!r) return;
+  S.editing={k,id,orig:r,presu:Array.isArray(r.presupuestos)?r.presupuestos.map(x=>({...x})):[]};
+  fillDatalists(k);
+  const ph=id?c.phase(r):null;
+  $('#dTitle').textContent=id?(r[c.titleField]||'(sin descripción)'):`Nuevo ${c.single}`;
+  $('#dSub').innerHTML=id?`<span class="pill ${PH[ph].c}">${phT(k,ph)}</span> ${esc([r.maquina,r.proveedor,r.numPedido].filter(Boolean).join(' · '))}`:'Rellena lo que sepas; el resto se completa más tarde.';
+  $('#dForm').innerHTML=c.groups.map(([g,fs])=>`<fieldset><legend>${g}</legend><div class="grid">${fs.map(f=>fieldHtml(f,r)).join('')}</div></fieldset>`).join('');
+  const q=id?c.quick(r).filter(Boolean):[];
+  $('#dQuick').style.display=q.length&&S.canWrite?'flex':'none';
+  $('#dQuick').innerHTML=q.length?`<span>Acción rápida:</span>`+q.map(([l],i)=>`<button type="button" class="btn sm" data-q="${i}">${l}</button>`).join(''):'';
+  $('#dQuick').querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>saveQuick(q[+b.dataset.q][1],q[+b.dataset.q][0]));
+  $('#dForm').querySelectorAll('[data-today]').forEach(b=>b.onclick=()=>{const i=$('#dForm').elements[b.dataset.today];i.value=fmtDate(today()).replace(/(\d\d)$/,'20$1');i.focus();});
+  const codes=id?otsOf(r):[];
+  $('#dFix').innerHTML=codes.length?`<div class="fix">${codes.map(c=>{const o=otInfo(c);return `<div class="fixrow"><div><a class="otlink" href="${fxUrl(o)}" target="_blank" rel="noopener" title="${o&&o.fxid?'Abrir esta OT en Fixner':'Abrir el listado de Fixner'}"><b>${esc(c)}</b> ↗</a> <span class="pill ${otCls(o)}">${esc(o?o.estado:'Sin datos')}</span>${o&&o.prioridad?` <span class="hint">${esc(o.prioridad)}</span>`:''}<div class="fixd">${o?esc(o.descripcion):'Esta OT no se ha encontrado en la última lectura de Fixner.'}</div>${o?`<div class="hint">${esc([o.activo,o.tipo,o.inicio&&'Inicio '+o.inicio,o.fin&&'Finalizada '+o.fin].filter(Boolean).join(' · '))}</div>`:''}</div></div>`;}).join('')}<div class="fixfoot"><span class="hint">${S.otsSync?'Datos de Fixner leídos el '+new Date(S.otsSync).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}):''}</span><a href="${fxUrl(otInfo(codes[0]))}" target="_blank" rel="noopener">${otInfo(codes[0])&&otInfo(codes[0]).fxid?'Abrir OT en Fixner':'Abrir Fixner'} ↗</a></div></div>`:'';
+  renderPresu();
+  $('#dDel').style.display=id&&S.canWrite?'':'none';
+  $('#dConfirm').classList.remove('show');
+  $('#dSave').disabled=!S.canWrite;
+  $('#dForm').querySelectorAll('input,textarea,select').forEach(i=>i.disabled=!S.canWrite);
+  meta(r); renderHist(r);
+  $('#drawer').classList.add('show');$('#scrim').classList.add('show');$('#drawer').setAttribute('aria-hidden','false');
+  setTimeout(()=>{const f=$('#dForm').querySelector('input,textarea');if(f&&!id)f.focus();},230);
+}
+const FLAB={fecha:'Fecha',descripcion:'Descripción',maquina:'Máquina',solicitante:'Quién pide',explicacion:'Explicación',numPedido:'Nº pedido',fechaPedido:'Fecha pedido',proveedor:'Proveedor',fechaPrevista:'Prevista',fechaRecepcion:'Recepción',estado:'Estado',comentarios:'Comentarios',presupuestos:'Presupuestos',urgente:'Urgente',ot:'OT Fixner',fechaLlegada:'Llegada',fechaSalida:'Salida',finalizado:'Finalizado',fechaOK:'Fecha OK',autorizadoPor:'Autorizado por',creado:'Creado'};
+async function renderHist(r){
+  const box=$('#dHist'); if(!box) return; const h=Array.isArray(r.historial)?r.historial.slice().reverse():[];
+  if(!h.length){box.innerHTML='';return;}
+  let ps={}; try{ if(S.user&&S.user.profiles) ps=await S.user.profiles([...new Set(h.map(x=>x.u).filter(Boolean))]); }catch(e){}
+  box.innerHTML=`<details class="hist"><summary>Historial de cambios (${h.length})</summary>${h.map(x=>`<div class="hrow"><span>${new Date(x.t).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})}</span><b>${esc((ps[x.u]&&ps[x.u].name)||'—')}</b><span>${x.c.map(f=>esc(FLAB[f]||f)+(x.a&&x.a[f]?` <em>(antes: ${esc(x.a[f])})</em>`:'')).join(', ')}</span></div>`).join('')}</details>`;
+}
+async function meta(r){
+  const el=$('#dMeta'); el.textContent='';
+  if(!r.editadoEn) return;
+  let name='';
+  try{ if(r.editadoPor&&S.user&&S.user.profiles){const ps=await S.user.profiles([r.editadoPor]);name=(ps[r.editadoPor]&&ps[r.editadoPor].name)||'';} }catch(e){}
+  const d=new Date(r.editadoEn);
+  el.textContent=`Últ. cambio ${d.toLocaleDateString('es-ES')} ${d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}${name?' · '+name:''}`;
+}
+function closeDrawer(){S.editing=null;$('#drawer').classList.remove('show');$('#scrim').classList.remove('show');$('#drawer').setAttribute('aria-hidden','true');}
+$('#dClose').onclick=closeDrawer;$('#dCancel').onclick=closeDrawer;$('#scrim').onclick=closeDrawer;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.editing)closeDrawer();});
+
+function readForm(){
+  const {k}=S.editing,c=SHEETS[k],out={};
+  c.groups.forEach(([,fs])=>fs.forEach(([f,,type])=>{ if(type==='check'){ out[f]=$('#dForm').elements[f].checked; return; } let v=$('#dForm').elements[f].value;
+    if(type==='date') v=parseDate(v); else if(type==='number') v=v===''?'':Number(v); else v=v.trim();
+    if(type==='list'&&['maquina','proveedor','solicitante','autorizadoPor','tipo'].includes(f)) v=v.toUpperCase();
+    out[f]=v;}));
+  if(PRESU_SHEETS.has(k)) out.presupuestos=S.editing.presu.slice();
+  return out;
+}
+async function write(k,id,body){
+  if(!S.db) throw {code:'unavailable',message:'Sin conexión con la base de datos'};
+  const stamp={editadoEn:Date.now()}; if(S.uid) stamp.editadoPor=S.uid;
+  const col=S.db.collection(k);
+  if(id){
+    const prev=S.data[k].find(x=>x.id===id)||{};
+    const emp=v=>v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length);
+    const campos=Object.keys(body).filter(f=>{ const a=prev[f],b=body[f];
+      if(f==='urgente'&&a===undefined) return b!==isUrg(prev);
+      if(emp(a)&&emp(b)) return false; return JSON.stringify(a??'')!==JSON.stringify(b??''); });
+    if(!campos.length) return id;
+    const hist=(Array.isArray(prev.historial)?prev.historial:[]).concat([{t:Date.now(),u:S.uid||'',c:campos.slice(0,12),a:Object.fromEntries(campos.slice(0,12).map(f=>[f,typeof prev[f]==='object'?(Array.isArray(prev[f])?prev[f].length+' adjuntos':''):String(prev[f]??'').slice(0,80)]))}]).slice(-40);
+    await col.doc(id).update({...body,...stamp,historial:hist}); return id; }
+  const ref=col.doc(); await ref.set({...body,...stamp,creadoEn:Date.now(),orden:Date.now(),historial:[{t:Date.now(),u:S.uid||'',c:['creado']}]}); return ref.id;
+}
+function writeErr(e){
+  if(e&&e.code==='invalid_argument'){S.canWrite=false;toast('No tienes permiso para modificar datos');render();}
+  else if(e&&e.code==='quota_exceeded') toast('La base de datos está llena: '+(e.message||''));
+  else toast('No se pudo guardar. Inténtalo de nuevo.');
+}
+$('#dSave').onclick=async()=>{
+  const {k,id}=S.editing, body=readForm(), c=SHEETS[k];
+  if(!id && !body[c.titleField] && !body.maquina){toast('Escribe al menos la descripción o la máquina');return;}
+  $('#dSave').disabled=true;
+  try{ const nid=await write(k,id,body); if(!id&&S.editing&&S.editing.textos) await flushTextos(S.editing,nid); toast(id?'Cambios guardados':`${c.single[0].toUpperCase()+c.single.slice(1)} creado`); closeDrawer(); }
+  catch(e){ writeErr(e); }
+  finally{ $('#dSave').disabled=!S.canWrite; }
+};
+async function saveQuick(patch,label){
+  const {k,id}=S.editing;
+  const body={...readForm(),...patch};
+  try{ await write(k,id,body); toast(label+' ✓'); closeDrawer(); }catch(e){ writeErr(e); }
+}
+$('#dDel').onclick=()=>$('#dConfirm').classList.add('show');
+$('#dDelNo').onclick=()=>$('#dConfirm').classList.remove('show');
+$('#dDelYes').onclick=async()=>{const {k,id}=S.editing;try{const prev=S.data[k].find(x=>x.id===id); if(prev){const {id:_i,...rest}=prev; await S.db.collection('papelera').doc(k+'__'+id).set({col:k,docId:id,datos:rest,borradoEn:Date.now(),borradoPor:S.uid||''});} await S.db.collection(k).doc(id).delete();toast('Eliminado');closeDrawer();}catch(e){writeErr(e);}};
+
+/* ---------- presupuestos ---------- */
+const PRESU_SHEETS=new Set(['recambios','reparaciones']);
+const fmtSize=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+function renderPresu(){
+  const box=$('#dPresu'); const ed=S.editing;
+  if(!ed||!PRESU_SHEETS.has(ed.k)){box.innerHTML='';return;}
+  const list=ed.presu, can=!!S.assets&&S.canWrite;
+  box.innerHTML=`<div class="presu" id="pzBox"><h4><span>Presupuestos (${list.length})</span>${can?`<span><input type="file" id="pzFile" accept="application/pdf,image/*" multiple hidden><button type="button" class="pbtn" id="pzAdd">+ Añadir presupuesto</button></span>`:''}</h4>
+   ${list.length?list.map((p,i)=>`<div class="pz"><span>📄</span><a href="#" data-ver="${i}" title="Ver ${esc(p.nombre)}">${esc(p.nombre||'Presupuesto '+(i+1))}</a><span class="hint">${p.pages?p.pages.length+' pág. · ':''}${p.tam?fmtSize(p.tam)+' · ':''}${p.fecha?esc(fmtDate(p.fecha)):''}</span>${can?`<button type="button" data-del="${i}" title="Quitar">×</button>`:''}</div>`).join('')
+    :`<div class="hint">${can?'Sin presupuestos. Pulsa «Añadir presupuesto» o arrastra aquí los PDF o fotos (puedes añadir varios).':'Sin presupuestos adjuntos.'}</div>`}
+   <div class="hint" id="pzMsg"></div></div>`;
+  box.querySelectorAll('[data-ver]').forEach(a=>a.onclick=e=>{e.preventDefault();openViewer(list[+a.dataset.ver]);});
+  if(!can) return;
+  const f=$('#pzFile'); $('#pzAdd').onclick=()=>f.click(); f.onchange=()=>{addPresu([...f.files]);f.value='';};
+  const bx=$('#pzBox');
+  bx.ondragover=e=>{e.preventDefault();bx.classList.add('drag');}; bx.ondragleave=()=>bx.classList.remove('drag');
+  bx.ondrop=e=>{e.preventDefault();bx.classList.remove('drag');addPresu([...e.dataTransfer.files]);};
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delPresu(+b.dataset.del));
+}
+async function flushTextos(ed,docIdOverride){
+  const docId=docIdOverride||ed.id; if(!docId||!ed.textos) return;
+  let changed=false;
+  for(const p of ed.presu){ const t=ed.textos[p.id]; if(t&&!p.cola){ try{ if(await enqueuePrecio(ed.k,docId,p,t)){ p.cola=true; changed=true; } }catch(e){} delete ed.textos[p.id]; } }
+  if(changed){ try{ await S.db.collection(ed.k).doc(docId).update({presupuestos:ed.presu.slice()}); }catch(e){} }
+}
+async function savePresuNow(){
+  const ed=S.editing; if(!ed||!ed.id) return; // new record: saved with the form
+  await write(ed.k,ed.id,{presupuestos:ed.presu.slice()});
+}
+async function extractPdfText(src){
+  const lib=await getPdfjs();
+  const data=src instanceof Blob?new Uint8Array(await src.arrayBuffer()):src;
+  const pdf=await lib.getDocument({data,isEvalSupported:false}).promise; let out='';
+  for(let i=1;i<=Math.min(pdf.numPages,15);i++){
+    const tc=await (await pdf.getPage(i)).getTextContent(); let lastY=null, line='';
+    for(const it of tc.items){ const y=Math.round(it.transform[5]); if(lastY!==null&&Math.abs(y-lastY)>2){ out+=line.trim()+'\n'; line=''; } line+=it.str+' '; lastY=y; }
+    out+=line.trim()+'\n--- página '+i+' ---\n';
+  }
+  return out.replace(/[ \t]+/g,' ').slice(0,30000);
+}
+async function enqueuePrecio(k,docId,p,texto){
+  if(!S.db||!texto||texto.replace(/\s|-|página|\d/g,'').length<20) return false;
+  const r=S.data[k].find(x=>x.id===docId)||{};
+  await S.db.collection('presus_pendientes').doc(p.pages?p.pages[0]:p.id).set({col:k,docId,asset:p.id,nombre:p.nombre||'',fecha:p.fecha||today(),proveedor:r.proveedor||'',descripcion:r.descripcion||'',maquina:r.maquina||'',texto,subidoPor:S.uid||'',creadoEn:Date.now()});
+  return true;
+}
+async function pdfToImages(file,onPage){
+  const lib=await getPdfjs();
+  const pdf=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;
+  const ids=[]; let bytes=0;
+  for(let i=1;i<=pdf.numPages;i++){
+    onPage&&onPage(i,pdf.numPages);
+    const page=await pdf.getPage(i); const vp=page.getViewport({scale:2});
+    const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+    const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+    const up=await S.assets.upload(blob,{type:'image/jpeg'}); ids.push(up.id); bytes+=up.sizeBytes;
+  }
+  return {ids,bytes};
+}
+async function addPresu(files){
+  const ed=S.editing; if(!ed||!files.length) return;
+  const msg=t=>{const m=$('#pzMsg'); if(m) m.textContent=t;};
+  const ok=files.filter(f=>/^(application\/pdf|image\/(png|jpeg|gif|webp))$/.test(f.type));
+  if(ok.length<files.length) toast('Solo se admiten PDF e imágenes (JPG, PNG)');
+  let n=0;
+  ed.textos=ed.textos||{};
+  for(const f of ok){
+    let texto=''; if(f.type==='application/pdf'){ try{ msg(`Leyendo ${f.name}…`); texto=await extractPdfText(f); }catch(e){} }
+    msg(`Subiendo ${f.name}…`);
+    const before=ed.presu.length;
+    try{ const r=await S.assets.upload(f,{type:f.type});
+      ed.presu.push({id:r.id,nombre:f.name,tipo:r.contentType,tam:r.sizeBytes,fecha:today(),por:S.uid||''}); n++; }
+    catch(e){
+      const c=e&&e.code;
+      if(f.type==='application/pdf'&&!['too_large','quota_or_state','rate_limited'].includes(c)){
+        try{ msg(`Convirtiendo ${f.name} a imágenes…`); const pg=await pdfToImages(f,(i,t)=>msg(`Subiendo ${f.name}: página ${i} de ${t}…`));
+          ed.presu.push({id:pg.ids[0],pages:pg.ids,nombre:f.name,tipo:'pdf-imagenes',tam:pg.bytes,fecha:today(),por:S.uid||''}); n++; continue; }
+        catch(e2){ toast(`No se pudo subir ${f.name}`); continue; }
+      }
+      toast(c==='too_large'?`${f.name} pesa demasiado (máx. 20 MB)`:c==='quota_or_state'?'No queda espacio para más archivos':`No se pudo subir ${f.name}`); }
+    finally{ if(ed.presu.length>before&&texto){ const pz=ed.presu[ed.presu.length-1]; ed.textos[pz.id]=texto; } }
+  }
+  if(n){ try{ await savePresuNow(); await flushTextos(ed); toast(n>1?`${n} presupuestos añadidos`:'Presupuesto añadido'); }catch(e){ writeErr(e); } }
+  if(S.editing===ed) renderPresu();
+}
+async function delPresu(i){
+  const ed=S.editing; const p=ed.presu[i]; if(!p) return;
+  ed.presu.splice(i,1);
+  try{ await savePresuNow(); }catch(e){ ed.presu.splice(i,0,p); writeErr(e); renderPresu(); return; }
+  for(const aid of (p.pages||[p.id])){ try{ await S.assets.delete(aid); }catch(e){} }
+  toast('Presupuesto quitado'); if(S.editing===ed) renderPresu();
+}
+
+/* ---------- visor de presupuestos ---------- */
+let _pdfjs=null;
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+async function getPdfjs(){
+  if(_pdfjs) return _pdfjs;
+  const base='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  await loadScript(base+'pdf.min.js'); await loadScript(base+'pdf.worker.min.js');
+  const lib=window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc=base+'pdf.worker.min.js';
+  _pdfjs=lib; return lib;
+}
+async function fetchPresu(p){
+  const r=await fetch('/_blob/'+encodeURIComponent(p.id),{credentials:'include'});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return await r.blob();
+}
+let _vBlob=null,_vP=null;
+async function pagesToPdf(ids){
+  if(!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  const {jsPDF}=window.jspdf; let doc=null;
+  for(const aid of ids){
+    const b=await fetchPresu({id:aid}); const url=URL.createObjectURL(b);
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url;});
+    const w=img.naturalWidth,h=img.naturalHeight, o=w>h?'l':'p';
+    if(!doc) doc=new jsPDF({orientation:o,unit:'px',format:[w,h]}); else doc.addPage([w,h],o);
+    const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0);
+    doc.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,0,w,h);
+  }
+  return doc.output('blob');
+}
+async function openViewer(p){
+  if(!p) return;
+  _vP=p; _vBlob=null;
+  const v=$('#viewer'), body=$('#vBody');
+  $('#vName').textContent=p.nombre||'Presupuesto';
+  body.innerHTML='<div class="vmsg">Cargando…</div>';
+  v.classList.add('show'); v.setAttribute('aria-hidden','false');
+  try{
+    if(p.pages){
+      body.innerHTML='';
+      for(const aid of p.pages){ const b=await fetchPresu({id:aid}); if(_vP!==p) return; const img=new Image(); img.src=URL.createObjectURL(b); body.appendChild(img); }
+      _vBlob='pages'; return;
+    }
+    const blob=await fetchPresu(p); if(_vP!==p) return; _vBlob=blob;
+    const type=p.tipo||blob.type;
+    if(/^image\//.test(type)){ body.innerHTML=''; const img=new Image(); img.alt=p.nombre||''; img.src=URL.createObjectURL(blob); body.appendChild(img); return; }
+    const lib=await getPdfjs();
+    const pdf=await lib.getDocument({data:new Uint8Array(await blob.arrayBuffer()),isEvalSupported:false}).promise;
+    if(_vP!==p) return; body.innerHTML='';
+    const w=Math.min(1000,body.clientWidth-36);
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i); const vp0=page.getViewport({scale:1});
+      const scale=(w/vp0.width)*(window.devicePixelRatio||1); const vp=page.getViewport({scale});
+      const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height; c.style.width=(vp.width/(window.devicePixelRatio||1))+'px';
+      body.appendChild(c); await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      if(_vP!==p) return;
+    }
+  }catch(e){
+    if(_vP!==p) return;
+    body.innerHTML=`<div class="vmsg">${_vBlob?'No se puede mostrar este archivo aquí. Pulsa «Descargar» para abrirlo en tu ordenador.':'No se ha podido cargar el presupuesto. Recarga la página e inténtalo de nuevo.'}</div>`;
+  }
+}
+function closeViewer(){_vP=null;_vBlob=null;$('#viewer').classList.remove('show');$('#viewer').setAttribute('aria-hidden','true');$('#vBody').innerHTML='';}
+$('#vClose').onclick=closeViewer;
+$('#vDl').onclick=async()=>{
+  const p=_vP; if(!p) return;
+  try{ let blob;
+    if(p.pages){ blob=await pagesToPdf(p.pages); }
+    else blob=(_vBlob instanceof Blob)?_vBlob:await fetchPresu(p);
+    const dl=await claude.use('downloads'); if(!dl) throw 0;
+    await dl.save({filename:p.nombre||'presupuesto.pdf',data:blob}); }
+  catch(e){ toast('Descarga cancelada o no disponible'); }
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_vP){e.stopImmediatePropagation();closeViewer();}},true);
+
+/* ---------- copia completa ---------- */
+async function backupAll(){
+  const msg=t=>{const m=$('#bkMsg'); if(m) m.textContent=t;}; const btn=$('#bkBtn'); btn.disabled=true;
+  try{
+    const cols=['recambios','reparaciones','rodillos','asistencias','fixner_ots','fixner_pa','papelera','precios','alertas_precio','presus_pendientes'];
+    const out={formato:'recambios-gdp-1',exportado:new Date().toISOString(),collections:{},files:[]};
+    for(const c of cols){ msg('Leyendo '+c+'…'); const sn=await S.db.collection(c).get(); out.collections[c]=sn.docs.filter(d=>d.exists).map(d=>({id:d.id,data:d.data()})); }
+    const ids=new Set();
+    for(const c of ['recambios','reparaciones']) for(const r of out.collections[c]) for(const p of (r.data.presupuestos||[])) for(const a of (p.pages||[p.id])) ids.add(a);
+    let i=0; for(const id of ids){ i++; msg(`Copiando presupuestos adjuntos ${i} de ${ids.size}…`);
+      try{ const b=await fetchPresu({id}); const b64=await new Promise(res=>{const f=new FileReader();f.onload=()=>res(String(f.result).split(',')[1]);f.readAsDataURL(b);}); out.files.push({id,type:b.type||'application/octet-stream',b64}); }catch(e){} }
+    msg('Preparando archivo…');
+    const blob=new Blob([JSON.stringify(out)],{type:'application/json'});
+    const dl=await claude.use('downloads'); if(!dl) throw new Error('sin descargas');
+    await dl.save({filename:`copia_recambios_${today()}.json`,data:blob});
+    msg(`Copia descargada: ${Object.values(out.collections).reduce((a,x)=>a+x.length,0)} registros y ${out.files.length} archivos.`);
+  }catch(e){ msg('No se pudo completar la copia. Inténtalo de nuevo.'); }
+  btn.disabled=false;
+}
+
+/* ---------- papelera ---------- */
+async function loadPapelera(){
+  const box=$('#papelera'); if(!box||!S.db) return;
+  try{
+    const snap=await S.db.collection('papelera').orderBy('borradoEn','desc').limit(100).get();
+    const items=snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
+    let ps={}; try{ ps=await S.user.profiles([...new Set(items.map(x=>x.borradoPor).filter(Boolean))]); }catch(e){}
+    box.innerHTML=`<h3>Papelera <span class="hint">(solo la ves tú)</span></h3>${items.length?items.map(x=>`<div class="prow"><span>${new Date(x.borradoEn).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})}</span><b>${esc((ps[x.borradoPor]&&ps[x.borradoPor].name)||'—')}</b><span>${esc(SHEETS[x.col]?SHEETS[x.col].label:x.col)}: ${esc((x.datos&&(x.datos.descripcion||x.datos.tipo||x.datos.trabajo))||x.docId)}</span><button class="btn sm" data-rest="${esc(x.id)}">Restaurar</button></div>`).join(''):'<p class="hint">No se ha eliminado nada.</p>'}`;
+    box.querySelectorAll('[data-rest]').forEach(b=>b.onclick=async()=>{
+      const x=items.find(i=>i.id===b.dataset.rest); if(!x) return; b.disabled=true;
+      try{ await S.db.collection(x.col).doc(x.docId).set(x.datos); await S.db.collection('papelera').doc(x.id).delete(); toast('Restaurado'); loadPapelera(); }
+      catch(e){ b.disabled=false; toast('No se pudo restaurar'); }
+    });
+  }catch(e){ box.innerHTML='<h3>Papelera</h3><p class="hint">No se pudo cargar.</p>'; }
+}
+
+/* ---------- export ---------- */
+async function exportXlsx(){
+  const k=S.tab,c=SHEETS[k],rows=visibleRows();
+  const fields=[]; c.groups.forEach(([,fs])=>fs.forEach(f=>fields.push(f)));
+  const aoa=[['Estado','Presupuestos',...fields.map(f=>f[1])],...rows.map(r=>[phT(k,r._ph),nPresu(r),...fields.map(([f,,t])=>t==='date'&&isISO(r[f])?new Date(r[f]+'T00:00:00'):r[f]??'')])];
+  if(typeof XLSX==='undefined'){toast('No se pudo cargar el generador de Excel');return;}
+  const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true,dateNF:'dd/mm/yyyy'});
+  ws['!cols']=aoa[0].map((h,i)=>({wch:Math.min(45,Math.max(10,...aoa.slice(0,200).map(r=>String(r[i]instanceof Date?'00/00/0000':r[i]??'').length)))}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,c.label.toUpperCase());
+  const data=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  const filename=`${c.label}_${today()}.xlsx`;
+  try{ const dl=await claude.use('downloads'); if(!dl) throw 0; await dl.save({filename,data:new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}); }
+  catch(e){ toast('Descarga cancelada o no disponible'); }
+}
+
+
+/* ---------- import from Excel ---------- */
+const IMP={
+  recambios:{match:/^recamb/i,start:1,map:r=>{const c=T(r[15]),[e,com]=EST(r[14],c);return {fecha:D(r[0]),descripcion:U(r[1]),compra:T(r[2]),reparacion:T(r[3]),solicitante:U(r[4]),maquina:U(r[5]),explicacion:T(r[6]),fechaMail:D(r[7]),numPedido:U(r[8]),fechaPedido:D(r[9]),proveedor:U(r[10]),enviadoFirmar:typeof r[11]==='number'?D(r[11]):T(r[11]),fechaPrevista:D(r[12]),fechaRecepcion:D(r[13]),estado:e,comentarios:com,otros:T(r[16])};}},
+  reparaciones:{match:/^repar/i,start:1,map:r=>{const c=T(r[15]),[e,com]=EST(r[14],c);return {fecha:D(r[0]),descripcion:U(r[1]),reparacion:T(r[2]),fabricacion:T(r[3]),solicitante:U(r[4]),maquina:U(r[5]),explicacion:T(r[6]),fechaOK:D(r[7]),autorizadoPor:U(r[8]),numPedido:U(r[9]),fechaPedido:D(r[10]),proveedor:U(r[11]),fechaPrevista:D(r[12]),fechaRecepcion:D(r[13]),estado:e,comentarios:com,otros:T(r[16])};}},
+  rodillos:{match:/^rodill/i,start:1,map:r=>({maquina:U(r[0]),tipo:U(r[1]),cantidad:typeof r[2]==='number'?r[2]:T(r[2]),trabajo:T(r[3]),proveedor:U(r[4]),fechaSalida:D(r[5]),fechaLlegada:D(r[6]),fechaPrevista:D(r[7]),numPedido:U(r[8]).replace(/^COO/,'C00'),comentarios:''})},
+  asistencias:{match:/^as+ist/i,start:2,map:r=>({empresa:T(r[0]),contacto:T(r[1]),fechaSolicitud:D(r[2]),trabajo:T(r[3]),fechaPrevista:D(r[5]),finalizado:typeof r[6]==='number'?D(r[6]):T(r[6]),datosContacto:T(r[7]),comentarios:T(r[8])})},
+};
+function T(v){ if(v==null) return ''; return String(v).replace(/\s+/g,' ').trim(); }
+function U(v){ return T(v).toUpperCase(); }
+function D(v){ if(v==null||v==='') return '';
+  if(typeof v==='number'){ const p=XLSX.SSF.parse_date_code(v); if(p&&p.y>1900) return `${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`; return String(v); }
+  return parseDate(T(v)); }
+function EST(v,com){ const s=T(v),u=s.toUpperCase();
+  if(u==='OK'||u==='K') return ['OK',com];
+  if(u.replace(/\s/g,'')==='NOOK'||u==='NOK') return ['NO OK',com];
+  if(/^(ANUL|CANCEL)/.test(u)) return ['ANULADO',com];
+  if(!s||u==='?'||u==='??') return ['',com];
+  return ['',s+(com?' | '+com:'')]; }
+function parseWorkbook(buf){
+  const wb=XLSX.read(buf,{type:'array',cellDates:false});
+  const out={};
+  for(const k of ORDER){ const name=wb.SheetNames.find(n=>IMP[k].match.test(n.trim())); if(!name) continue;
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:null,blankrows:true});
+    out[k]=[];
+    rows.forEach((r,i)=>{ if(i<IMP[k].start) return; if(!r||!r.some(v=>v!=null&&String(v).trim()!=='')) return;
+      const body=IMP[k].map(r); if(!Object.values(body).some(v=>v!==''&&v!=null)) return;
+      out[k].push({id:`xl-${k}-${String(i+1).padStart(5,'0')}`,body:{...body,orden:i+1}}); });
+  }
+  return out;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+S.imp={running:false,text:'',pct:0};
+async function runImport(file){
+  const say=t=>{S.imp.text=t; const b=$('#impStatus'); if(b) b.textContent=t;};
+  if(typeof XLSX==='undefined'){say('No se pudo cargar el lector de Excel. Recarga la página.');return;}
+  if(!S.db){say('Sin conexión con la base de datos.');return;}
+  let parsed; try{ parsed=parseWorkbook(await file.arrayBuffer()); }catch(e){ say('No se pudo leer el archivo: '+(e.message||e)); return; }
+  const jobs=[]; for(const k of ORDER){ const have=new Set(S.data[k].map(r=>r.id)); (parsed[k]||[]).forEach(x=>{ if(!have.has(x.id)) jobs.push([k,x]); }); }
+  const found=ORDER.map(k=>`${SHEETS[k].label}: ${(parsed[k]||[]).length}`).join(' · ');
+  if(!jobs.length){ say(`Leído (${found}). No hay filas nuevas: todo ya estaba importado.`); return; }
+  S.imp.running=true; S.imp.pct=0; render(); let done=0,fail=0; const stamp=Date.now();
+  let i=0; const N=3;
+  async function worker(){ while(i<jobs.length){ const [k,x]=jobs[i++]; let tries=0;
+      for(;;){ try{ await S.db.collection(k).doc(x.id).set({...x.body,creadoEn:stamp,importado:true}); done++; break; }
+        catch(e){ const c=e&&e.code; if((c==='resource_exhausted'||c==='unavailable')&&tries<6){ tries++; await sleep(800*2**tries+Math.random()*400); continue; }
+          if(c==='invalid_argument'&&!done){ S.canWrite=false; } fail++; break; } }
+      S.imp.pct=100*(done+fail)/jobs.length; const bi=document.querySelector('#impBar i'); if(bi) bi.style.width=S.imp.pct+'%';
+      say(`Importando… ${done+fail} de ${jobs.length}`); await sleep(60); } }
+  await Promise.all(Array.from({length:N},worker));
+  say(`Listo: ${done} filas importadas${fail?`, ${fail} con error (vuelve a importar el mismo archivo para reintentarlas)`:''}. (${found})`);
+  S.imp.running=false; render();
+}
+function impPanel(){ return `<div class="imp card"><h3>Importar desde el Excel</h3>
+  <p>Sube el archivo <b>PEDIDO DE RECAMBIOS.xlsx</b>. Se leen las hojas RECAMBIOS, REPARACIONES, RODILLOS y ASSISTÈNCIES. Solo se añaden las filas que aún no están en la web, así que puedes volver a subirlo sin duplicar nada ni pisar lo que ya se ha editado aquí.</p>
+  <input type="file" id="impFile" accept=".xlsx,.xlsm,.xls" ${S.imp.running?'disabled':''}> <button class="btn primary" id="impGo" disabled>${S.imp.running?'Importando…':'Importar'}</button>
+  <div class="bar" id="impBar" style="display:${S.imp.running||S.imp.pct?'block':'none'}"><i style="width:${S.imp.pct}%"></i></div><p class="hint" id="impStatus">${esc(S.imp.text)}</p></div>`; }
+function bindImp(){ const f=$('#impFile'),g=$('#impGo'); if(!f) return; f.onchange=()=>g.disabled=!f.files.length||!S.canWrite||S.imp.running; g.onclick=()=>runImport(f.files[0]); }
+
+/* ---------- precios ---------- */
+const eur=v=>typeof v==='number'?v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:3})+' €':'';
+S.pq='';
+function renderPrecios(){
+  const al=(S.alertas||[]).slice().sort((a,b)=>(a.revisada-b.revisada)||(b.creadoEn-a.creadoEn));
+  const pend=al.filter(a=>!a.revisada);
+  const g={}; for(const p of (S.precios||[])){ (g[p.clave]=g[p.clave]||[]).push(p); }
+  let prods=Object.values(g).map(arr=>{ arr.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.creadoEn||0)-(a.creadoEn||0)); const u=arr[0],a=arr[1];
+    return {u,a,n:arr.length,varp:a&&a.precio?((u.precio-a.precio)/a.precio*100):null,arr}; });
+  const q=norm(S.pq); if(q) prods=prods.filter(x=>norm([x.u.ref,x.u.desc,x.u.proveedor].join(' ')).includes(q));
+  prods.sort((x,y)=>(y.u.fecha||'').localeCompare(x.u.fecha||''));
+  $('#view').innerHTML=`
+   <div class="kpis"><div class="kpi ${pend.length?'warn':''}"><b>${pend.length}</b><span>Alertas sin revisar</span></div><div class="kpi"><b>${Object.keys(g).length}</b><span>Productos con precio</span></div><div class="kpi"><b>${(S.precios||[]).length}</b><span>Precios registrados</span></div></div>
+   <div class="card" style="margin-bottom:14px"><h3>Alertas de precio</h3>
+    ${al.length?al.slice(0,60).map(a=>{const up=a.ahora>a.antes;return `<div class="arow ${a.revisada?'rev':''}"><span class="arr ${up?'up':'down'}">${up?'▲':'▼'} ${a.varPct>0?'+':''}${(a.varPct||0).toFixed(1)}%</span>
+      <div><b>${esc(a.desc||'')}</b> ${a.ref?`<span class="mono">${esc(a.ref)}</span>`:''}<div class="hint">${esc(a.proveedor||'')} · antes ${eur(a.antes)} (${esc(fmtDate(a.fechaAntes||''))}${a.proveedorAntes&&a.proveedorAntes!==a.proveedor?' · '+esc(a.proveedorAntes):''}) → ahora <b>${eur(a.ahora)}</b> (${esc(fmtDate(a.fechaAhora||''))})</div></div>
+      <span class="aact">${a.pedido?`<button class="btn sm" data-ped="${esc(a.pedido)}">Ver pedido</button>`:''}${a.revisada?'<span class="hint">Revisada</span>':S.canWrite?`<button class="btn sm" data-rev="${esc(a.id)}">Revisada</button>`:''}</span></div>`;}).join(''):'<p class="hint">Todavía no hay alertas. Aparecerán cuando un producto ya registrado llegue en un presupuesto nuevo con otro precio.</p>'}
+   </div>
+   <div class="tools"><div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" placeholder="Buscar producto, referencia o proveedor…" value="${esc(S.pq)}"></div></div>
+   <div class="tablewrap"><table><thead><tr><th>Referencia</th><th>Producto</th><th>Proveedor</th><th>Último precio</th><th>Anterior</th><th>Variación</th><th>Fecha</th><th>Registros</th></tr></thead><tbody>
+    ${prods.length?prods.slice(0,400).map(x=>`<tr class="prod" data-ped="${esc(x.u.pedido||'')}" title="${esc(x.arr.map(p=>fmtDate(p.fecha)+': '+eur(p.precio)+' '+(p.proveedor||'')).join('\n'))}"><td class="mono">${esc(x.u.ref||'')}</td><td class="strong">${esc(x.u.desc||'')}</td><td>${esc(x.u.proveedor||'')}</td><td class="mono">${eur(x.u.precio)}</td><td class="mono">${x.a?eur(x.a.precio):'—'}</td><td>${x.varp==null?'—':`<span class="arr ${x.varp>0?'up':x.varp<0?'down':''}">${x.varp>0?'▲ +':x.varp<0?'▼ ':''}${x.varp.toFixed(1)}%</span>`}</td><td class="date">${esc(fmtDate(x.u.fecha||''))}</td><td>${x.n}</td></tr>`).join(''):`<tr><td colspan="8" class="empty">Aún no hay precios registrados. Se irán llenando solos a medida que se adjunten presupuestos en PDF.</td></tr>`}
+   </tbody></table></div>
+   <p class="hint" style="margin-top:8px">Los precios se leen de los presupuestos PDF adjuntos (no de las fotos). Pasa el ratón por un producto para ver su histórico; pulsa para abrir el pedido.</p>`;
+  const pq=$('#pq'); pq.oninput=()=>{S.pq=pq.value; const pos=pq.selectionStart; renderPrecios(); const n=$('#pq'); n.focus(); n.setSelectionRange(pos,pos);};
+  $('#view').querySelectorAll('[data-rev]').forEach(b=>b.onclick=async e=>{e.stopPropagation(); b.disabled=true; try{ await S.db.collection('alertas_precio').doc(b.dataset.rev).update({revisada:true,revisadaPor:S.uid||'',revisadaEn:Date.now()}); }catch(err){ b.disabled=false; toast('No se pudo marcar'); }});
+  $('#view').querySelectorAll('[data-ped]').forEach(el=>el.onclick=e=>{ const v=el.dataset.ped; if(!v) return; e.stopPropagation(); const [k,id]=v.split('/'); if(!SHEETS[k]) return; S.tab=k; S.kpi='all'; render(); openDrawer(id); });
+}
+
+/* ---------- procedure ---------- */
+function renderProc(){
+  $('#view').innerHTML=`<div class="proc">
+   <div class="card"><h3>Compra de materiales con oferta</h3><ol>
+     <li><b>Presupuesto para compra <span class="who-tag">Jose</span></b><em>Rellenar la ficha en esta app. Precio con 2 o más ofertas. Presupuesto, proforma o referencia de compra. Proveedor o contacto donde pasar el pedido. Mail a Gabriel con copia a Joan.</em></li>
+     <li><b>Quién pide y por qué</b><em>Mecánico, responsable de sección, OT, falta de stock… Explicación: “es un sensor roto”, o “es para tener recambio” (indicar cuántos hay en stock, cuántos lleva la máquina y si se rompe a menudo).</em></li>
+     <li><b>Enviar pedido <span class="who-tag">Gabriel</span></b><em>Picar el pedido en el ERP y completar Nº pedido y fecha aquí (copia a Joan y Jose).</em></li>
+     <li><b>Recepción y control de llegada <span class="who-tag">Jose</span></b><em>Albarán a Gabriel, que pica la entrada en el ERP. Comprobar medidas, calidades y referencias.</em></li>
+     <li><b>Validación <span class="who-tag">Jose</span></b><em>Quien encargó el recambio confirma si es OK → marcar “Recibido OK” o “NO OK” con comentario.</em></li>
+     <li><b>Entrada de recambios / consumo <span class="who-tag">Jose</span></b></li>
+   </ol><div class="warnbox">Totalmente PROHIBIDO entrar recambios al almacén sin que estén reflejados en FIXNER.</div></div>
+   <div class="card"><h3>Petición de trabajos y reparaciones</h3><ol>
+     <li><b>Urgencias</b><em>Petición de servicio por el canal de WhatsApp: Gabriel, Joan, Jose.</em></li>
+     <li><b>Resto <span class="who-tag">Gabriel</span></b><em>Siempre a través de Gabriel.</em></li>
+     <li><b>Recoger la información <span class="who-tag">Jose</span></b><em>Qué se ha de reparar, qué petición nos hacen, de qué máquina; contrastar con equipo nuevo, recambio oficial…</em></li>
+     <li><b>Autoriza el pedido de servicios <span class="who-tag">Gabriel</span></b><em>Anotar “Fecha de OK” y “Autorizado por” en la reparación.</em></li>
+   </ol></div>
+   <div class="card"><h3>Cómo leer los estados</h3><ol class="legend">
+     ${['pend','presu','ped','late','rec','ok','nook','anul'].map(p=>`<li><span class="pill ${PH[p].c}">${PH[p].t}</span> <em>${{pend:'sin Nº pedido ni fecha de pedido',presu:'tiene presupuesto adjunto, falta hacer el pedido',ped:'pedido hecho, esperando llegada',late:'la fecha prevista ya ha pasado y no ha llegado',rec:'ha llegado pero nadie lo ha validado',ok:'validado y cerrado',nook:'ha llegado mal: revisar comentarios',anul:'pedido anulado'}[p]}</em></li>`).join('')}
+   </ol><p class="hint" style="margin-top:10px">El estado se calcula solo a partir de las fechas y del campo “Estado”. Las fechas admiten texto (“SEMANA 45”), pero solo las fechas reales sirven para avisar de retrasos.</p></div>
+   ${S.isOwner?'<div class="card" id="papelera"><h3>Papelera</h3><p class="hint">Cargando…</p></div>':''}
+   ${S.isOwner?'<div class="card"><h3>Copia de seguridad completa</h3><p class="hint" style="margin:0 0 10px">Descarga todos los datos (pedidos, reparaciones, rodillos, asistencias, OT de Fixner, precios, papelera) y los presupuestos adjuntos en un solo archivo .json. Sirve para guardar una copia o para pasar la web al servidor de la empresa.</p><button class="btn primary" id="bkBtn">Descargar copia completa</button><p class="hint" id="bkMsg"></p></div>':''}
+   ${S.canWrite?impPanel():''}
+  </div>`;
+  bindImp();
+  if(S.isOwner) loadPapelera();
+  const bk=$('#bkBtn'); if(bk) bk.onclick=backupAll;
+}
+
+/* ---------- data ---------- */
+async function init(){
+  render();
+  const timer=setTimeout(()=>{ if(ORDER.some(k=>!S.loaded[k])) notice('Los datos están tardando en llegar. Si no aparecen, revisa la conexión.'); },10000);
+  let db=null; try{ db=await claude.use('db'); }catch(e){}
+  if(!db){ clearTimeout(timer); notice('No se puede acceder a la base de datos compartida desde esta vista. Inicia sesión en claude.ai para ver y editar los pedidos.'); ORDER.forEach(k=>S.loaded[k]=true); render(); return; }
+  S.db=db;
+  ORDER.forEach(k=>{
+    db.collection(k).onSnapshot(snap=>{
+      S.data[k]=snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()}));
+      if(!snap.metadata.fromCache){ S.loaded[k]=true; if(ORDER.every(x=>S.loaded[x])){clearTimeout(timer);notice(''); setTimeout(backfillTextos,4000);} }
+      else if(snap.size) S.loaded[k]=true;
+      scheduleRender(k);
+    },err=>{ clearTimeout(timer); S.loaded[k]=true; notice(err&&err.code==='revoked'?'':'No se pudieron cargar los datos de '+SHEETS[k].label+'.'); render(); });
+  });
+  S.precios=[]; S.alertas=[];
+  db.collection('precios').onSnapshot(sn=>{ S.precios=sn.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})); if(S.tab==='precios') renderPrecios(); else renderNav(); },()=>{});
+  db.collection('alertas_precio').onSnapshot(sn=>{ S.alertas=sn.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})); if(S.tab==='precios') renderPrecios(); else renderNav(); },()=>{});
+  db.collection('fixner_ots').onSnapshot(snap=>{ const m={}; let last=0;
+    snap.docs.forEach(d=>{ if(!d.exists) return; const v=d.data(); if(d.id==='_meta'){ last=v.sincronizado||0; return; } m[d.id]=v; });
+    S.ots=m; S.otsSync=last||null; if(SHEETS[S.tab]) scheduleRender(S.tab); },()=>{});
+  try{ S.assets=await claude.use('assets'); }catch(e){ S.assets=null; }
+  try{ const u0=await claude.use('user'); S.isOwner=!!(u0&&await u0.isOwner()); }catch(e){ S.isOwner=false; }
+  try{
+    const u=await claude.use('user'); S.user=u;
+    if(u){ S.uid=await u.id(); const cw=await u.can('data.write'); if(cw===false){S.canWrite=false;render();}
+      try{const me=await u.me(); if(me&&me.name) $('#who').textContent=me.name+(S.canWrite?'':' · solo lectura');}catch(e){} }
+  }catch(e){}
+}
+let _rt=null,_rk=new Set();
+function scheduleRender(k){ _rk.add(k); if(_rt) return; _rt=setTimeout(()=>{ _rt=null; const ks=_rk; _rk=new Set();
+  if(S.tab!=='procedimiento' && S.tab!=='precios' && ks.has(S.tab) && !(S.imp.running&&S.tab!=='procedimiento'&&false)){
+    const a=document.activeElement; if(a&&(a.id==='q'||a.tagName==='SELECT')){renderNav();renderKpisOnly();renderBody();} else render(); }
+  else renderNav(); }, S.imp.running?700:60); }
+let _bfDone=false;
+async function backfillTextos(){
+  if(_bfDone||!S.db||!S.canWrite) return; _bfDone=true; let n=0;
+  for(const k of ['recambios','reparaciones']) for(const r of S.data[k]){
+    const ps=Array.isArray(r.presupuestos)?r.presupuestos.map(x=>({...x})):[]; let ch=false;
+    for(const p of ps){ if(p.cola||p.tipo!=='application/pdf'||n>=8) continue;
+      try{ const b=await fetchPresu(p); const t=await extractPdfText(b); if(await enqueuePrecio(k,r.id,p,t)){ p.cola=true; ch=true; n++; } }catch(e){} }
+    if(ch){ try{ await S.db.collection(k).doc(r.id).update({presupuestos:ps}); }catch(e){} }
+  }
+}
+function renderKpisOnly(){
+  const k=S.tab,c=SHEETS[k],all=rowsWithPhase(k);
+  document.querySelectorAll('.kpi').forEach(b=>{const key=b.dataset.k;b.querySelector('b').textContent=key==='all'?all.length:all.filter(r=>kpiMatchR(r,key)).length;});
+}
+init();
+</script>
+</body>
+</html>
