@@ -60,6 +60,11 @@
 .payroll-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;margin-top:14px}.payroll-form label{display:block;margin:0 0 6px}
 .payroll-form-note{grid-column:1/3}.payroll-form-submit button{width:100%}.payroll-form-help{font-size:12px;margin:8px 0 6px}
 .type-nómina{background:#e3f3e9;color:#1e6a3e;font-weight:700}.legend-dot.nomina{background:#3f9a63}
+.ctabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}.ctabs button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 14px;cursor:pointer;font-weight:bold;color:var(--text)}.ctabs button.on{background:#123f70;color:#fff;border-color:#123f70}
+.cinfo{border-left:4px solid #8a5cc7;background:#fbf8ff;border-radius:8px;padding:12px 14px;margin:10px 0}.cinfo h3{margin:0 0 4px}.cinfo small{color:var(--muted)}
+.uh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0}.uh-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}.uh-card h3{margin:0 0 6px;font-size:16px}
+.uh-num{display:flex;gap:14px;flex-wrap:wrap}.uh-num div small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}.uh-num div b{font-size:22px}.uh-left b{color:#123f70}.uh-over b{color:#b42318}
+.uh-bar{height:9px;border-radius:6px;background:#e9edf3;overflow:hidden;margin-top:8px}.uh-bar i{display:block;height:100%;background:#8a5cc7}
 .calendar-day.vac-ok{background:#e3f4e8;border-color:#65a978}.calendar-day.vac-pend{background:#fff4dc;border-color:#d8a63d}.calendar-day.vac-sel{background:#dbe9ff;border:2px solid #2f6fd0}
 .calendar-day.vac-off{opacity:.45}.vac-tag{font-size:10px;font-weight:bold;border-radius:4px;padding:1px 4px;align-self:flex-start}.vac-tag.ok{background:#65a978;color:#fff}.vac-tag.pend{background:#d8a63d;color:#fff}.vac-tag.sel{background:#2f6fd0;color:#fff}
 .legend-dot.vac-ok{background:#65a978;outline:2px solid #e3f4e8}.legend-dot.vac-pend{background:#d8a63d}.legend-dot.vac-sel{background:#2f6fd0}
@@ -306,12 +311,16 @@ function seed(){
    Cada persona entra con su nº de empleado y PIN. El servidor solo le envía lo que le corresponde
    (sus datos + lo público); RRHH ve la gestión; el comité ve las consultas. Las reglas están en el servidor,
    no en esta página: aunque alguien manipule el navegador, no recibe datos ajenos. */
-var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents'];
+var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf'];
 var LOCAL_KEY='gdp_portal_ui_v1',AUTH_LS='gdp_portal_auth_v1';
 var CFG=window.PORTAL_CONFIG||{},URL0=String(CFG.url||'').replace(/\/$/,''),KEY=CFG.anonKey||'';
 var MODE='loading',personal=false,readOnly=false,resetArmed=false,ASSETS=null;
 var AUTH=null,known={},lastSeq=0,pending=0,pushQ=Promise.resolve(),pollT=null,lastFull=0,DIR=[];
 var realFetch=window.fetch.bind(window);
+function itemKey(x){if(!x||typeof x!=='object')return JSON.stringify(x);if(x.id!=null)return 'id:'+x.id;if(x.period)return 'p:'+x.period;
+  if(x.pid!=null&&x.eid!=null&&x.body==null)return 'like:'+x.pid+':'+x.eid;if(x.cid!=null&&x.eid!=null)return 'c:'+x.cid+':'+x.eid;
+  if(x.eid!=null&&x.version)return 's:'+x.eid+':'+x.version;if(x.eid!=null&&x.weekday!=null)return 'w:'+x.eid+':'+x.weekday;
+  if(x.eid!=null&&x.date&&x.min!=null)return 'l:'+x.eid+':'+x.date;return 'j:'+JSON.stringify(x);}
 function migrate(){SHARED.forEach(function(k){if(!S[k])S[k]=[];});if(!S.fails)S.fails={};if(!S.flash)S.flash=[];}
 function emptyState(ui){S={session:null,ui:ui||{view:'inicio',calMonth:isoD(today()).slice(0,7),calDate:isoD(today()),payYear:today().getFullYear()},flash:[],fails:{}};SHARED.forEach(function(k){S[k]=[];});}
 function loadLocalSession(){var ui=null,fails={};try{var r=JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');if(r){ui=r.ui;fails=r.fails||{};}}catch(e){}emptyState(ui);S.fails=fails;S.ui.calMonth=isoD(today()).slice(0,7);S.ui.calDate=isoD(today());}
@@ -442,7 +451,8 @@ function layout(content){
   var r=role(),u=me();
   var nav='<a href="#" data-go="inicio">Inicio</a>';
   if(r==='employee'||r==='hr')nav+='<a href="#" data-go="turnos">'+(r==='hr'?'Gestión de turnos':'Mis turnos')+'</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="fichaje">Fichaje</a><a href="#" data-go="nominas">Nóminas</a><a href="#" data-go="ausencias">Solicitar ausencias</a><a href="#" data-go="tickets">Tickets a RRHH</a>';
-  if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">'+(r==='committee'?'Consultas recibidas':'Comité de empresa')+'</a>';
+  if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">Comité de empresa</a>';
+  if(r==='hr')nav+='<a href="#" data-go="comite">Horas sindicales</a>';
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
   nav+='<a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
   if(r==='hr')nav+='<a href="#" data-go="empleados">Empleados</a><a href="#" data-go="formaciones">Formaciones y revisiones</a><a href="#" data-go="vehiculos">Vehículos y accesos</a>';
@@ -653,10 +663,32 @@ function vTickets(){
    (hr&&t.status!=='Resuelto'?'<button class="success" data-act="tclose" data-id="'+t.id+'">Marcar como resuelto</button>':'')+'</div>';}).join('')||'<p class="muted">No hay tickets.</p>')+'</section>';
 }
 
+var UH_DEFAULT=20;
+function cPosts(){return S.posts.filter(function(p){return p.role==='committee'&&p.published;}).sort(function(a,b){return b.id-a.id;});}
+function cInfoList(canDel){var ps=cPosts();return ps.map(function(p){return '<div class="cinfo"><h3>'+esc(p.title)+'</h3><small>'+esc(String(p.created||'').slice(0,10))+' · Comité de empresa</small><p style="white-space:pre-wrap">'+esc(p.body)+'</p>'+(p.path?'<a href="#" data-act="pdf" data-path="'+esc(p.path)+'" data-name="'+esc(p.file||'documento')+'" data-t="'+esc(p.title)+'">📎 '+esc(p.file||'Ver adjunto')+'</a>':'')+(canDel?' <button class="danger" data-act="cpostdel" data-id="'+p.id+'" style="float:right">Quitar</button>':'')+'</div>';}).join('')||'<p class="muted">El comité todavía no ha publicado información.</p>';}
+function uhMembers(){return S.employees.filter(function(e){return e.role==='committee'&&e.active!==0;}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});}
+function uhAllow(eid){var c=S.uhconf.filter(function(x){return x.eid===eid;})[0];return c&&+c.monthly>=0&&c.monthly!==''?+c.monthly:UH_DEFAULT;}
+function uhUsed(eid,ym){return S.uhours.filter(function(h){return h.eid===eid&&String(h.date).slice(0,7)===ym;}).reduce(function(a,h){return a+(+h.hours||0);},0);}
+function vHoras(){
+  var hr=role()==='hr',u=me(),ym=S.ui.uhMonth||isoD(today()).slice(0,7),a=ym.split('-'),mName=cap(MONTHS[+a[1]-1])+' '+a[0],mem=uhMembers();
+  var list=S.uhours.filter(function(h){return String(h.date).slice(0,7)===ym;}).sort(function(x,y){return x.date<y.date?1:-1;});
+  return '<section class="card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="uhmonth" data-d="-1">‹</a><h2>Horas sindicales · '+mName+'</h2><a class="calendar-arrow" href="#" data-act="uhmonth" data-d="1">›</a></div>'+
+  '<p class="muted">Solo lo ven RR. HH. y el comité de empresa.</p>'+
+  '<div class="uh-grid">'+(mem.map(function(e){var al=uhAllow(e.id),us=uhUsed(e.id,ym),left=al-us,pc=al>0?Math.min(100,us/al*100):100;
+    return '<div class="uh-card"><h3>'+esc(e.name)+(e.id===u.id?' <small class="muted">(tú)</small>':'')+'</h3><div class="uh-num"><div><small>Crédito mes</small><b>'+f1(al)+' h</b></div><div><small>Usadas</small><b>'+f1(us)+' h</b></div><div class="'+(left<0?'uh-over':'uh-left')+'"><small>Le quedan</small><b>'+f1(left)+' h</b></div></div><div class="uh-bar"><i style="width:'+pc.toFixed(1)+'%;'+(left<0?'background:#b42318':'')+'"></i></div>'+
+    (hr?'<div style="margin-top:10px;display:flex;gap:6px;align-items:center"><label style="margin:0;font-size:12px">Crédito mensual</label><input type="number" min="0" max="200" step="0.5" id="uhc-'+e.id+'" value="'+al+'" style="width:80px"><button data-act="uhsave" data-id="'+e.id+'">Guardar</button></div>':'')+'</div>';}).join('')||'<p class="muted">No hay miembros del comité dados de alta. RR. HH. puede crear sus cuentas con «Tipo de cuenta: Comité de empresa».</p>')+'</div></section>'+
+  (role()==='committee'?'<section class="card"><h2>Avisar a RR. HH. de horas sindicales</h2><form data-a="uhour"><div class="grid two"><div><label>Día</label><input type="date" name="date" value="'+isoD(today())+'" required></div><div><label>Horas</label><input type="number" name="hours" min="0.5" max="24" step="0.5" placeholder="Ej. 2,5" required></div></div><div class="grid two"><div><label>Desde (opcional)</label><input type="time" name="from"></div><div><label>Hasta (opcional)</label><input type="time" name="to"></div></div><label>Motivo (opcional)</label><input name="reason" maxlength="200" placeholder="Ej. Reunión comité, formación sindical…"><button class="primary">Enviar aviso a RR. HH.</button></form></section>':'')+
+  '<section class="card"><h2>Avisos de '+mName+'</h2>'+(list.map(function(h){var e=byId(S.employees,h.eid)||{};return '<div class="row wrap"><div><b>'+esc(e.name||'¿?')+' · '+f1(+h.hours)+' h</b><p>'+esc(fmtD(h.date))+(h.from?' · '+esc(h.from)+'–'+esc(h.to||''):'')+(h.reason?' · '+esc(h.reason):'')+'</p><small class="muted">Avisado el '+esc(String(h.created||'').slice(0,16).replace('T',' '))+'</small></div>'+((hr||h.eid===u.id)?'<button class="danger" data-act="uhdel" data-id="'+h.id+'">Quitar</button>':'')+'</div>';}).join('')||'<p class="muted">No hay horas sindicales avisadas este mes.</p>')+'</section>';
+}
 function vComite(){
-  if(role()==='committee')return '<h1>Consultas confidenciales</h1>'+queriesReceived();
+  var r=role();
+  if(r==='hr')return '<h1>Horas sindicales</h1><p class="muted">Avisos del comité de empresa y saldo de horas de cada miembro.</p>'+vHoras();
+  if(r==='committee'){var t=S.ui.ctab||'info';
+    return '<h1>Comité de empresa</h1><div class="ctabs"><button data-act="ctab" data-t="info" class="'+(t==='info'?'on':'')+'">📢 Información para la plantilla</button><button data-act="ctab" data-t="consultas" class="'+(t==='consultas'?'on':'')+'">✉️ Consultas recibidas</button><button data-act="ctab" data-t="horas" class="'+(t==='horas'?'on':'')+'">⏱️ Horas sindicales</button></div>'+
+    (t==='consultas'?queriesReceived():t==='horas'?vHoras():
+     '<section class="card"><h2>Publicar información para los trabajadores</h2><p class="muted">Lo verán todos los trabajadores en «Comité de empresa» y en «Información de empresa».</p><form data-a="cpost"><label>Título</label><input name="title" maxlength="140" required><label>Información</label><textarea name="body" rows="5" required></textarea><label>Adjunto (opcional, PDF o imagen)</label><input type="file" name="file" accept="application/pdf,image/*"><button class="primary">Publicar</button></form></section><section class="card"><h2>Publicado por el comité</h2>'+cInfoList(true)+'</section>');}
   var rows=S.queries.filter(function(q){return q.eid===me().id;}).slice().reverse();
-  return '<h1>Comité de empresa</h1><p class="muted">Envía una consulta o propuesta al comité. Puedes ocultar tu identidad.</p><div class="grid two"><section class="card"><h2>Nueva consulta</h2><form data-a="query"><label>Asunto</label><input name="subject" required><label>Mensaje</label><textarea name="message" rows="5" required></textarea><label class="check"><input type="checkbox" name="anonymous" checked> Enviar de forma anónima</label><button class="primary">Enviar al comité</button></form><p class="muted" style="font-size:12px">Si es anónima, no se guarda quién la envía ni la hora exacta: el comité solo ve el día.</p></section><section class="card"><h2>Mis consultas</h2>'+(rows.map(function(q){return '<div class="row"><div><b>'+esc(q.subject)+'</b><p>'+esc(q.message)+'</p>'+(q.reply?'<p><b>Respuesta:</b> '+esc(q.reply)+'</p>':'')+'</div><em>'+esc(q.status)+'</em></div>';}).join('')||'<p class="muted">Todavía no has enviado consultas identificadas. Las anónimas no se pueden asociar a ti, por eso no aparecen aquí.</p>')+'</section></div>';
+  return '<h1>Comité de empresa</h1><section class="card"><h2>📢 Información del comité</h2>'+cInfoList(false)+'</section><p class="muted">Envía una consulta o propuesta al comité. Puedes ocultar tu identidad.</p><div class="grid two"><section class="card"><h2>Nueva consulta</h2><form data-a="query"><label>Asunto</label><input name="subject" required><label>Mensaje</label><textarea name="message" rows="5" required></textarea><label class="check"><input type="checkbox" name="anonymous" checked> Enviar de forma anónima</label><button class="primary">Enviar al comité</button></form><p class="muted" style="font-size:12px">Si es anónima, no se guarda quién la envía ni la hora exacta: el comité solo ve el día.</p></section><section class="card"><h2>Mis consultas</h2>'+(rows.map(function(q){return '<div class="row"><div><b>'+esc(q.subject)+'</b><p>'+esc(q.message)+'</p>'+(q.reply?'<p><b>Respuesta:</b> '+esc(q.reply)+'</p>':'')+'</div><em>'+esc(q.status)+'</em></div>';}).join('')||'<p class="muted">Todavía no has enviado consultas identificadas. Las anónimas no se pueden asociar a ti, por eso no aparecen aquí.</p>')+'</section></div>';
 }
 
 function vEmpresa(){
@@ -810,7 +842,7 @@ function vFormaciones(){
 }
 
 /* ---------- navegación y permisos ---------- */
-var VIEWS={inicio:[vInicio,['employee','hr','committee']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee']],empresa:[vEmpresa,['employee','hr','committee']],misdatos:[vMisDatos,['employee','hr','committee']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
+var VIEWS={inicio:[vInicio,['employee','hr','committee']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],empresa:[vEmpresa,['employee','hr','committee']],misdatos:[vMisDatos,['employee','hr','committee']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
 function render(scrollTop){
   var root=document.getElementById('app');
   if(MODE==='loading'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Portal del empleado</h1><p class="muted">Cargando…</p></div>';return;}
@@ -1132,6 +1164,22 @@ A.importxl=function(f,form){
       flash(done.length+' cuenta'+(done.length===1?'':'s')+' creada'+(done.length===1?'':'s')+'. Imprime las fichas ahora: los PIN solo se ven esta vez.'+(fail.length?' No se pudieron crear: '+fail.join(', '):''),fail.length?'error':'success');stay();}
   };rd.readAsArrayBuffer(file);
 };
+C.ctab=function(b){S.ui.ctab=b.dataset.t;stay();};
+C.uhmonth=function(b){var a=(S.ui.uhMonth||isoD(today()).slice(0,7)).split('-'),d=new Date(+a[0],+a[1]-1+(+b.dataset.d),1);S.ui.uhMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);stay();};
+A.cpost=function(f,form){
+  var t=f.title.trim(),body=f.body.trim(),file=form.querySelector('[name=file]').files[0];if(!t||!body){flash('Pon un título y la información.','error');return stay();}
+  function done(path){S.posts.push({id:nextId(),role:'committee',title:t,body:body,category:'Comunicados',created:nowStr(),published:1,file:file?file.name:'',path:path||''});flash('Publicado. Ya lo ven todos los trabajadores.','success');stay();}
+  if(!file)return done('');if(file.size>20*1024*1024){flash('El adjunto es demasiado grande (máx. 20 MB).','error');return stay();}
+  flash('Subiendo adjunto…','success');stay();storagePut('pub',file,/\.pdf$/i.test(file.name)?'.pdf':'').then(done,function(e){flash('No se ha podido subir el adjunto: '+(e.message||e),'error');stay();});
+};
+C.cpostdel=function(b){if(!confirm('¿Quitar esta publicación del comité?'))return;S.posts=S.posts.filter(function(p){return p.id!==+b.dataset.id;});flash('Publicación quitada.','success');stay();};
+A.uhour=function(f){var h=+String(f.hours).replace(',','.');if(!f.date||!(h>0)){flash('Indica el día y las horas.','error');return stay();}
+  var ym=f.date.slice(0,7),u=me(),left=uhAllow(u.id)-uhUsed(u.id,ym)-h;
+  S.uhours.push({id:nextId(),eid:u.id,date:f.date,hours:h,from:f.from||'',to:f.to||'',reason:(f.reason||'').trim(),created:nowStr()});
+  S.ui.uhMonth=ym;flash('Aviso enviado a RR. HH.: '+f1(h)+' h el '+fmtD(f.date)+'. '+(left<0?'⚠️ Te pasas del crédito de este mes en '+f1(-left)+' h.':'Te quedan '+f1(left)+' h este mes.'),left<0?'error':'success');stay();};
+C.uhdel=function(b){if(!confirm('¿Quitar este aviso de horas sindicales?'))return;S.uhours=S.uhours.filter(function(h){return h.id!==+b.dataset.id;});flash('Aviso quitado.','success');stay();};
+C.uhsave=function(b){var eid=+b.dataset.id,v=+document.getElementById('uhc-'+eid).value;if(!(v>=0)){flash('Pon un número de horas válido.','error');return stay();}
+  var c=S.uhconf.filter(function(x){return x.eid===eid;})[0];if(c)c.monthly=v;else S.uhconf.push({id:eid,eid:eid,monthly:v});flash('Crédito mensual guardado.','success');stay();};
 C.closemodal=function(){var m=document.querySelector('.demo-modal');if(m)m.remove();};
 
 document.addEventListener('submit',function(e){
