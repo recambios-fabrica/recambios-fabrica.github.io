@@ -60,6 +60,16 @@
 .payroll-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;margin-top:14px}.payroll-form label{display:block;margin:0 0 6px}
 .payroll-form-note{grid-column:1/3}.payroll-form-submit button{width:100%}.payroll-form-help{font-size:12px;margin:8px 0 6px}
 .type-nómina{background:#e3f3e9;color:#1e6a3e;font-weight:700}.legend-dot.nomina{background:#3f9a63}
+.calendar-day.vac-ok{background:#e3f4e8;border-color:#65a978}.calendar-day.vac-pend{background:#fff4dc;border-color:#d8a63d}.calendar-day.vac-sel{background:#dbe9ff;border:2px solid #2f6fd0}
+.calendar-day.vac-off{opacity:.45}.vac-tag{font-size:10px;font-weight:bold;border-radius:4px;padding:1px 4px;align-self:flex-start}.vac-tag.ok{background:#65a978;color:#fff}.vac-tag.pend{background:#d8a63d;color:#fff}.vac-tag.sel{background:#2f6fd0;color:#fff}
+.legend-dot.vac-ok{background:#65a978;outline:2px solid #e3f4e8}.legend-dot.vac-pend{background:#d8a63d}.legend-dot.vac-sel{background:#2f6fd0}
+.vac-card{margin-bottom:16px}.vac-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.vac-box{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fff}.vac-box small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.3px}.vac-box b{font-size:26px;line-height:1.2}
+.vac-box.left{background:#123f70;color:#fff;border-color:#123f70}.vac-box.left small{color:#cfe0f3}.vac-box.prev{background:#fff8e6;border-color:#e6c46c}
+.vac-bar{height:10px;border-radius:6px;background:#e9edf3;overflow:hidden;display:flex}.vac-bar i{display:block;height:100%}.vac-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.vac-sticky{position:sticky;bottom:10px;z-index:5;background:#123f70;color:#fff;border-radius:12px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.vac-sticky button{background:#fff;color:#123f70;border:0;border-radius:8px;padding:8px 14px;font-weight:bold;cursor:pointer}.vac-sticky .ghost{background:transparent;color:#fff;border:1px solid #fff}
+.vac-table input{width:70px;padding:5px}.vac-table td,.vac-table th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
 @media(max-width:650px){.payroll-card{padding:16px}.payroll-dates{gap:9px}.payroll-date{padding:13px}.payroll-date strong{font-size:25px}.payroll-date p{font-size:12px}.payroll-form{grid-template-columns:1fr}.payroll-form-note{grid-column:auto}}
 
 /* Ficha profesional con antigüedad integrada */
@@ -540,19 +550,58 @@ function calEvents(ms,me_){
     if(r.pay>=ms&&r.pay<=me_)ev.push({id:null,date:r.pay,title:'Pago de nómina',desc:'Nómina de '+l+': fecha prevista de ingreso del salario.',type:'Nómina'});});
   return ev.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
 }
+// ---- vacaciones ----
+var VAC_DEFAULT=22, VAC_AUTO_FROM=2026; // días laborables por año; el arrastre automático empieza con los datos de 2026
+function vacOffDays(){var m={};S.events.forEach(function(e){if(e.type==='Festivo'||e.type==='Vacaciones empresa')m[e.date]=1;});return m;}
+function isWorkDay(k,off){var d=new Date(k+'T12:00:00'),w=d.getDay();return w!==0&&w!==6&&!off[k];}
+function vacDaysOf(l,year,off){var n=0,d=new Date(l.start+'T12:00:00'),e=new Date(l.end+'T12:00:00');for(;d<=e;d.setDate(d.getDate()+1)){var k=isoD(d);if(year&&+k.slice(0,4)!==year)continue;if(isWorkDay(k,off))n++;}return n;}
+function vacAnual(u){var v=+(u&&u.vacAnual);return v>0?v:VAC_DEFAULT;}
+function vacInfo(u,year){var off=vacOffDays(),used=0,pend=0;
+  S.leaves.forEach(function(l){if(l.eid!==u.id||l.kind!=='Vacaciones')return;if(l.start.slice(0,4)>String(year)||l.end.slice(0,4)<String(year))return;var n=vacDaysOf(l,year,off);if(l.status==='Aprobada')used+=n;else if(l.status==='Pendiente')pend+=n;});
+  var prev=0,man=u.vacPrev&&u.vacPrev[String(year)];
+  if(man!=null&&man!=='')prev=+man;else if(year-1>=VAC_AUTO_FROM){var p=vacInfo(u,year-1);prev=Math.max(0,p.left);}
+  var tot=vacAnual(u);return {year:year,anual:tot,prev:prev,used:used,pend:pend,left:tot+prev-used-pend};}
+function vacDayMap(u){var m={},off=vacOffDays();S.leaves.forEach(function(l){if(l.eid!==u.id||l.kind!=='Vacaciones'||(l.status!=='Aprobada'&&l.status!=='Pendiente'))return;var d=new Date(l.start+'T12:00:00'),e=new Date(l.end+'T12:00:00');for(;d<=e;d.setDate(d.getDate()+1)){var k=isoD(d);if(isWorkDay(k,off))m[k]=l.status==='Aprobada'?'ok':'pend';}});return m;}
+function vVacCard(){
+  var u=me();if(!u||role()==='hr'&&!S.ui.vacSelf)return '';
+  var y=+S.ui.calMonth.slice(0,4),v=vacInfo(u,y),sel=S.ui.vacSel||{},nsel=Object.keys(sel).length,total=v.anual+v.prev||1;
+  function pct(x){return Math.max(0,Math.min(100,x/total*100)).toFixed(1)+'%';}
+  return '<section class="card vac-card"><div class="card-title-row"><h2>🏖️ Mis vacaciones '+y+'</h2><span class="muted">Días laborables (lunes a viernes, sin festivos)</span></div>'+
+  '<div class="vac-boxes"><div class="vac-box"><small>Te da la empresa</small><b>'+v.anual+'</b></div>'+
+  (v.prev>0?'<div class="vac-box prev"><small>Sin gastar de '+(y-1)+'</small><b>'+v.prev+'</b></div>':'')+
+  '<div class="vac-box"><small>Disfrutados / aprobados</small><b>'+v.used+'</b></div><div class="vac-box"><small>Pendientes de aprobar</small><b>'+v.pend+'</b></div>'+
+  '<div class="vac-box left"><small>Te quedan</small><b>'+(v.left-nsel)+'</b>'+(nsel?'<small>(si pides los '+nsel+' marcados)</small>':'')+'</div></div>'+
+  '<div class="vac-bar" title="Aprobados · Pendientes · Marcados · Libres"><i style="width:'+pct(v.used)+';background:#65a978"></i><i style="width:'+pct(v.pend)+';background:#d8a63d"></i><i style="width:'+pct(nsel)+';background:#2f6fd0"></i></div>'+
+  (v.prev>0?'<p class="muted" style="margin:10px 0 0">Tienes <b>'+v.prev+' día'+(v.prev===1?'':'s')+' del año '+(y-1)+'</b> sin gastar sumados a los <b>'+v.anual+'</b> de '+y+'.</p>':'')+
+  (S.ui.vacMode?'<p style="margin:12px 0 0"><b>Pulsa en el calendario los días que quieres coger</b> (vuelve a pulsar para quitarlo). Los sábados, domingos y festivos no cuentan.</p>':
+   '<div class="vac-actions"><button class="primary" data-act="vacmode">＋ Pedir vacaciones</button><span class="muted">Marcas los días en el calendario y se envían a RR. HH. para aprobar.</span></div>')+
+  '</section>';
+}
+function vacSticky(){var sel=S.ui.vacSel||{},ks=Object.keys(sel).sort();if(!S.ui.vacMode)return '';
+  return '<div class="vac-sticky"><span><b>'+ks.length+' día'+(ks.length===1?'':'s')+' marcado'+(ks.length===1?'':'s')+'</b>'+(ks.length?' · del '+fmtD(ks[0])+' al '+fmtD(ks[ks.length-1]):' · pulsa los días en el calendario')+'</span><span><button class="ghost" data-act="vaccancel">Cancelar</button> <button data-act="vacsend"'+(ks.length?'':' disabled')+'>Enviar solicitud</button></span></div>';}
+function fmtD(k){return k.slice(8,10)+'/'+k.slice(5,7);}
+function vVacHR(){
+  if(role()!=='hr')return '';var y=+S.ui.calMonth.slice(0,4),emps=S.employees.filter(function(e){return e.active;}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+  var pend=S.leaves.filter(function(l){return l.kind==='Vacaciones'&&l.status==='Pendiente';}).sort(function(a,b){return a.start<b.start?-1:1;}),off=vacOffDays();
+  return '<section class="card"><h2>🏖️ Vacaciones de la plantilla · '+y+'</h2>'+
+  (pend.length?'<h3 style="margin:6px 0">Solicitudes pendientes ('+pend.length+')</h3>'+pend.map(function(l){var e=byId(S.employees,l.eid)||{};return '<div class="row wrap"><div><b>'+esc(e.name||'¿?')+'</b><p>'+fmtD(l.start)+(l.end!==l.start?' – '+fmtD(l.end):'')+' · '+vacDaysOf(l,0,off)+' días'+(l.comment?' · '+esc(l.comment):'')+'</p></div><span><button class="primary" data-act="leave" data-id="'+l.id+'" data-v="Aprobada">Aprobar</button> <button class="danger" data-act="leave" data-id="'+l.id+'" data-v="Denegada">Denegar</button></span></div>';}).join(''):'<p class="muted">No hay solicitudes de vacaciones pendientes.</p>')+
+  '<h3 style="margin:14px 0 6px">Saldo por persona</h3><p class="muted" style="margin:0 0 8px">Cambia los días que da la empresa o los que arrastra del año anterior y pulsa Guardar. Si dejas «año anterior» vacío, a partir de '+(VAC_AUTO_FROM+1)+' se calcula solo con lo que no gastó.</p>'+
+  '<div style="overflow-x:auto"><table class="vac-table"><thead><tr><th>Persona</th><th>Días año</th><th>Año anterior</th><th>Gastados</th><th>Pendientes</th><th>Quedan</th><th></th></tr></thead><tbody>'+
+  emps.map(function(e){var v=vacInfo(e,y),man=e.vacPrev&&e.vacPrev[String(y)];return '<tr><td>'+esc(e.name)+'<br><small class="muted">'+esc(e.no)+'</small></td><td><input type="number" min="0" max="60" id="va-'+e.id+'" value="'+vacAnual(e)+'"></td><td><input type="number" min="0" max="60" id="vp-'+e.id+'" value="'+(man!=null?esc(man):'')+'" placeholder="'+v.prev+'"></td><td>'+v.used+'</td><td>'+v.pend+'</td><td><b>'+v.left+'</b></td><td><button data-act="vacsave" data-id="'+e.id+'">Guardar</button></td></tr>';}).join('')+'</tbody></table></div></section>';
+}
 function vCalendario(){
   var a=S.ui.calMonth.split('-'),y=+a[0],m=+a[1]-1,ts=isoD(today()),sel=S.ui.calDate;
   var ms=y+'-'+pad(m+1)+'-01',me_=y+'-'+pad(m+1)+'-'+pad(monthEnd(y,m));
   var evs=calEvents(ms,me_),map={};evs.forEach(function(e){(map[e.date]=map[e.date]||[]).push(e);});
-  var first=(new Date(y,m,1).getDay()+6)%7,cells='',n=monthEnd(y,m),total=Math.ceil((first+n)/7)*7;
+  var first=(new Date(y,m,1).getDay()+6)%7,cells='',n=monthEnd(y,m),total=Math.ceil((first+n)/7)*7,OFF=vacOffDays(),VS=me()?vacDayMap(me()):{};
   for(var i=0;i<total;i++){var d=i-first+1;
     if(d<1||d>n){cells+='<div class="calendar-day empty"></div>';continue;}
-    var k=y+'-'+pad(m+1)+'-'+pad(d),list=map[k]||[];
-    cells+='<a href="#" data-act="calday" data-d="'+k+'" class="calendar-day '+(k===ts?'is-today ':'')+(k===sel?'is-selected ':'')+(list.length?'has-events':'')+'"><span class="day-number">'+d+'</span>'+list.slice(0,2).map(function(e){return '<span class="day-event type-'+esc(e.type.toLowerCase().replace(/ /g,'-'))+'">'+esc(e.title)+'</span>';}).join('')+(list.length>2?'<span class="day-more">+'+(list.length-2)+' más</span>':'')+'</a>';}
+    var k=y+'-'+pad(m+1)+'-'+pad(d),list=map[k]||[],vs=VS[k],sl=(S.ui.vacSel||{})[k],offd=S.ui.vacMode&&!isWorkDay(k,OFF);
+    cells+='<a href="#" data-act="calday" data-d="'+k+'" class="calendar-day '+(k===ts?'is-today ':'')+(k===sel&&!S.ui.vacMode?'is-selected ':'')+(list.length?'has-events ':'')+(sl?'vac-sel ':vs==='ok'?'vac-ok ':vs==='pend'?'vac-pend ':'')+(offd?'vac-off':'')+'"><span class="day-number">'+d+'</span>'+(sl?'<span class="vac-tag sel">Marcado</span>':vs==='ok'?'<span class="vac-tag ok">Vacaciones</span>':vs==='pend'?'<span class="vac-tag pend">Pendiente</span>':'')+list.slice(0,2).map(function(e){return '<span class="day-event type-'+esc(e.type.toLowerCase().replace(/ /g,'-'))+'">'+esc(e.title)+'</span>';}).join('')+(list.length>2?'<span class="day-more">+'+(list.length-2)+' más</span>':'')+'</a>';}
   var hr=role()==='hr';
-  return '<div class="calendar-heading"><div><h1>Calendario de empresa</h1><p class="muted">Un calendario claro: pulsa un día para ver o marcar lo que ocurre.</p></div></div><section class="card calendar-card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="calnav" data-d="-1" aria-label="Mes anterior">‹</a><h2>'+cap(MONTHS[m])+' '+y+'</h2><a class="calendar-arrow" href="#" data-act="calnav" data-d="1" aria-label="Mes siguiente">›</a></div>'+
+  return '<div class="calendar-heading"><div><h1>Calendario de empresa</h1><p class="muted">Un calendario claro: pulsa un día para ver o marcar lo que ocurre.</p></div>'+(hr?'<button data-act="vacself">'+(S.ui.vacSelf?'Ocultar mis vacaciones':'🏖️ Mis vacaciones')+'</button>':'')+'</div>'+vVacCard()+'<section class="card calendar-card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="calnav" data-d="-1" aria-label="Mes anterior">‹</a><h2>'+cap(MONTHS[m])+' '+y+'</h2><a class="calendar-arrow" href="#" data-act="calnav" data-d="1" aria-label="Mes siguiente">›</a></div>'+
   '<div class="calendar-grid calendar-weekdays">'+DAYS.map(function(d){return '<div>'+d+'</div>';}).join('')+'</div><div class="calendar-grid calendar-days">'+cells+'</div>'+
-  '<div class="calendar-legend"><span><i class="legend-dot festivo"></i>Festivo</span><span><i class="legend-dot vacaciones"></i>Vacaciones empresa</span><span><i class="legend-dot evento"></i>Evento</span><span><i class="legend-dot prevencion"></i>Prevención</span><span><i class="legend-dot nomina"></i>Nómina</span></div></section>'+
+  '<div class="calendar-legend"><span><i class="legend-dot festivo"></i>Festivo</span><span><i class="legend-dot vacaciones"></i>Vacaciones empresa</span><span><i class="legend-dot evento"></i>Evento</span><span><i class="legend-dot prevencion"></i>Prevención</span><span><i class="legend-dot nomina"></i>Nómina</span><span><i class="legend-dot vac-ok"></i>Mis vacaciones</span><span><i class="legend-dot vac-pend"></i>Pendiente de aprobar</span>'+(S.ui.vacMode?'<span><i class="legend-dot vac-sel"></i>Marcado ahora</span>':'')+'</div>'+vacSticky()+'</section>'+vVacHR()+
   (hr?'<section class="card calendar-editor"><h2>Marcar un día</h2><p class="muted">Día seleccionado: <strong>'+esc(sel)+'</strong>. Elige qué quieres señalar y guarda.</p><form data-a="event"><div class="grid two calendar-form-grid"><div><label>Fecha</label><input type="date" name="event_date" value="'+esc(sel)+'" required></div><div><label>Tipo de día</label><select name="event_type"><option>Festivo</option><option>Vacaciones empresa</option><option>Evento</option><option>Prevención</option><option>Plazo RRHH</option></select></div></div><label>Nombre o descripción corta</label><input name="title" placeholder="Ej. Festivo local, cierre de fábrica…" required><label>Nota (opcional)</label><input name="description" placeholder="Información adicional"><button class="primary calendar-save">Guardar marca en el calendario</button></form></section>':'')+
   '<section class="card calendar-events-list"><h2>Marcas de '+cap(MONTHS[m])+' '+y+'</h2>'+(evs.map(function(e){return '<div class="row"><div><b>'+e.date+' · '+esc(e.title)+'</b><p>'+esc(e.desc||e.type)+'</p></div><em>'+esc(e.type)+'</em>'+(hr&&e.id?'<button class="danger" data-act="evdel" data-id="'+e.id+'">Quitar</button>':'')+'</div>';}).join('')||'<p class="muted">Este mes todavía no tiene días marcados.</p>')+'</section>';
 }
@@ -990,7 +1039,30 @@ C.resetcancel=function(){resetArmed=false;render(false);};
 C.seedshared=function(){};
 C.fill=function(){};
 C.calnav=function(b){var a=S.ui.calMonth.split('-'),d=new Date(+a[0],+a[1]-1+(+b.dataset.d),1);S.ui.calMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);stay();};
-C.calday=function(b){S.ui.calDate=b.dataset.d;stay();var el=document.querySelector('.calendar-editor')||document.querySelector('.calendar-events-list');if(el&&role()==='hr')el.scrollIntoView({block:'start',behavior:'smooth'});};
+C.vacmode=function(){S.ui.vacMode=true;S.ui.vacSel={};stay();};
+C.vacself=function(){S.ui.vacSelf=!S.ui.vacSelf;if(!S.ui.vacSelf){S.ui.vacMode=false;S.ui.vacSel={};}stay();};
+C.vaccancel=function(){S.ui.vacMode=false;S.ui.vacSel={};stay();};
+C.vacsend=function(){
+  var u=me(),ks=Object.keys(S.ui.vacSel||{}).sort();if(!ks.length)return;
+  var y=+ks[0].slice(0,4),v=vacInfo(u,y);
+  if(ks.length>v.left&&!confirm('Pides '+ks.length+' días y solo te quedan '+v.left+'. ¿Enviar igualmente a RR. HH.?'))return;
+  // agrupar días seguidos (saltando fines de semana y festivos) en una sola solicitud
+  var off=vacOffDays(),groups=[],cur=null;
+  ks.forEach(function(k){if(cur){var d=new Date(cur.end+'T12:00:00');d.setDate(d.getDate()+1);while(isoD(d)<k&&!isWorkDay(isoD(d),off))d.setDate(d.getDate()+1);if(isoD(d)===k){cur.end=k;return;}}cur={start:k,end:k};groups.push(cur);});
+  groups.forEach(function(g,i){S.leaves.push({id:nextId()+i,eid:u.id,kind:'Vacaciones',start:g.start,end:g.end,comment:'Pedido desde el calendario',status:'Pendiente',created:nowStr()});});
+  S.ui.vacMode=false;S.ui.vacSel={};flash('Solicitud de '+ks.length+' día'+(ks.length===1?'':'s')+' de vacaciones enviada a RR. HH. Te aparecerán en naranja hasta que la aprueben.','success');stay();
+};
+C.vacsave=function(b){
+  var e=byId(S.employees,+b.dataset.id);if(!e)return;var y=String(+S.ui.calMonth.slice(0,4));
+  var a=document.getElementById('va-'+e.id).value,p=document.getElementById('vp-'+e.id).value;
+  e.vacAnual=a===''?VAC_DEFAULT:Math.max(0,Math.min(60,+a));e.vacPrev=Object.assign({},e.vacPrev||{});if(p==='')delete e.vacPrev[y];else e.vacPrev[y]=Math.max(0,Math.min(60,+p));
+  flash('Vacaciones de '+e.name+' guardadas.','success');stay();
+};
+C.calday=function(b){
+  if(S.ui.vacMode){var k=b.dataset.d,off=vacOffDays();if(!isWorkDay(k,off)){flash('Ese día no es laborable: no hace falta pedirlo.','error');return stay();}
+    var vs=vacDayMap(me())[k];if(vs){flash(vs==='ok'?'Ese día ya lo tienes de vacaciones.':'Ese día ya está pedido y pendiente de aprobar.','error');return stay();}
+    if(k<isoD(today())){flash('No se pueden pedir días ya pasados.','error');return stay();}
+    S.ui.vacSel=S.ui.vacSel||{};if(S.ui.vacSel[k])delete S.ui.vacSel[k];else S.ui.vacSel[k]=1;var y=window.scrollY;stay();window.scrollTo(0,y);return;}S.ui.calDate=b.dataset.d;stay();var el=document.querySelector('.calendar-editor')||document.querySelector('.calendar-events-list');if(el&&role()==='hr')el.scrollIntoView({block:'start',behavior:'smooth'});};
 C.evdel=function(b){S.events=S.events.filter(function(e){return e.id!==+b.dataset.id;});flash('Marca eliminada.','success');stay();};
 C.paydel=function(b){S.payroll=S.payroll.filter(function(r){return r.period!==b.dataset.p;});flash('Fechas de nómina eliminadas.','success');stay('calendario-nominas');};
 C.payedit=function(b){var r=S.payroll.filter(function(x){return x.period===b.dataset.p;})[0],f=document.querySelector('.payroll-form');f.period.value=r.period;f.close_date.value=r.close;f.pay_date.value=r.pay;f.note.value=r.note||'';f.scrollIntoView({block:'center',behavior:'smooth'});f.close_date.focus();};
