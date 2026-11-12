@@ -65,6 +65,22 @@
 .uh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0}.uh-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}.uh-card h3{margin:0 0 6px;font-size:16px}
 .uh-num{display:flex;gap:14px;flex-wrap:wrap}.uh-num div small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}.uh-num div b{font-size:22px}.uh-left b{color:#123f70}.uh-over b{color:#b42318}
 .uh-bar{height:9px;border-radius:6px;background:#e9edf3;overflow:hidden;margin-top:8px}.uh-bar i{display:block;height:100%;background:#8a5cc7}
+.chip{display:inline-block;border-radius:12px;padding:1px 9px;font-size:12px;font-weight:bold;vertical-align:middle}.chip-ok{background:#e3f5ea;color:#1d7a43}.chip-no{background:#fde3e1;color:#b42318}.chip-pend{background:#fff3d6;color:#9a6200}.chip-info{background:#e6f0fb;color:#123f70}
+.lv-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--line);padding:12px 0;flex-wrap:wrap}.lv-row:last-child{border-bottom:0}.lv-main{flex:1;min-width:220px}.lv-main p{margin:4px 0}.lv-btns{display:flex;gap:6px;flex-wrap:wrap}.lv-note{background:#f3f7fc;border-left:3px solid #123f70;padding:6px 10px;border-radius:6px;margin-top:6px;font-size:14px}.lv-edit{background:#fbfcfe}
+.badge-red{display:inline-block;background:#b42318;color:#fff;border-radius:10px;padding:0 7px;font-size:12px;font-weight:bold;margin-left:6px;line-height:18px}.badge-amber{display:inline-block;background:#e8a317;color:#fff;border-radius:10px;padding:0 7px;font-size:12px;font-weight:bold;margin-left:6px;line-height:18px}
+@keyframes blinkred{0%,100%{background:#b42318;color:#fff}50%{background:#ffd5d1;color:#b42318}}
+.nav-alert{animation:blinkred 1.1s ease-in-out infinite;border-radius:8px;font-weight:bold}.nav-alert .badge-red{background:#fff;color:#b42318}
+.tk-banner{display:block;animation:blinkred 1.1s ease-in-out infinite;border-radius:10px;padding:10px 14px;margin:0 0 14px;font-weight:bold;text-decoration:none}
+.chat-wrap{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}.chat-list{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;max-height:72vh;overflow:auto}.chat-main{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;min-height:420px}
+.chat-item{display:block;border-radius:10px;padding:9px 10px;margin-top:6px;color:inherit;text-decoration:none;border:1px solid transparent}.chat-item:hover{background:#f3f7fc}.chat-item.on{background:#e6f0fb;border-color:#b9d1ee}.chat-item.unread{border-color:#f3b4ad;background:#fff6f5}
+.ci-top{display:flex;justify-content:space-between;gap:6px}.ci-top small{color:var(--muted);white-space:nowrap}.ci-sub{font-size:12px;color:var(--muted)}.ci-last{font-size:13px;color:#4a5568;display:flex;justify-content:space-between;gap:6px;margin-top:2px}
+.chat-head{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;flex-wrap:wrap}.chat-back{display:none}
+.chat-body{flex:1;overflow:auto;max-height:55vh;min-height:240px;padding:12px 4px;display:flex;flex-direction:column;gap:8px;background:#f7f9fc;border-radius:10px;margin:10px 0}
+.bub{max-width:78%;padding:8px 12px;border-radius:14px;font-size:15px;line-height:1.4;word-wrap:break-word}.bub.me{align-self:flex-end;background:#123f70;color:#fff;border-bottom-right-radius:4px}.bub.them{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.bub-who{font-size:12px;font-weight:bold;color:#123f70;margin-bottom:2px}.bub-t{font-size:11px;opacity:.7;text-align:right;margin-top:3px}
+.chat-foot{display:flex;gap:8px;align-items:flex-end}.chat-foot textarea{flex:1;margin:0;resize:vertical}.chat-foot button{margin:0}.chat-empty{margin:auto;text-align:center}.chat-new{margin-top:8px}
+.uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
+@media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
 .calendar-day.vac-ok{background:#e3f4e8;border-color:#65a978}.calendar-day.vac-pend{background:#fff4dc;border-color:#d8a63d}.calendar-day.vac-sel{background:#dbe9ff;border:2px solid #2f6fd0}
 .calendar-day.vac-off{opacity:.45}.vac-tag{font-size:10px;font-weight:bold;border-radius:4px;padding:1px 4px;align-self:flex-start}.vac-tag.ok{background:#65a978;color:#fff}.vac-tag.pend{background:#d8a63d;color:#fff}.vac-tag.sel{background:#2f6fd0;color:#fff}
 .legend-dot.vac-ok{background:#65a978;outline:2px solid #e3f4e8}.legend-dot.vac-pend{background:#d8a63d}.legend-dot.vac-sel{background:#2f6fd0}
@@ -311,7 +327,7 @@ function seed(){
    Cada persona entra con su nº de empleado y PIN. El servidor solo le envía lo que le corresponde
    (sus datos + lo público); RRHH ve la gestión; el comité ve las consultas. Las reglas están en el servidor,
    no en esta página: aunque alguien manipule el navegador, no recibe datos ajenos. */
-var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf'];
+var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf','treads'];
 var LOCAL_KEY='gdp_portal_ui_v1',AUTH_LS='gdp_portal_auth_v1';
 var CFG=window.PORTAL_CONFIG||{},URL0=String(CFG.url||'').replace(/\/$/,''),KEY=CFG.anonKey||'';
 var MODE='loading',personal=false,readOnly=false,resetArmed=false,ASSETS=null;
@@ -450,9 +466,9 @@ function csrf(){return '';}
 function layout(content){
   var r=role(),u=me();
   var nav='<a href="#" data-go="inicio">Inicio</a>';
-  if(r==='employee'||r==='hr')nav+='<a href="#" data-go="turnos">'+(r==='hr'?'Gestión de turnos':'Mis turnos')+'</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="fichaje">Fichaje</a><a href="#" data-go="nominas">Nóminas</a><a href="#" data-go="ausencias">Solicitar ausencias</a><a href="#" data-go="tickets">Tickets a RRHH</a>';
+  if(r==='employee'||r==='hr')nav+='<a href="#" data-go="turnos">'+(r==='hr'?'Gestión de turnos':'Mis turnos')+'</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="fichaje">Fichaje</a><a href="#" data-go="nominas">Nóminas</a>'+ausLink()+tkLink()+'';
   if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">Comité de empresa</a>';
-  if(r==='hr')nav+='<a href="#" data-go="comite">Horas sindicales</a>';
+  if(r==='hr')nav+=uhLink();
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
   nav+='<a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
@@ -528,7 +544,7 @@ function vHR(){
   '<form data-a="payroll" class="payroll-form"><div><label>Mes de la nómina</label><input type="month" name="period" required></div><div><label>Cierre de nómina</label><input type="date" name="close_date" required></div><div><label>Pago de nómina</label><input type="date" name="pay_date" required></div><div class="payroll-form-note"><label>Nota para el personal (opcional)</label><input name="note" maxlength="300" placeholder="Ej. Este mes se adelanta el cierre por el festivo del día 8"></div><div class="payroll-form-submit"><button class="primary">Guardar fechas</button></div></form>'+
   '<p class="muted payroll-form-help">Si el mes ya existe, se sustituyen sus fechas. El aviso destacado se muestra al personal desde 3 días antes del cierre.</p>'+
   (rows.map(function(r){return '<div class="row wrap"><div><b>'+periodLabel(r.period)+'</b><p>Cierre: '+fechaLarga(r.close)+' · Pago: '+fechaLarga(r.pay)+'</p>'+(r.note?'<small>'+esc(r.note)+'</small>':'')+'</div><span class="row-actions"><button data-act="payedit" data-p="'+r.period+'">Editar</button><button class="danger" data-act="paydel" data-p="'+r.period+'">Eliminar</button></span></div>';}).join('')||'<p class="muted">Todavía no hay fechas de nómina guardadas.</p>')+'</section>'+
-  '<section class="card"><h2>Solicitudes de ausencia</h2>'+(pend.map(function(r){var e=emp(r.eid);return '<div class="row wrap"><div><b>'+esc(e.name)+' · '+esc(e.no)+'</b><p>'+esc(r.kind)+' · '+r.start+' – '+r.end+'</p><small>'+esc(r.comment)+'</small></div><em>'+esc(r.status)+'</em>'+(r.status==='Pendiente'?'<button class="success" data-act="leave" data-id="'+r.id+'" data-v="Aprobada">Aprobar</button><button class="danger" data-act="leave" data-id="'+r.id+'" data-v="Rechazada">Rechazar</button>':'')+'</div>';}).join('')||'<p class="muted">No hay solicitudes.</p>')+'</section>'+
+  '<section class="card"><h2>Solicitudes de ausencia <a href="#" data-go="ausencias" style="font-size:14px;font-weight:normal">Gestionar todas →</a></h2>'+(pend.map(function(r){var e=emp(r.eid);return '<div class="row wrap"><div><b>'+esc(e.name)+' · '+esc(e.no)+'</b><p>'+esc(r.kind)+' · '+r.start+' – '+r.end+'</p><small>'+esc(r.comment)+'</small></div><em>'+esc(r.status)+'</em>'+(r.status==='Pendiente'?'<button class="success" data-act="leave" data-id="'+r.id+'" data-v="Aprobada">Aprobar</button><button class="danger" data-act="leave" data-id="'+r.id+'" data-v="Rechazada">Rechazar</button>':'')+'</div>';}).join('')||'<p class="muted">No hay solicitudes.</p>')+'</section>'+
   '<section class="card"><h2>Tickets pendientes</h2>'+(tko.map(function(t){return '<div class="row"><div><b>'+esc(t.subject)+'</b><p>'+esc(emp(t.eid).name)+' · '+esc(t.cat)+'</p></div><em>'+esc(t.status)+'</em><a href="#" data-go="tickets">Abrir gestión</a></div>';}).join('')||'<p class="muted">No hay tickets pendientes.</p>')+'</section>'+
   '<div class="grid three"><a class="card" href="#" data-go="empleados">Gestionar empleados →</a><a class="card" href="#" data-go="turnos">Gestionar turnos →</a><a class="card" href="#" data-go="nominas">Cargar nóminas →</a></div>';
 }
@@ -595,7 +611,7 @@ function vVacHR(){
   if(role()!=='hr')return '';var y=+S.ui.calMonth.slice(0,4),emps=S.employees.filter(function(e){return e.active;}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
   var pend=S.leaves.filter(function(l){return l.kind==='Vacaciones'&&l.status==='Pendiente';}).sort(function(a,b){return a.start<b.start?-1:1;}),off=vacOffDays();
   return '<section class="card"><h2>🏖️ Vacaciones de la plantilla · '+y+'</h2>'+
-  (pend.length?'<h3 style="margin:6px 0">Solicitudes pendientes ('+pend.length+')</h3>'+pend.map(function(l){var e=byId(S.employees,l.eid)||{};return '<div class="row wrap"><div><b>'+esc(e.name||'¿?')+'</b><p>'+fmtD(l.start)+(l.end!==l.start?' – '+fmtD(l.end):'')+' · '+(function(n){return n+(n===1?' día':' días');})(vacDaysOf(l,0,off))+(l.comment?' · '+esc(l.comment):'')+'</p></div><span><button class="primary" data-act="leave" data-id="'+l.id+'" data-v="Aprobada">Aprobar</button> <button class="danger" data-act="leave" data-id="'+l.id+'" data-v="Denegada">Denegar</button></span></div>';}).join(''):'<p class="muted">No hay solicitudes de vacaciones pendientes.</p>')+
+  (pend.length?'<h3 style="margin:6px 0">Solicitudes pendientes ('+pend.length+')</h3>'+pend.map(function(l){var e=byId(S.employees,l.eid)||{};return '<div class="row wrap"><div><b>'+esc(e.name||'¿?')+'</b><p>'+fmtD(l.start)+(l.end!==l.start?' – '+fmtD(l.end):'')+' · '+(function(n){return n+(n===1?' día':' días');})(vacDaysOf(l,0,off))+(l.comment?' · '+esc(l.comment):'')+'</p></div><span><button class="primary" data-act="leave" data-id="'+l.id+'" data-v="Aprobada">Aprobar</button> <button class="danger" data-act="leave" data-id="'+l.id+'" data-v="Rechazada">Rechazar</button></span></div>';}).join(''):'<p class="muted">No hay solicitudes de vacaciones pendientes.</p>')+
   '<h3 style="margin:14px 0 6px">Saldo por persona</h3><p class="muted" style="margin:0 0 8px">Cambia los días que da la empresa o los que arrastra del año anterior y pulsa Guardar. Si dejas «año anterior» vacío, a partir de '+(VAC_AUTO_FROM+1)+' se calcula solo con lo que no gastó.</p>'+
   '<div style="overflow-x:auto"><table class="vac-table"><thead><tr><th>Persona</th><th>Días año</th><th>Año anterior</th><th>Gastados</th><th>Pendientes</th><th>Quedan</th><th></th></tr></thead><tbody>'+
   emps.map(function(e){var v=vacInfo(e,y),man=e.vacPrev&&e.vacPrev[String(y)];return '<tr><td>'+esc(e.name)+'<br><small class="muted">'+esc(e.no)+'</small></td><td><input type="number" min="0" max="60" id="va-'+e.id+'" value="'+vacAnual(e)+'"></td><td><input type="number" min="0" max="60" id="vp-'+e.id+'" value="'+(man!=null?esc(man):'')+'" placeholder="'+v.prev+'"></td><td>'+v.used+'</td><td>'+v.pend+'</td><td><b>'+v.left+'</b></td><td><button data-act="vacsave" data-id="'+e.id+'">Guardar</button></td></tr>';}).join('')+'</tbody></table></div></section>';
@@ -898,7 +914,7 @@ function render(scrollTop){
   else if(!S.session.must&&role()==='employee'&&['privacidad','mivehiculo','recordatorio'].indexOf(S.ui.view)<0){var vs=vehicleState(S.session.eid);if(vs==='missing'){S.ui.vregister=false;S.ui.view='mivehiculo';}else if(vs==='reminder')S.ui.view='recordatorio';}
   var v=VIEWS[S.ui.view]||VIEWS.inicio;
   var html=v[1].indexOf(role())<0?'<h1>Sin permiso</h1><p class="muted">No tienes permisos para acceder a esta sección.</p>':v[0]();
-  root.innerHTML=layout(html);
+  root.innerHTML=layout(tkBanner()+html);var cb=document.querySelector('.chat-body');if(cb)cb.scrollTop=cb.scrollHeight;
   document.querySelectorAll('[data-go]').forEach(function(a){if(a.getAttribute('data-go')===S.ui.view)a.classList.add('is-active');});
   save();if(scrollTop!==false)window.scrollTo(0,0);
   try{if(location.hash.slice(1)!==S.ui.view)history.replaceState(null,'','#'+S.ui.view);}catch(e){}
@@ -1239,6 +1255,169 @@ document.addEventListener('click',function(e){
 document.addEventListener('change',function(e){if(e.target.getAttribute('data-act')==='year'){S.ui.payYear=+e.target.value;stay();}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')C.closemodal();});
 window.addEventListener('hashchange',function(){var v=location.hash.slice(1);if(S.session&&VIEWS[v]&&v!==S.ui.view)go(v);});
+
+/* ===== 13) Ausencias gestionadas por RR. HH., chat de tickets con aviso en rojo, horas sindicales con autorización ===== */
+var LEAVE_KINDS=['Vacaciones','Asuntos propios','Permiso retribuido','Baja médica','Cita médica','Otros'];
+function fDMY(k){return k?String(k).slice(8,10)+'/'+String(k).slice(5,7)+'/'+String(k).slice(0,4):'';}
+function lvStatus(s){return s==='Denegada'?'Rechazada':(s||'Pendiente');}
+function chip(s){var c=/^(Aprobada|Autorizada|Resuelto)$/.test(s)?'ok':/^(Rechazada|Denegada)$/.test(s)?'no':/^(En curso)$/.test(s)?'info':'pend';return '<span class="chip chip-'+c+'">'+esc(s)+'</span>';}
+function lvDays(l){try{return diffDays(parseD(l.end),parseD(l.start))+1;}catch(e){return 0;}}
+function lvRange(l){return fDMY(l.start)+(l.end&&l.end!==l.start?' – '+fDMY(l.end):'')+' · '+lvDays(l)+(lvDays(l)===1?' día':' días');}
+function kindOpts(sel){return LEAVE_KINDS.map(function(k){return '<option'+(k===sel?' selected':'')+'>'+esc(k)+'</option>';}).join('');}
+function staffList(){return S.employees.filter(function(e){return e.active!==0&&e.active!==false;}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});}
+
+function vAusencias(){
+  if(role()==='hr')return vAusHR();
+  var rows=S.leaves.filter(function(l){return l.eid===me().id;}).slice().sort(function(a,b){return String(b.created||'').localeCompare(String(a.created||''))||(b.id-a.id);});
+  return '<h1>Solicitar ausencia</h1><div class="grid two"><section class="card"><form data-a="leave"><label>Tipo de ausencia</label><select name="kind" required><option value="">Selecciona</option>'+kindOpts('')+'</select><div class="grid two"><div><label>Desde</label><input type="date" name="start_date" required></div><div><label>Hasta</label><input type="date" name="end_date" required></div></div><label>Comentario</label><textarea name="comment" rows="4"></textarea><button class="primary">Enviar solicitud</button></form></section>'+
+  '<section class="card"><h2>Mis solicitudes</h2>'+(rows.map(function(r){var st=lvStatus(r.status);
+    return '<div class="lv-row"><div class="lv-main"><b>'+esc(r.kind)+'</b> '+chip(st)+(r.hrMod?' <span class="chip chip-info">Modificada por RR. HH.</span>':'')+'<p>'+lvRange(r)+'</p>'+(r.comment?'<small>Tu comentario: '+esc(r.comment)+'</small>':'')+(r.hrNote?'<div class="lv-note">💬 RR. HH.: '+esc(r.hrNote)+'</div>':'')+'</div>'+
+    (st==='Pendiente'?'<button class="ghost" data-act="lvcancel" data-id="'+r.id+'">Anular</button>':'')+'</div>';}).join('')||'<p class="muted">No has enviado solicitudes.</p>')+'</section></div>';
+}
+function vAusHR(){
+  var f=S.ui.lvF||'Pendiente',q=S.ui.lvQ||'',emps=staffList(),ed=S.ui.lvEdit;
+  var cnt={Pendiente:0,Aprobada:0,Rechazada:0,Todas:S.leaves.length};S.leaves.forEach(function(l){cnt[lvStatus(l.status)]=(cnt[lvStatus(l.status)]||0)+1;});
+  var list=S.leaves.filter(function(l){return (f==='Todas'||lvStatus(l.status)===f)&&(!q||String(l.eid)===q);})
+    .sort(function(a,b){var pa=lvStatus(a.status)==='Pendiente'?0:1,pb=lvStatus(b.status)==='Pendiente'?0:1;return pa-pb||(pa===0?String(a.start).localeCompare(String(b.start)):String(b.start).localeCompare(String(a.start)));});
+  function tab(k,l){return '<button data-act="lvf" data-v="'+k+'" class="'+(f===k?'on':'')+'">'+l+' <small>('+(cnt[k]||0)+')</small></button>';}
+  var rows=list.map(function(l){var e=byId(S.employees,l.eid)||{},st=lvStatus(l.status);
+    if(ed===l.id)return '<div class="lv-row lv-edit"><form data-a="lvedit" data-id="'+l.id+'" style="width:100%"><b>'+esc(e.name||'¿?')+' · Nº '+esc(e.no||'')+'</b>'+
+      '<div class="grid two"><div><label>Tipo</label><select name="kind">'+kindOpts(l.kind)+'</select></div><div><label>Estado</label><select name="status">'+['Pendiente','Aprobada','Rechazada'].map(function(s){return '<option'+(s===st?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div></div>'+
+      '<div class="grid two"><div><label>Desde</label><input type="date" name="start" value="'+esc(l.start)+'" required></div><div><label>Hasta</label><input type="date" name="end" value="'+esc(l.end)+'" required></div></div>'+
+      '<label>Nota para el trabajador (la verá en sus solicitudes)</label><textarea name="hrNote" rows="2">'+esc(l.hrNote||'')+'</textarea>'+
+      '<div class="row" style="gap:8px;justify-content:flex-start"><button class="primary">Guardar cambios</button><button type="button" class="ghost" data-act="lvx">Cancelar</button></div></form></div>';
+    return '<div class="lv-row"><div class="lv-main"><b>'+esc(e.name||'¿?')+'</b> <small class="muted">Nº '+esc(e.no||'')+'</small> '+chip(st)+(l.hrMod?' <span class="chip chip-info">Modificada</span>':'')+(l.byHR?' <span class="chip chip-info">Registrada por RR. HH.</span>':'')+
+      '<p><b>'+esc(l.kind)+'</b> · '+lvRange(l)+'</p>'+(l.comment?'<small>«'+esc(l.comment)+'»</small>':'')+(l.hrNote?'<div class="lv-note">💬 '+esc(l.hrNote)+'</div>':'')+
+      (l.resolvedBy?'<small class="muted">'+esc(st)+' por '+esc(l.resolvedBy)+(l.resolvedAt?' el '+esc(fechaHora(l.resolvedAt)):'')+'</small>':'')+'</div>'+
+      '<div class="lv-btns">'+(st!=='Aprobada'?'<button class="success" data-act="leave" data-id="'+l.id+'" data-v="Aprobada">Aprobar</button>':'')+(st!=='Rechazada'?'<button class="danger" data-act="leave" data-id="'+l.id+'" data-v="Rechazada">Rechazar</button>':'')+
+      '<button class="ghost" data-act="lvedit" data-id="'+l.id+'">Modificar</button><button class="ghost" data-act="lvdel" data-id="'+l.id+'">Quitar</button></div></div>';}).join('');
+  return '<h1>Ausencias del personal</h1><p class="muted">Aquí ves todas las solicitudes. Puedes aprobarlas, rechazarlas o modificarlas (fechas, tipo o estado), y dejar una nota que verá el trabajador.</p>'+
+  '<section class="card"><div class="ctabs">'+tab('Pendiente','⏳ Pendientes')+tab('Aprobada','✅ Aprobadas')+tab('Rechazada','⛔ Rechazadas')+tab('Todas','Todas')+'</div>'+
+  '<label style="margin-top:0">Persona</label><select data-chg="lvq"><option value="">Todas las personas</option>'+emps.map(function(e){return '<option value="'+e.id+'"'+(String(e.id)===q?' selected':'')+'>'+esc(e.name)+' · '+esc(e.no)+'</option>';}).join('')+'</select>'+
+  '<div style="margin-top:12px">'+(rows||'<p class="muted">No hay ausencias '+(f==='Todas'?'':f==='Pendiente'?'pendientes':f==='Aprobada'?'aprobadas':'rechazadas')+(q?' de esta persona':'')+'.</p>')+'</div></section>'+
+  '<section class="card"><details><summary><b>➕ Registrar una ausencia a un trabajador</b> <small class="muted">(p. ej. una baja médica que te comunican)</small></summary><form data-a="lvhr" style="margin-top:10px"><label>Trabajador</label><select name="eid" required><option value="">Selecciona</option>'+emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+' · '+esc(e.no)+'</option>';}).join('')+'</select>'+
+  '<div class="grid two"><div><label>Tipo</label><select name="kind" required>'+kindOpts('Baja médica')+'</select></div><div><label>Estado</label><select name="status"><option>Aprobada</option><option>Pendiente</option></select></div></div>'+
+  '<div class="grid two"><div><label>Desde</label><input type="date" name="start" required></div><div><label>Hasta</label><input type="date" name="end" required></div></div><label>Nota para el trabajador (opcional)</label><textarea name="hrNote" rows="2"></textarea><button class="primary">Registrar ausencia</button></form></details></section>';
+}
+C.leave=function(b){var l=byId(S.leaves,+b.dataset.id);if(!l)return;l.status=b.dataset.v;l.resolvedBy=(me()||{}).name||'RR. HH.';l.resolvedAt=nowStr();if(S.ui.lvEdit===l.id)S.ui.lvEdit=null;flash('Ausencia '+(l.status==='Aprobada'?'aprobada':'rechazada')+'.','success');stay();};
+C.lvf=function(b){S.ui.lvF=b.dataset.v;S.ui.lvEdit=null;stay();};
+C.lvedit=function(b){S.ui.lvEdit=+b.dataset.id;stay();};
+C.lvx=function(){S.ui.lvEdit=null;stay();};
+C.lvdel=function(b){var l=byId(S.leaves,+b.dataset.id);if(!l||!confirm('¿Quitar esta ausencia? El trabajador dejará de verla.'))return;S.leaves=S.leaves.filter(function(x){return x.id!==l.id;});flash('Ausencia quitada.','success');stay();};
+C.lvcancel=function(b){var l=byId(S.leaves,+b.dataset.id);if(!l||lvStatus(l.status)!=='Pendiente'||!confirm('¿Anular esta solicitud?'))return;S.leaves=S.leaves.filter(function(x){return x.id!==l.id;});flash('Solicitud anulada.','success');stay();};
+A.lvedit=function(f,form){var l=byId(S.leaves,+form.dataset.id);if(!l)return stay();
+  if(!f.start||!f.end||f.end<f.start){flash('Revisa las fechas.','error');return stay();}
+  var changed=l.kind!==f.kind||l.start!==f.start||l.end!==f.end;
+  l.kind=f.kind;l.start=f.start;l.end=f.end;l.hrNote=(f.hrNote||'').trim();if(changed)l.hrMod=1;
+  if(lvStatus(l.status)!==f.status){l.status=f.status;l.resolvedBy=(me()||{}).name||'RR. HH.';l.resolvedAt=nowStr();}
+  l.modAt=nowStr();S.ui.lvEdit=null;flash('Ausencia actualizada.','success');stay();};
+A.lvhr=function(f){if(!f.eid||!f.kind||!f.start||!f.end||f.end<f.start){flash('Elige trabajador, tipo y fechas.','error');return stay();}
+  var st=f.status==='Pendiente'?'Pendiente':'Aprobada';
+  S.leaves.push({id:nextId(),eid:+f.eid,kind:f.kind,start:f.start,end:f.end,comment:'',hrNote:(f.hrNote||'').trim(),status:st,byHR:1,created:nowStr(),resolvedBy:st==='Aprobada'?((me()||{}).name||'RR. HH.'):'',resolvedAt:st==='Aprobada'?nowStr():''});
+  flash('Ausencia registrada.','success');stay();};
+
+/* ---------- tickets como chat ---------- */
+function msgTs(m){return +m.ts||Date.parse(m.created)||0;}
+function tMine(){var u=me();if(!u)return [];var hr=role()==='hr';return S.tickets.filter(function(t){return hr||t.eid===u.id;});}
+function tMsgs(tid){return S.tmsgs.filter(function(m){return m.tid===tid;}).sort(function(a,b){return msgTs(a)-msgTs(b);});}
+function tRead(tid){var u=me();if(!u)return 0;var r=byId(S.treads,'tr-'+tid+'-'+u.id);return r?+r.at||0:0;}
+function tUnread(t){var u=me();if(!u)return 0;var r=tRead(t.id);return S.tmsgs.filter(function(m){return m.tid===t.id&&m.sender!==u.id&&msgTs(m)>r;}).length;}
+function tUnreadAll(){if(!S.session||!me())return 0;var r=role();if(r!=='hr'&&r!=='employee')return 0;return tMine().reduce(function(a,t){return a+tUnread(t);},0);}
+function tLast(t){var ms=tMsgs(t.id);return ms.length?ms[ms.length-1]:null;}
+function tMarkRead(tid){var u=me();if(!u)return;var id='tr-'+tid+'-'+u.id,r=byId(S.treads,id),last=tMsgs(tid).reduce(function(a,m){return Math.max(a,msgTs(m));},0),at=Math.max(Date.now(),last);
+  if(r)r.at=at;else S.treads.push({id:id,tid:tid,eid:u.id,at:at});}
+function hhmm(m){var d=new Date(msgTs(m));if(isNaN(d))return '';var t=pad(d.getHours())+':'+pad(d.getMinutes()),k=isoD(d);return k===isoD(today())?t:fDMY(k)+' '+t;}
+function nl2br(s){return esc(s).replace(/\n/g,'<br>');}
+function tkLink(){var n=tUnreadAll();try{document.title=(n?'('+n+') ':'')+'Portal del empleado · García de Pou';}catch(e){}
+  return '<a href="#" data-go="tickets"'+(n?' class="nav-alert"':'')+'>Tickets a RRHH'+(n?' <span class="badge-red">'+n+'</span>':'')+'</a>';}
+function tkBanner(){var n=tUnreadAll();if(!n||S.ui.view==='tickets')return '';return '<a href="#" data-go="tickets" class="tk-banner">💬 Tienes '+n+' mensaje'+(n===1?'':'s')+' nuevo'+(n===1?'':'s')+' en Tickets a RRHH. Pulsa para leer'+(n===1?'lo':'los')+'.</a>';}
+function ausLink(){var hr=role()==='hr',n=hr?S.leaves.filter(function(l){return lvStatus(l.status)==='Pendiente';}).length:0;return '<a href="#" data-go="ausencias">'+(hr?'Ausencias':'Solicitar ausencias')+(n?' <span class="badge-amber">'+n+'</span>':'')+'</a>';}
+function uhLink(){var n=S.uhours.filter(function(h){return h.status==='Pendiente';}).length;return '<a href="#" data-go="comite">Horas sindicales'+(n?' <span class="badge-amber">'+n+'</span>':'')+'</a>';}
+
+function vTickets(){
+  var hr=role()==='hr',u=me(),open=S.ui.tOpen;
+  var rows=tMine().slice().sort(function(a,b){var la=tLast(a),lb=tLast(b);return (lb?msgTs(lb):0)-(la?msgTs(la):0);});
+  var t=typeof open==='number'?byId(S.tickets,open):null;if(t&&!hr&&t.eid!==u.id)t=null;
+  if(t&&tUnread(t)&&!document.hidden)tMarkRead(t.id);
+  var listHtml='<button class="primary full" data-act="tnew">✏️ '+(hr?'Nuevo mensaje a un trabajador':'Nuevo ticket')+'</button>'+(rows.map(function(x){var n=tUnread(x),l=tLast(x),e=byId(S.employees,x.eid)||{};
+    return '<a href="#" class="chat-item'+(t&&t.id===x.id?' on':'')+(n?' unread':'')+'" data-act="topen" data-id="'+x.id+'"><div class="ci-top"><b>'+esc(hr?(e.name||'¿?'):x.subject)+'</b><small>'+(l?hhmm(l):'')+'</small></div>'+
+    '<div class="ci-sub">'+(hr?esc(x.subject)+' · ':'')+esc(x.cat||'')+' · '+esc(x.status||'')+'</div><div class="ci-last">'+(l?esc(String(l.message).slice(0,70)):'')+(n?'<span class="badge-red">'+n+'</span>':'')+'</div></a>';}).join('')||'<p class="muted" style="padding:10px">'+(hr?'Todavía no hay conversaciones.':'No tienes tickets. Pulsa «Nuevo ticket» para escribir a RR. HH.')+'</p>');
+  var main;
+  if(open==='new'){
+    main='<div class="chat-head"><button class="ghost chat-back" data-act="tback">‹ Volver</button><b>'+(hr?'Nuevo mensaje a un trabajador':'Nuevo ticket a RR. HH.')+'</b></div><form data-a="ticket" class="chat-new">'+
+      (hr?'<label>Trabajador</label><select name="eid" required><option value="">Selecciona</option>'+staffList().filter(function(e){return e.id!==u.id;}).map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+' · '+esc(e.no)+'</option>';}).join('')+'</select>':
+          '<label>Categoría</label><select name="category"><option>Nómina</option><option>Turnos y fichaje</option><option>Vacaciones y ausencias</option><option>Certificados</option><option>Documentos</option><option>Otros</option></select>')+
+      '<label>Asunto</label><input name="subject" required maxlength="120"><label>Mensaje</label><textarea name="message" rows="4" required></textarea><button class="primary">Enviar</button></form>';
+  }else if(t){var e=byId(S.employees,t.eid)||{};
+    var msgs=tMsgs(t.id).map(function(m){var mine=m.sender===u.id,s=byId(S.employees,m.sender)||{};return '<div class="bub '+(mine?'me':'them')+'">'+(mine?'':'<div class="bub-who">'+esc(s.name||'RR. HH.')+'</div>')+'<div>'+nl2br(m.message)+'</div><div class="bub-t">'+hhmm(m)+'</div></div>';}).join('');
+    main='<div class="chat-head"><button class="ghost chat-back" data-act="tback">‹ Volver</button><div><b>'+esc(t.subject)+'</b><br><small class="muted">'+(hr?esc(e.name||'¿?')+' · Nº '+esc(e.no||'')+' · ':'')+esc(t.cat||'')+'</small></div><span style="margin-left:auto">'+chip(t.status||'Abierto')+'</span>'+
+      (hr?(t.status!=='Resuelto'?'<button class="success" data-act="tclose" data-id="'+t.id+'">Marcar resuelto</button>':'<button class="ghost" data-act="treopen" data-id="'+t.id+'">Reabrir</button>'):'')+'</div>'+
+      '<div class="chat-body">'+(msgs||'<p class="muted">Sin mensajes.</p>')+'</div>'+
+      '<form data-a="treply" data-id="'+t.id+'" class="chat-foot"><textarea name="message" class="chat-input" rows="2" placeholder="Escribe un mensaje… (Intro para enviar, Mayús+Intro para salto de línea)" required></textarea><button class="primary">Enviar</button></form>'+
+      (t.status==='Resuelto'?'<p class="muted" style="font-size:12px;margin:6px 0 0">Esta conversación está marcada como resuelta. '+(hr?'':'Si escribes, se vuelve a abrir.')+'</p>':'');
+  }else main='<div class="chat-empty"><div style="font-size:40px">💬</div><p class="muted">Elige una conversación de la lista'+(hr?'':' o crea un ticket nuevo')+'.</p></div>';
+  return '<h1>Tickets a RRHH</h1><p class="muted">'+(hr?'Conversaciones con el personal. Cuando alguien te escribe, el apartado parpadea en rojo hasta que lo lees.':'Escribe a RR. HH. y sigue la conversación aquí. Cuando te respondan, el apartado parpadeará en rojo.')+'</p>'+
+    '<div class="chat-wrap'+(open!=null&&open!==''?' has-open':'')+'"><aside class="chat-list">'+listHtml+'</aside><section class="chat-main">'+main+'</section></div>';
+}
+C.topen=function(b){S.ui.tOpen=+b.dataset.id;tMarkRead(S.ui.tOpen);stay();};
+C.tnew=function(){S.ui.tOpen='new';stay();};
+C.tback=function(){S.ui.tOpen=null;stay();};
+C.tclose=function(b){var t=byId(S.tickets,+b.dataset.id);if(!t)return;t.status='Resuelto';t.updated=nowStr();flash('Conversación marcada como resuelta.','success');stay();};
+C.treopen=function(b){var t=byId(S.tickets,+b.dataset.id);if(!t)return;t.status='En curso';t.updated=nowStr();stay();};
+A.ticket=function(f){
+  var hr=role()==='hr',u=me();if(!f.subject.trim()||!f.message.trim()||(hr&&!f.eid)){flash('Completa '+(hr?'trabajador, ':'')+'asunto y mensaje.','error');return stay();}
+  var id=nextId(),now=Date.now();
+  S.tickets.push({id:id,eid:hr?+f.eid:u.id,cat:hr?'Mensaje de RR. HH.':f.category,subject:f.subject.trim(),message:f.message.trim(),status:hr?'En curso':'Abierto',created:nowStr(),updated:nowStr(),by:u.id});
+  S.tmsgs.push({tid:id,sender:u.id,message:f.message.trim(),created:nowStr(),ts:now});
+  S.ui.tOpen=id;tMarkRead(id);flash(hr?'Mensaje enviado.':'Ticket enviado a RR. HH.','success');stay();
+};
+A.treply=function(f,form){
+  var t=byId(S.tickets,+form.dataset.id),u=me();if(!t||!f.message.trim())return stay();
+  S.tmsgs.push({tid:t.id,sender:u.id,message:f.message.trim(),created:nowStr(),ts:Date.now()});t.updated=nowStr();
+  if(role()==='hr'){if(t.status!=='Resuelto')t.status='En curso';}else if(t.status==='Resuelto')t.status='Abierto';
+  tMarkRead(t.id);stay();
+  setTimeout(function(){var n=document.querySelector('textarea.chat-input');if(n)n.focus();},0);
+};
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&e.target&&e.target.classList&&e.target.classList.contains('chat-input')){e.preventDefault();var fm=e.target.form;if(!e.target.value.trim())return;if(fm.requestSubmit)fm.requestSubmit();else fm.querySelector('button').click();}});
+document.addEventListener('change',function(e){var c=e.target.getAttribute&&e.target.getAttribute('data-chg');if(c==='lvq'){S.ui.lvQ=e.target.value;S.ui.lvEdit=null;stay();}});
+function remoteRender(){
+  var a=document.activeElement,ci=a&&a.classList&&a.classList.contains('chat-input')?{v:a.value,s:a.selectionStart,id:a.form&&a.form.dataset.id}:null;
+  if(!ci&&(busyTyping()||document.querySelector('.demo-modal'))){pendingRemote=true;return;}
+  pendingRemote=false;var y=window.scrollY;render(false);window.scrollTo(0,y);
+  if(ci){var n=document.querySelector('textarea.chat-input');if(n&&(!ci.id||(n.form&&n.form.dataset.id===ci.id))){n.value=ci.v;n.focus();try{n.setSelectionRange(ci.s,ci.s);}catch(x){}}}
+}
+
+/* ---------- horas sindicales con autorización de RR. HH. ---------- */
+function uhSt(h){return h.status||'Autorizada';}
+function uhUsed(eid,ym){return S.uhours.filter(function(h){return h.eid===eid&&String(h.date).slice(0,7)===ym&&uhSt(h)==='Autorizada';}).reduce(function(a,h){return a+(+h.hours||0);},0);}
+function uhPend(eid,ym){return S.uhours.filter(function(h){return h.eid===eid&&String(h.date).slice(0,7)===ym&&uhSt(h)==='Pendiente';}).reduce(function(a,h){return a+(+h.hours||0);},0);}
+function uhRow(h,hr,u){var e=byId(S.employees,h.eid)||{},st=uhSt(h);
+  return '<div class="lv-row"><div class="lv-main"><b>'+esc(e.name||'¿?')+' · '+f1(+h.hours)+' h</b> '+chip(st)+'<p>'+esc(fDMY(h.date))+(h.from?' · '+esc(h.from)+'–'+esc(h.to||''):'')+(h.reason?' · '+esc(h.reason):'')+'</p><small class="muted">Pedido el '+esc(String(h.created||'').slice(0,16).replace('T',' '))+(h.resolvedBy?' · '+esc(st)+' por '+esc(h.resolvedBy):'')+'</small></div>'+
+  '<div class="lv-btns">'+(hr&&st==='Pendiente'?'<button class="success" data-act="uhok" data-id="'+h.id+'">Autorizar</button><button class="danger" data-act="uhno" data-id="'+h.id+'">Denegar</button>':'')+
+  ((hr||(h.eid===u.id&&st==='Pendiente'))?'<button class="ghost" data-act="uhdel" data-id="'+h.id+'">Quitar</button>':'')+'</div></div>';}
+function vHoras(){
+  var hr=role()==='hr',u=me(),ym=S.ui.uhMonth||isoD(today()).slice(0,7),a=ym.split('-'),mName=cap(MONTHS[+a[1]-1])+' '+a[0],mem=uhMembers();
+  var list=S.uhours.filter(function(h){return String(h.date).slice(0,7)===ym;}).sort(function(x,y){return x.date<y.date?1:-1;});
+  var pend=S.uhours.filter(function(h){return uhSt(h)==='Pendiente';}).sort(function(x,y){return x.date<y.date?-1:1;});
+  var table='<div style="overflow-x:auto"><table class="vac-table uh-table"><thead><tr><th>Persona</th><th>Horas del mes</th><th>Autorizadas</th><th>Pendientes</th><th>Le quedan</th>'+(hr?'<th>Crédito mensual</th>':'')+'</tr></thead><tbody>'+
+    mem.map(function(e){var al=uhAllow(e.id),us=uhUsed(e.id,ym),pe=uhPend(e.id,ym),left=al-us,pc=al>0?Math.min(100,us/al*100):100;
+      return '<tr'+(e.id===u.id?' class="uh-me"':'')+'><td><b>'+esc(e.name)+'</b>'+(e.id===u.id?' <small class="muted">(tú)</small>':'')+'</td><td>'+f1(al)+' h</td><td>'+f1(us)+' h</td><td>'+(pe?'<b style="color:#b26b00">'+f1(pe)+' h</b>':'—')+'</td>'+
+      '<td><b class="'+(left<0?'uh-neg':'uh-pos')+'">'+f1(left)+' h</b><div class="uh-bar"><i style="width:'+pc.toFixed(1)+'%;'+(left<0?'background:#b42318':'')+'"></i></div>'+(pe&&left-pe<0?'<small style="color:#b42318">Si se autoriza lo pendiente: '+f1(left-pe)+' h</small>':'')+'</td>'+
+      (hr?'<td><span style="display:flex;gap:6px;align-items:center"><input type="number" min="0" max="200" step="0.5" id="uhc-'+e.id+'" value="'+al+'" style="width:75px"><button data-act="uhsave" data-id="'+e.id+'">Guardar</button></span></td>':'')+'</tr>';}).join('')+'</tbody></table></div>';
+  return '<section class="card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="uhmonth" data-d="-1">‹</a><h2>Horas sindicales · '+mName+'</h2><a class="calendar-arrow" href="#" data-act="uhmonth" data-d="1">›</a></div>'+
+  '<p class="muted">Solo lo ven RR. HH. y el comité de empresa. Las horas cuentan como gastadas cuando RR. HH. las autoriza.</p>'+
+  (mem.length?table:'<p class="muted">No hay miembros del comité dados de alta. RR. HH. puede crear sus cuentas con «Tipo de cuenta: Comité de empresa».</p>')+'</section>'+
+  (hr?'<section class="card" id="uh-pend"><h2>Peticiones por autorizar'+(pend.length?' ('+pend.length+')':'')+'</h2>'+(pend.map(function(h){return uhRow(h,hr,u);}).join('')||'<p class="muted">No hay peticiones pendientes.</p>')+'</section>':'')+
+  (role()==='committee'?'<section class="card"><h2>Pedir horas sindicales</h2><p class="muted">RR. HH. recibirá la petición y la autorizará o denegará.</p><form data-a="uhour"><div class="grid two"><div><label>Día</label><input type="date" name="date" value="'+isoD(today())+'" required></div><div><label>Horas</label><input type="number" name="hours" min="0.5" max="24" step="0.5" placeholder="Ej. 2,5" required></div></div><div class="grid two"><div><label>Desde (opcional)</label><input type="time" name="from"></div><div><label>Hasta (opcional)</label><input type="time" name="to"></div></div><label>Motivo (opcional)</label><input name="reason" maxlength="200" placeholder="Ej. Reunión comité, formación sindical…"><button class="primary">Enviar petición a RR. HH.</button></form></section>':'')+
+  '<section class="card"><h2>Peticiones de '+mName+'</h2>'+(list.map(function(h){return uhRow(h,hr,u);}).join('')||'<p class="muted">No hay horas sindicales pedidas este mes.</p>')+'</section>';
+}
+A.uhour=function(f){var h=+String(f.hours).replace(',','.');if(!f.date||!(h>0)){flash('Indica el día y las horas.','error');return stay();}
+  var ym=f.date.slice(0,7),u=me(),left=uhAllow(u.id)-uhUsed(u.id,ym)-uhPend(u.id,ym)-h;
+  S.uhours.push({id:nextId(),eid:u.id,date:f.date,hours:h,from:f.from||'',to:f.to||'',reason:(f.reason||'').trim(),status:'Pendiente',created:nowStr()});
+  S.ui.uhMonth=ym;flash('Petición enviada a RR. HH.: '+f1(h)+' h el '+fDMY(f.date)+'. '+(left<0?'⚠️ Si se autoriza, te pasarías del crédito de este mes en '+f1(-left)+' h.':'Si se autoriza, te quedarán '+f1(left)+' h este mes.'),left<0?'error':'success');stay();};
+C.uhok=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;h.status='Autorizada';h.resolvedBy=(me()||{}).name||'RR. HH.';h.resolvedAt=nowStr();flash('Horas autorizadas.','success');stay();};
+C.uhno=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;h.status='Denegada';h.resolvedBy=(me()||{}).name||'RR. HH.';h.resolvedAt=nowStr();flash('Horas denegadas.','success');stay();};
+C.uhdel=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;if(role()!=='hr'&&(h.eid!==me().id||uhSt(h)!=='Pendiente'))return;if(!confirm('¿Quitar esta petición de horas sindicales?'))return;S.uhours=S.uhours.filter(function(x){return x.id!==h.id;});flash('Petición quitada.','success');stay();};
 
 boot();
 })();
