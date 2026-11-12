@@ -80,6 +80,9 @@
 .bub-who{font-size:12px;font-weight:bold;color:#123f70;margin-bottom:2px}.bub-t{font-size:11px;opacity:.7;text-align:right;margin-top:3px}
 .chat-foot{display:flex;gap:8px;align-items:flex-end}.chat-foot textarea{flex:1;margin:0;resize:vertical}.chat-foot button{margin:0}.chat-empty{margin:auto;text-align:center}.chat-new{margin-top:8px}
 .mode-card{max-width:460px}.mode-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px 16px 14px 60px;margin-top:12px;cursor:pointer;position:relative;color:var(--text)}.mode-btn:hover{border-color:#123f70;background:#f3f7fc}.mode-btn span{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:28px}.mode-btn b{font-size:17px;color:#123f70}.mode-btn small{color:var(--muted)}
+.sat-tag{display:block;font-size:11px;font-weight:bold;border-radius:6px;padding:1px 5px;margin-top:2px}.sat-tag.ok{background:#e3f5ea;color:#1d7a43}.sat-tag.pend{background:#fff3d6;color:#9a6200}.sat-tag.no{background:#fde3e1;color:#b42318}.sat-tag.can{background:#eef4fb;color:#123f70;border:1px dashed #9db8d9}
+.sat-steps{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px;margin-top:6px;color:#4a5568}.sat-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}.sat-head h2{margin:0}.sat-head button{margin-left:auto}
+.sat-send{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.sat-send input{margin:0;min-width:220px}.scope-box{margin:8px 0;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fbfcfe}.scope-box summary{cursor:pointer;font-weight:bold;color:#123f70}.scope-list{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0}.scope-chk{display:inline-flex;gap:4px;align-items:center;font-size:14px;margin:0}.scope-chk input{width:auto;margin:0}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -329,7 +332,7 @@ function seed(){
    Cada persona entra con su nº de empleado y PIN. El servidor solo le envía lo que le corresponde
    (sus datos + lo público); RRHH ve la gestión; el comité ve las consultas. Las reglas están en el servidor,
    no en esta página: aunque alguien manipule el navegador, no recibe datos ajenos. */
-var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf','treads'];
+var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf','treads','satreq'];
 var LOCAL_KEY='gdp_portal_ui_v1',AUTH_LS='gdp_portal_auth_v1';
 var CFG=window.PORTAL_CONFIG||{},URL0=String(CFG.url||'').replace(/\/$/,''),KEY=CFG.anonKey||'';
 var MODE='loading',personal=false,readOnly=false,resetArmed=false,ASSETS=null;
@@ -379,7 +382,7 @@ async function fullLoad(){
 }
 async function startSession(){
   var m=await rpc('p_me');if(!m)throw new Error('Tu cuenta no está activa. Habla con RRHH.');
-  S.session={eid:m.eid,role:m.role,realRole:m.role,must:false};if(m.role==='committee'){var md=S.ui.cmode;if(md==='employee'||md==='committee'){S.session.role=md;S.session.mode=md;}else{S.session.role='employee';S.session.mode=null;}}
+  S.session={eid:m.eid,role:m.role,realRole:m.role,sup:m.sup||[],dir:m.dir||[],must:false};(function(){var ch=modeChoices();if(ch.length>1){var md=S.ui.cmode;if(ch.indexOf(md)>=0){S.session.role=md;S.session.mode=md;}else{S.session.role=ch[0];S.session.mode=null;}}else{S.session.mode=ch[0];}})();
   await fullLoad();
   var u=me();S.session.must=!!(u&&u.must);MODE='shared';
   clearInterval(pollT);pollT=setInterval(poll,8000);
@@ -471,13 +474,14 @@ function layout(content){
   if(r==='employee'||r==='hr')nav+='<a href="#" data-go="turnos">'+(r==='hr'?'Gestión de turnos':'Mis turnos')+'</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="fichaje">Fichaje</a><a href="#" data-go="nominas">Nóminas</a>'+ausLink()+tkLink()+'';
   if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">Comité de empresa</a>';
   if(r==='hr')nav+=uhLink();
+  if(r==='sup'||r==='dir'||r==='hr')nav+=satLink();
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
-  if(S.session&&S.session.realRole==='committee')nav+='<a href="#" data-act="cswitch" class="nav-switch">⇄ '+(r==='committee'?'Ir a mi portal personal':'Ir al portal del comité')+'</a>';
+  nav+=modeSwitchLinks();
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
   nav+='<a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
   if(r==='hr')nav+='<a href="#" data-go="empleados">Empleados</a><a href="#" data-go="formaciones">Formaciones y revisiones</a><a href="#" data-go="vehiculos">Vehículos y accesos</a>';
   var fl='';S.flash.forEach(function(f){fl+='<div class="flash '+f[0]+'">'+esc(f[1])+'</div>';});S.flash=[];
-  return demoBar()+'<div class="layout"><aside class="sidebar"><div class="brand"><span class="crest">G</span><b>GARCIA DE POU</b></div><nav>'+nav+'</nav><button class="logout" data-act="logout">Cerrar sesión</button></aside><main class="main"><header class="topbar"><span>Portal del empleado</span><span>'+esc(u.name)+' · '+{employee:'EMPLEADO',hr:'RRHH',committee:'COMITÉ'}[r]+'</span></header>'+fl+content+'</main></div><footer class="mobile-nav"><a href="#" data-go="inicio">Inicio</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="misdatos">Mis datos</a><details class="mobile-more"><summary>☰ Menú</summary><div class="mobile-more-panel">'+nav+'<button class="mobile-logout" data-act="logout">Cerrar sesión</button></div></details></footer>';
+  return demoBar()+'<div class="layout"><aside class="sidebar"><div class="brand"><span class="crest">G</span><b>GARCIA DE POU</b></div><nav>'+nav+'</nav><button class="logout" data-act="logout">Cerrar sesión</button></aside><main class="main"><header class="topbar"><span>Portal del empleado</span><span>'+esc(u.name)+' · '+{employee:'EMPLEADO',hr:'RRHH',committee:'COMITÉ',sup:'ENCARGADO',dir:'DIRECCIÓN'}[r]+'</span></header>'+fl+content+'</main></div><footer class="mobile-nav"><a href="#" data-go="inicio">Inicio</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="misdatos">Mis datos</a><details class="mobile-more"><summary>☰ Menú</summary><div class="mobile-more-panel">'+nav+'<button class="mobile-logout" data-act="logout">Cerrar sesión</button></div></details></footer>';
 }
 function demoBar(){return '';}
 
@@ -507,6 +511,7 @@ function vInicio(){
   var r=role();
   if(r==='hr')return vHR();
   if(r==='committee')return vCommittee();
+  if(r==='sup'||r==='dir')return vSabados();
   var u=me(),t=today(),ts=isoD(t);
   var logs=S.worklogs.filter(function(w){return w.eid===u.id;});
   function sum(list){var a={minutes:0,overtime:0,days:0};list.forEach(function(w){a.minutes+=w.min;a.overtime+=w.ot;a.days+=1;});return a;}
@@ -627,11 +632,11 @@ function vCalendario(){
   for(var i=0;i<total;i++){var d=i-first+1;
     if(d<1||d>n){cells+='<div class="calendar-day empty"></div>';continue;}
     var k=y+'-'+pad(m+1)+'-'+pad(d),list=map[k]||[],vs=VS[k],sl=(S.ui.vacSel||{})[k],offd=S.ui.vacMode&&!isWorkDay(k,OFF);
-    cells+='<a href="#" data-act="calday" data-d="'+k+'" class="calendar-day '+(k===ts?'is-today ':'')+(k===sel&&!S.ui.vacMode?'is-selected ':'')+(list.length?'has-events ':'')+(sl?'vac-sel ':vs==='ok'?'vac-ok ':vs==='pend'?'vac-pend ':'')+(offd?'vac-off':'')+'"><span class="day-number">'+d+'</span>'+(sl?'<span class="vac-tag sel">Marcado</span>':vs==='ok'?'<span class="vac-tag ok">Vacaciones</span>':vs==='pend'?'<span class="vac-tag pend">Pendiente</span>':'')+list.slice(0,2).map(function(e){return '<span class="day-event type-'+esc(e.type.toLowerCase().replace(/ /g,'-'))+'">'+esc(e.title)+'</span>';}).join('')+(list.length>2?'<span class="day-more">+'+(list.length-2)+' más</span>':'')+'</a>';}
+    cells+='<a href="#" data-act="calday" data-d="'+k+'" class="calendar-day '+(k===ts?'is-today ':'')+(k===sel&&!S.ui.vacMode?'is-selected ':'')+(list.length?'has-events ':'')+(sl?'vac-sel ':vs==='ok'?'vac-ok ':vs==='pend'?'vac-pend ':'')+(offd?'vac-off':'')+'"><span class="day-number">'+d+'</span>'+satCell(k)+(sl?'<span class="vac-tag sel">Marcado</span>':vs==='ok'?'<span class="vac-tag ok">Vacaciones</span>':vs==='pend'?'<span class="vac-tag pend">Pendiente</span>':'')+list.slice(0,2).map(function(e){return '<span class="day-event type-'+esc(e.type.toLowerCase().replace(/ /g,'-'))+'">'+esc(e.title)+'</span>';}).join('')+(list.length>2?'<span class="day-more">+'+(list.length-2)+' más</span>':'')+'</a>';}
   var hr=role()==='hr';
-  return '<div class="calendar-heading"><div><h1>Calendario de empresa</h1><p class="muted">Un calendario claro: pulsa un día para ver o marcar lo que ocurre.</p></div>'+(hr?'<button data-act="vacself">'+(S.ui.vacSelf?'Ocultar mis vacaciones':'🏖️ Mis vacaciones')+'</button>':'')+'</div>'+vVacCard()+'<section class="card calendar-card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="calnav" data-d="-1" aria-label="Mes anterior">‹</a><h2>'+cap(MONTHS[m])+' '+y+'</h2><a class="calendar-arrow" href="#" data-act="calnav" data-d="1" aria-label="Mes siguiente">›</a></div>'+
+  return '<div class="calendar-heading"><div><h1>Calendario de empresa</h1><p class="muted">Un calendario claro: pulsa un día para ver o marcar lo que ocurre.</p></div>'+(hr?'<button data-act="vacself">'+(S.ui.vacSelf?'Ocultar mis vacaciones':'🏖️ Mis vacaciones')+'</button>':'')+'</div>'+vVacCard()+satCard()+'<section class="card calendar-card"><div class="calendar-toolbar"><a class="calendar-arrow" href="#" data-act="calnav" data-d="-1" aria-label="Mes anterior">‹</a><h2>'+cap(MONTHS[m])+' '+y+'</h2><a class="calendar-arrow" href="#" data-act="calnav" data-d="1" aria-label="Mes siguiente">›</a></div>'+
   '<div class="calendar-grid calendar-weekdays">'+DAYS.map(function(d){return '<div>'+d+'</div>';}).join('')+'</div><div class="calendar-grid calendar-days">'+cells+'</div>'+
-  '<div class="calendar-legend"><span><i class="legend-dot festivo"></i>Festivo</span><span><i class="legend-dot vacaciones"></i>Vacaciones empresa</span><span><i class="legend-dot evento"></i>Evento</span><span><i class="legend-dot prevencion"></i>Prevención</span><span><i class="legend-dot nomina"></i>Nómina</span><span><i class="legend-dot vac-ok"></i>Mis vacaciones</span><span><i class="legend-dot vac-pend"></i>Pendiente de aprobar</span>'+(S.ui.vacMode?'<span><i class="legend-dot vac-sel"></i>Marcado ahora</span>':'')+'</div>'+vacSticky()+'</section>'+vVacHR()+
+  '<div class="calendar-legend"><span><i class="legend-dot festivo"></i>Festivo</span><span><i class="legend-dot vacaciones"></i>Vacaciones empresa</span><span><i class="legend-dot evento"></i>Evento</span><span><i class="legend-dot prevencion"></i>Prevención</span><span><i class="legend-dot nomina"></i>Nómina</span><span><i class="legend-dot vac-ok"></i>Mis vacaciones</span><span><i class="legend-dot vac-pend"></i>Pendiente de aprobar</span>'+(S.ui.vacMode?'<span><i class="legend-dot vac-sel"></i>Marcado ahora</span>':'')+'</div>'+vacSticky()+satSticky()+'</section>'+vVacHR()+
   (hr?'<section class="card calendar-editor"><h2>Marcar un día</h2><p class="muted">Día seleccionado: <strong>'+esc(sel)+'</strong>. Elige qué quieres señalar y guarda.</p><form data-a="event"><div class="grid two calendar-form-grid"><div><label>Fecha</label><input type="date" name="event_date" value="'+esc(sel)+'" required></div><div><label>Tipo de día</label><select name="event_type"><option>Festivo</option><option>Vacaciones empresa</option><option>Evento</option><option>Prevención</option><option>Plazo RRHH</option></select></div></div><label>Nombre o descripción corta</label><input name="title" placeholder="Ej. Festivo local, cierre de fábrica…" required><label>Nota (opcional)</label><input name="description" placeholder="Información adicional"><button class="primary calendar-save">Guardar marca en el calendario</button></form></section>':'')+
   '<section class="card calendar-events-list"><h2>Marcas de '+cap(MONTHS[m])+' '+y+'</h2>'+(evs.map(function(e){return '<div class="row"><div><b>'+e.date+' · '+esc(e.title)+'</b><p>'+esc(e.desc||e.type)+'</p></div><em>'+esc(e.type)+'</em>'+(hr&&e.id?'<button class="danger" data-act="evdel" data-id="'+e.id+'">Quitar</button>':'')+'</div>';}).join('')||'<p class="muted">Este mes todavía no tiene días marcados.</p>')+'</section>';
 }
@@ -888,8 +893,8 @@ function vEmpleados(){
   (cr?'<section class="card"><h2>PIN iniciales generados</h2>'+(cr.length>1?'<p><button class="primary" data-act="printall">🖨 Imprimir todas las fichas ('+cr.length+')</button></p>':'')+'<p class="muted">Estos PIN solo se muestran ahora. Entrégalos de forma privada a cada trabajador y no compartas esta pantalla.</p><div class="table-wrap"><table><thead><tr><th>Número</th><th>Nombre</th><th>PIN inicial</th></tr></thead><tbody>'+cr.map(function(c){return '<tr><td>'+esc(c.no)+'</td><td>'+esc(c.name)+'</td><td><b style="font-size:20px;letter-spacing:3px">'+esc(c.pin)+'</b></td><td><button class="primary" data-act="printcred" data-no="'+esc(c.no)+'" data-name="'+esc(c.name)+'" data-pin="'+esc(c.pin)+'">🖨 Imprimir ficha para el operario</button></td></tr>';}).join('')+'</tbody></table></div></section>':'')+
   '<section class="card"><h2>Importar personal desde Excel</h2><p>Selecciona el Excel actualizado. Se leerán las columnas ID, NOMBRE Y APELLIDOS y GRUPOS. Los trabajadores nuevos recibirán un PIN aleatorio de 6 dígitos; se mostrará una sola vez al terminar.</p><form data-a="importxl"><input type="file" name="xl" accept=".xlsx,.xls,.csv" required><button class="primary">Importar y generar PIN</button></form><p class="muted" style="font-size:13px">También vale si las columnas se llaman Nº EMPLEADO, NOMBRE, SECCIÓN o CATEGORÍA. Las personas que ya tienen cuenta (mismo número) no se tocan.</p></section>'+
   '<section class="card"><h2>Alta manual de empleado</h2><form data-a="newemp"><div class="grid two"><div><label>Número de empleado</label><input name="employee_no" required></div><div><label>Nombre completo</label><input name="full_name" required></div><div><label>Sección</label><input name="center"></div><div><label>Categoría profesional</label><input name="category" placeholder="Ej. Categoría 11"></div><div><label>Tipo de cuenta</label><select name="acc_role"><option value="employee">Trabajador</option><option value="committee">Comité de empresa</option><option value="hr">RR. HH.</option></select></div></div><button class="primary">Crear cuenta</button></form><p class="muted" style="font-size:12px">El PIN inicial es provisional: el trabajador tendrá que cambiarlo al entrar.</p></section>'+
-  '<section class="card"><h2>Listado de cuentas</h2>'+rows.map(function(e){var isE=isStaffRole(e.role);return '<div class="row wrap"><div><b>'+esc(e.name)+'</b>'+(e.role==='committee'?' <span class="chip chip-info">👥 Comité de empresa</span>':'')+'<p>'+esc(e.no)+' · '+esc(e.center||'Sección pendiente')+' · '+esc(e.category||'Categoría pendiente')+'</p>'+
-   (isE?'<form data-a="empdata" data-id="'+e.id+'" class="inline-date-form"><label>Categoría</label><input name="category" value="'+esc(e.category)+'" placeholder="Ej. Categoría 11"><label>Sección</label><input name="center" value="'+esc(e.center)+'"><button>Guardar datos</button></form><form data-a="empstart" data-id="'+e.id+'" class="inline-date-form"><label>Fecha de incorporación</label><input type="date" name="employment_start_date" value="'+esc(e.start)+'"><button>Guardar fecha</button></form>':'')+'</div>'+(isE?(function(){var n=S.vehicles.filter(function(v){return v.eid===e.id;}).length;if(n)return '<span class="privacy-badge is-signed">🚗 '+n+' vehículo'+(n===1?'':'s')+'</span>';if(e.vexempt==='approved')return '<span class="privacy-badge is-info">🚶 Sin vehículo · desbloqueado</span><button data-act="vexempt" data-v="revoke" data-id="'+e.id+'">Quitar desbloqueo</button>';return '<span class="privacy-badge is-pending">🚗 '+(e.vexempt==='requested'?'Pide desbloqueo':'Sin vehículo')+'</span><button data-act="vexempt" data-v="approve" data-id="'+e.id+'">Desbloquear sin vehículo</button>';})():'')+(function(){var sg=signatureOf(e.id);return sg?'<span class="privacy-badge is-signed">🛡️ Firmado el '+fechaHora(sg.at)+'</span>':'<span class="privacy-badge is-pending">🛡️ Pendiente de firma</span>';})()+'<em>'+(e.active?'Activo':'Desactivado')+'</em>'+
+  '<section class="card"><h2>Listado de cuentas</h2>'+rows.map(function(e){var isE=isStaffRole(e.role);return '<div class="row wrap"><div><b>'+esc(e.name)+'</b>'+(e.role==='committee'?' <span class="chip chip-info">👥 Comité de empresa</span>':'')+scopeChips(e)+'<p>'+esc(e.no)+' · '+esc(e.center||'Sección pendiente')+' · '+esc(e.category||'Categoría pendiente')+'</p>'+
+   scopeForm(e)+(isE?'<form data-a="empdata" data-id="'+e.id+'" class="inline-date-form"><label>Categoría</label><input name="category" value="'+esc(e.category)+'" placeholder="Ej. Categoría 11"><label>Sección</label><input name="center" value="'+esc(e.center)+'"><button>Guardar datos</button></form><form data-a="empstart" data-id="'+e.id+'" class="inline-date-form"><label>Fecha de incorporación</label><input type="date" name="employment_start_date" value="'+esc(e.start)+'"><button>Guardar fecha</button></form>':'')+'</div>'+(isE?(function(){var n=S.vehicles.filter(function(v){return v.eid===e.id;}).length;if(n)return '<span class="privacy-badge is-signed">🚗 '+n+' vehículo'+(n===1?'':'s')+'</span>';if(e.vexempt==='approved')return '<span class="privacy-badge is-info">🚶 Sin vehículo · desbloqueado</span><button data-act="vexempt" data-v="revoke" data-id="'+e.id+'">Quitar desbloqueo</button>';return '<span class="privacy-badge is-pending">🚗 '+(e.vexempt==='requested'?'Pide desbloqueo':'Sin vehículo')+'</span><button data-act="vexempt" data-v="approve" data-id="'+e.id+'">Desbloquear sin vehículo</button>';})():'')+(function(){var sg=signatureOf(e.id);return sg?'<span class="privacy-badge is-signed">🛡️ Firmado el '+fechaHora(sg.at)+'</span>':'<span class="privacy-badge is-pending">🛡️ Pendiente de firma</span>';})()+'<em>'+(e.active?'Activo':'Desactivado')+'</em>'+
    (isE?'<button data-act="setcomm" data-id="'+e.id+'" data-v="'+(e.role==='committee'?'employee':'committee')+'">'+(e.role==='committee'?'Quitar del comité':'👥 Hacer del comité')+'</button><button data-act="resetpin" data-id="'+e.id+'">Restablecer PIN</button><button data-act="empstatus" data-id="'+e.id+'">'+(e.active?'Desactivar':'Activar')+'</button>':'')+'</div>';}).join('')+'</section>';
 }
 
@@ -903,7 +908,7 @@ function vFormaciones(){
 }
 
 /* ---------- navegación y permisos ---------- */
-var VIEWS={inicio:[vInicio,['employee','hr','committee']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee']],empresa:[vEmpresa,['employee','hr','committee']],misdatos:[vMisDatos,['employee','hr','committee']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
+var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
 function render(scrollTop){
   var root=document.getElementById('app');
   if(MODE==='loading'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Portal del empleado</h1><p class="muted">Cargando…</p></div>';return;}
@@ -911,7 +916,7 @@ function render(scrollTop){
   if(MODE==='setup'){root.innerHTML=vSetup();return;}
   if(MODE==='empty'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Demo compartida sin datos</h1><p class="muted">Todavía no hay datos de ejemplo. Cárgalos para que todos los que abran la página vean lo mismo.</p><button class="primary" data-act="seedshared">Cargar datos de ejemplo</button>'+(readOnly?'<p class="flash error">Solo el propietario o quien tenga permiso de edición puede cargarlos.</p>':'')+'</div>';return;}
   if(!S.session){root.innerHTML=S.ui.publicPrivacy?demoBar()+'<main class="main public-main">'+vPrivacy(true)+'</main>':vLogin();save();window.scrollTo(0,0);return;}
-  if(S.session.realRole==='committee'&&!S.session.mode){root.innerHTML=vModeChoice();save();window.scrollTo(0,0);return;}
+  if(modeChoices().length>1&&!S.session.mode){root.innerHTML=vModeChoice();save();window.scrollTo(0,0);return;}
   if(S.session.must&&S.ui.view!=='misdatos'){flash('Por seguridad, cambia tu PIN provisional antes de continuar.','error');S.ui.view='misdatos';}
   else if(!S.session.must&&!signatureOf(S.session.eid)&&S.ui.view!=='privacidad'&&role()!=='hr'){S.ui.view='privacidad';}
   else if(!S.session.must&&role()==='employee'&&S.ui.view==='mivehiculo'&&!S.ui.vadded&&!S.ui.vregister&&vehicleState(S.session.eid)==='ok'){S.ui.view='inicio';}
@@ -1133,7 +1138,7 @@ C.resetcancel=function(){resetArmed=false;render(false);};
 C.seedshared=function(){};
 C.fill=function(){};
 C.calnav=function(b){var a=S.ui.calMonth.split('-'),d=new Date(+a[0],+a[1]-1+(+b.dataset.d),1);S.ui.calMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);stay();};
-C.vacmode=function(){S.ui.vacMode=true;S.ui.vacSel={};stay();};
+C.vacmode=function(){S.ui.vacMode=true;S.ui.vacSel={};S.ui.satMode=false;S.ui.satSel={};stay();};
 C.vacself=function(){S.ui.vacSelf=!S.ui.vacSelf;if(!S.ui.vacSelf){S.ui.vacMode=false;S.ui.vacSel={};}stay();};
 C.vaccancel=function(){S.ui.vacMode=false;S.ui.vacSel={};stay();};
 C.vacsend=function(){
@@ -1153,6 +1158,7 @@ C.vacsave=function(b){
   flash('Vacaciones de '+e.name+' guardadas.','success');stay();
 };
 C.calday=function(b){
+  if(S.ui.satMode){satToggle(b.dataset.d);return;}
   if(S.ui.vacMode){var k=b.dataset.d,off=vacOffDays();if(!isWorkDay(k,off)){flash('Ese día no es laborable: no hace falta pedirlo.','error');return stay();}
     var vs=vacDayMap(me())[k];if(vs){flash(vs==='ok'?'Ese día ya lo tienes de vacaciones.':'Ese día ya está pedido y pendiente de aprobar.','error');return stay();}
     if(k<isoD(today())){flash('No se pueden pedir días ya pasados.','error');return stay();}
@@ -1435,6 +1441,99 @@ C.cswitch=function(){if(!S.session||S.session.realRole!=='committee')return;var 
 C.setcomm=function(b){var e=byId(S.employees,+b.dataset.id);if(!e)return;var to=b.dataset.v;
   if(!confirm(to==='committee'?'¿Marcar a '+e.name+' como miembro del comité de empresa?\n\nPodrá entrar en su portal personal y también en el del comité.':'¿Quitar a '+e.name+' del comité de empresa?\n\nSolo podrá entrar en su portal personal.'))return;
   b.disabled=true;rpc('p_set_role',{p_target:e.id,p_role:to}).then(function(){e.role=to;return fullLoad();}).then(function(){flash(to==='committee'?e.name+' ya es miembro del comité.':e.name+' ya no es del comité.','success');stay();},function(x){flash('No se ha podido cambiar: '+(x.message||x),'error');stay();});};
+
+/* ===== 15) Sábados: el trabajador pide desde el calendario → lo autoriza el encargado de su sección → autorización final del director ===== */
+var MODE_INFO={employee:['👤','Mi portal personal','Turnos, nóminas, vacaciones, ausencias, tickets a RR. HH.…'],hr:['🗂️','Recursos Humanos','Gestión del personal'],committee:['👥','Portal del comité de empresa','Información para la plantilla, consultas y horas sindicales'],sup:['🧭','Portal de encargado','Autorizar los sábados de tus secciones'],dir:['🎯','Portal de dirección','Autorización final de los sábados de tu área']};
+function modeChoices(){var s=S.session;if(!s)return [];var c=[s.realRole==='hr'?'hr':'employee'];if(s.realRole==='committee')c.push('committee');if((s.sup||[]).length)c.push('sup');if((s.dir||[]).length)c.push('dir');return c;}
+function vModeChoice(){var u=me()||{};
+  return '<div class="login-page"><div class="login-card mode-card"><div class="crest big">G</div><h1>Hola, '+esc(String(u.name||'').split(' ')[0]||'')+'</h1><p>Tienes más de un acceso. ¿Cómo quieres entrar?</p>'+
+  modeChoices().map(function(c){var i=MODE_INFO[c];return '<button class="mode-btn" data-act="cmode" data-v="'+c+'"><span>'+i[0]+'</span><b>'+i[1]+'</b><small>'+i[2]+'</small></button>';}).join('')+
+  '<p class="muted" style="font-size:13px;margin-top:14px">Dentro del portal puedes cambiar de uno a otro cuando quieras desde el menú.</p><button class="ghost" data-act="logout" style="margin-top:6px">Cerrar sesión</button></div></div>';}
+C.cmode=function(b){var v=b.dataset.v;if(modeChoices().indexOf(v)<0)return;var was=S.session.mode;S.session.mode=v;S.session.role=v;S.ui.cmode=v;S.ui.view='inicio';if(was)flash('Estás en: '+MODE_INFO[v][1]+'.','success');render();};
+C.cswitch=function(){var ch=modeChoices(),i=ch.indexOf(role());C.cmode({dataset:{v:ch[(i+1)%ch.length]}});};
+function modeSwitchLinks(){var r=role();return modeChoices().filter(function(c){return c!==r;}).map(function(c){return '<a href="#" data-act="cmode" data-v="'+c+'" class="nav-switch">⇄ '+(c==='employee'?'Ir a mi portal personal':c==='hr'?'Ir a Recursos Humanos':'Ir al '+MODE_INFO[c][1].charAt(0).toLowerCase()+MODE_INFO[c][1].slice(1))+'</a>';}).join('');}
+
+function satSt(x){return x.status||'Pendiente encargado';}
+function secNorm(s){return String(s||'').trim().toLowerCase();}
+function inScope(sec,arr){sec=secNorm(sec);return !!sec&&(arr||[]).some(function(a){return secNorm(a)===sec;});}
+function satScope(){var s=S.session||{},r=role();return r==='sup'?(s.sup||[]):r==='dir'?(s.dir||[]):[];}
+function satNeed(){var r=role();return r==='sup'?'Pendiente encargado':r==='dir'?'Pendiente director':null;}
+function satPendingCount(){var r=role();if(r==='hr')return S.satreq.filter(function(x){return /^Pendiente/.test(satSt(x));}).length;var need=satNeed(),sc=satScope();if(!need)return 0;return S.satreq.filter(function(x){return satSt(x)===need&&inScope(x.section,sc);}).length;}
+function satLink(){var n=satPendingCount();return '<a href="#" data-go="sabados">'+(role()==='hr'?'Sábados':'Sábados por autorizar')+(n?' <span class="badge-amber">'+n+'</span>':'')+'</a>';}
+function satChip(x){var st=satSt(x);return chip(st==='Autorizada'?'Autorizada':st==='Rechazada'?'Rechazada':st);}
+function satSteps(x){var st=satSt(x),rej=st==='Rechazada';
+  var enc=x.supBy?((rej&&!x.dirBy)?'⛔':'✅')+' Encargado: '+esc(x.supBy):(rej?'—':'⏳ Falta el encargado');
+  var dir=x.dirBy?(rej?'⛔':'✅')+' Director: '+esc(x.dirBy):(rej?'—':(st==='Pendiente director'?'⏳ Falta el director':'⏳ Después, el director'));
+  return '<div class="sat-steps"><span>📝 Pedido'+(x.created?' el '+esc(String(x.created).slice(8,10)+'/'+String(x.created).slice(5,7)):'')+'</span><span>'+enc+'</span><span>'+dir+'</span></div>'+
+    (x.supNote?'<div class="lv-note">💬 Encargado: '+esc(x.supNote)+'</div>':'')+(x.dirNote?'<div class="lv-note">💬 Director: '+esc(x.dirNote)+'</div>':'');}
+
+/* --- trabajador: desde el calendario --- */
+function satCell(k){if(role()!=='employee')return '';var d=parseD(k);if(d.getDay()!==6)return '';
+  if(S.ui.satMode&&(S.ui.satSel||{})[k])return '<span class="vac-tag sel">Marcado</span>';
+  var u=me(),x=S.satreq.filter(function(r){return r.eid===u.id&&r.date===k;}).sort(function(a,b){return satSt(a)==='Rechazada'?1:-1;})[0];
+  if(!x)return S.ui.satMode&&k>=isoD(today())?'<span class="sat-tag can">＋ Pedir</span>':'';
+  var st=satSt(x);return '<span class="sat-tag '+(st==='Autorizada'?'ok':st==='Rechazada'?'no':'pend')+'">'+(st==='Autorizada'?'🛠️ Trabajas':st==='Rechazada'?'Sábado rechazado':'Sábado pedido')+'</span>';}
+function satCard(){if(role()!=='employee')return '';var u=me();if(!u)return '';var ts=isoD(today());
+  var mine=S.satreq.filter(function(x){return x.eid===u.id;}),up=mine.filter(function(x){return x.date>=ts;}).sort(function(a,b){return a.date<b.date?-1:1;}),past=mine.filter(function(x){return x.date<ts;}).sort(function(a,b){return a.date<b.date?1:-1;}).slice(0,6);
+  function row(x){var st=satSt(x);return '<div class="lv-row"><div class="lv-main"><b>Sábado '+esc(fDMY(x.date))+'</b> '+satChip(x)+(x.note?'<p><small>Tu comentario: '+esc(x.note)+'</small></p>':'')+satSteps(x)+'</div>'+(/^Pendiente/.test(st)&&x.date>=ts?'<button class="ghost" data-act="satcancel" data-id="'+x.id+'">Anular</button>':'')+'</div>';}
+  return '<section class="card sat-card"><div class="card-title-row"><h2>🛠️ Trabajar en sábado</h2>'+(S.ui.satMode?'':'<button data-act="satmode"'+(u.center?'':' disabled')+'>Pedir sábados</button>')+'</div>'+
+    '<p class="muted">Marca en el calendario los sábados que quieres venir a trabajar. Primero lo autoriza el <b>encargado de tu sección</b> y después el <b>director</b>. Aquí verás en qué paso está.</p>'+
+    (u.center?'':'<div class="flash error">No tienes sección asignada en el portal. Pide a RR. HH. que te la ponga para poder pedir sábados.</div>')+
+    (up.length?up.map(row).join(''):'<p class="muted">No tienes peticiones de sábado.</p>')+(past.length?'<details><summary class="muted">Sábados anteriores</summary>'+past.map(row).join('')+'</details>':'')+'</section>';}
+function satSticky(){if(!S.ui.satMode)return '';var ks=Object.keys(S.ui.satSel||{}).sort();
+  return '<div class="vac-sticky sat-sticky"><span><b>'+ks.length+' sábado'+(ks.length===1?'':'s')+' marcado'+(ks.length===1?'':'s')+'</b>'+(ks.length?' · '+ks.map(fDMY).join(', '):' · pulsa los sábados en el calendario')+'</span><span class="sat-send"><input id="satnote" maxlength="200" placeholder="Comentario para el encargado (opcional)"><button class="ghost" data-act="satquit">Cancelar</button> <button data-act="satsend"'+(ks.length?'':' disabled')+'>Enviar petición</button></span></div>';}
+function satToggle(k){var d=parseD(k);
+  if(d.getDay()!==6){flash('Solo se pueden pedir sábados.','error');return stay();}
+  if(k<isoD(today())){flash('Ese sábado ya ha pasado.','error');return stay();}
+  var u=me();if(S.satreq.some(function(x){return x.eid===u.id&&x.date===k&&satSt(x)!=='Rechazada';})){flash('Ese sábado ya lo has pedido.','error');return stay();}
+  S.ui.satSel=S.ui.satSel||{};if(S.ui.satSel[k])delete S.ui.satSel[k];else S.ui.satSel[k]=1;var y=window.scrollY;stay();window.scrollTo(0,y);}
+C.satmode=function(){var u=me();if(!u||!u.center){flash('No tienes sección asignada: habla con RR. HH.','error');return stay();}S.ui.satMode=true;S.ui.satSel={};S.ui.vacMode=false;S.ui.vacSel={};stay();};
+C.satquit=function(){S.ui.satMode=false;S.ui.satSel={};stay();};
+C.satsend=function(){var u=me(),ks=Object.keys(S.ui.satSel||{}).sort();if(!ks.length)return;var n=document.getElementById('satnote'),note=n?n.value.trim():'';
+  ks.forEach(function(k){S.satreq.push({id:nextId(),eid:u.id,date:k,status:'Pendiente encargado',note:note,section:u.center||'',created:nowStr()});});
+  S.ui.satMode=false;S.ui.satSel={};flash('Petición enviada: '+ks.length+' sábado'+(ks.length===1?'':'s')+'. Ahora lo tiene que autorizar tu encargado y después el director.','success');stay();};
+C.satcancel=function(b){var x=byId(S.satreq,+b.dataset.id);if(!x||!/^Pendiente/.test(satSt(x))||!confirm('¿Anular la petición del sábado '+fDMY(x.date)+'?'))return;S.satreq=S.satreq.filter(function(y){return y.id!==x.id;});flash('Petición anulada.','success');stay();};
+
+/* --- encargado / director / RR. HH. --- */
+function vSabados(){
+  var r=role(),hr=r==='hr',need=satNeed(),sc=satScope(),tab=S.ui.satTab||'pend';
+  var mine=hr?S.satreq.slice():S.satreq.filter(function(x){return inScope(x.section,sc);});
+  var pend=mine.filter(function(x){return hr?/^Pendiente/.test(satSt(x)):satSt(x)===need;});
+  var list=tab==='pend'?pend:mine.filter(function(x){return pend.indexOf(x)<0;});
+  var groups={};list.forEach(function(x){(groups[x.date]=groups[x.date]||[]).push(x);});
+  var dates=Object.keys(groups).sort();if(tab!=='pend')dates.reverse();
+  var html=dates.slice(0,60).map(function(d){var g=groups[d].sort(function(a,b){var ea=byId(S.employees,a.eid)||{},eb=byId(S.employees,b.eid)||{};return String(a.section).localeCompare(String(b.section))||String(ea.name).localeCompare(String(eb.name));});
+    return '<section class="card"><div class="sat-head"><h2>Sábado '+esc(fDMY(d))+'</h2><span class="muted">'+g.length+' persona'+(g.length===1?'':'s')+'</span>'+(tab==='pend'&&!hr&&g.length>1?'<button class="success" data-act="satall" data-d="'+d+'">'+(r==='dir'?'Autorizar todos':'Dar el visto bueno a todos')+'</button>':'')+'</div>'+
+    g.map(function(x){var e=byId(S.employees,x.eid)||{};return '<div class="lv-row"><div class="lv-main"><b>'+esc(e.name||'¿?')+'</b> <small class="muted">Nº '+esc(e.no||'')+' · '+esc(x.section||'Sin sección')+'</small> '+satChip(x)+(x.note?'<p><small>«'+esc(x.note)+'»</small></p>':'')+satSteps(x)+'</div>'+
+      '<div class="lv-btns">'+(tab==='pend'&&!hr?'<button class="success" data-act="satok" data-id="'+x.id+'">'+(r==='dir'?'Autorizar':'Visto bueno')+'</button><button class="danger" data-act="satno" data-id="'+x.id+'">Rechazar</button>':'')+(hr?'<button class="ghost" data-act="satdel" data-id="'+x.id+'">Quitar</button>':'')+'</div></div>';}).join('')+'</section>';}).join('');
+  var who=hr?'Todas las peticiones':r==='dir'?'Dirección':'Encargado';
+  return '<h1>Sábados · '+who+'</h1><p class="muted">'+(hr?'Peticiones de todo el personal para trabajar en sábado.':'Tus secciones: <b>'+esc(sc.join(', ')||'ninguna')+'</b>.')+' Recorrido: el trabajador lo pide desde su calendario → el <b>encargado</b> de la sección da el visto bueno → el <b>director</b> del área da la autorización final.</p>'+
+  '<div class="ctabs" style="margin:10px 0 14px"><button data-act="sattab" data-v="pend" class="'+(tab==='pend'?'on':'')+'">⏳ '+(hr?'Pendientes':'Por autorizar')+' <small>('+pend.length+')</small></button><button data-act="sattab" data-v="hist" class="'+(tab!=='pend'?'on':'')+'">Historial</button></div>'+
+  (html||'<section class="card"><p class="muted">'+(tab==='pend'?(hr?'No hay peticiones pendientes.':'No tienes sábados por autorizar. ✅'):'Todavía no hay peticiones resueltas.')+'</p></section>');}
+function satApprove(x){var r=role(),n=(me()||{}).name||'';
+  if(r==='sup'&&satSt(x)==='Pendiente encargado'&&inScope(x.section,satScope())){x.status='Pendiente director';x.supBy=n;x.supAt=nowStr();return true;}
+  if(r==='dir'&&satSt(x)==='Pendiente director'&&inScope(x.section,satScope())){x.status='Autorizada';x.dirBy=n;x.dirAt=nowStr();return true;}
+  return false;}
+C.sattab=function(b){S.ui.satTab=b.dataset.v;stay();};
+C.satok=function(b){var x=byId(S.satreq,+b.dataset.id);if(x&&satApprove(x))flash(role()==='dir'?'Sábado autorizado.':'Visto bueno dado: ahora lo tiene que autorizar el director.','success');stay();};
+C.satall=function(b){var d=b.dataset.d,need=satNeed(),sc=satScope(),g=S.satreq.filter(function(x){return x.date===d&&satSt(x)===need&&inScope(x.section,sc);});
+  if(!g.length||!confirm((role()==='dir'?'¿Autorizar':'¿Dar el visto bueno a')+' las '+g.length+' peticiones del sábado '+fDMY(d)+'?'))return;var k=0;g.forEach(function(x){if(satApprove(x))k++;});flash(k+' peticiones '+(role()==='dir'?'autorizadas.':'con visto bueno.'),'success');stay();};
+C.satno=function(b){var x=byId(S.satreq,+b.dataset.id);if(!x)return;var why=prompt('Motivo del rechazo (lo verá el trabajador). Puedes dejarlo en blanco:','');if(why===null)return;
+  var r=role(),n=(me()||{}).name||'';
+  if(r==='sup'&&satSt(x)==='Pendiente encargado'){x.status='Rechazada';x.supBy=n;x.supAt=nowStr();x.supNote=why.trim();}
+  else if(r==='dir'&&satSt(x)==='Pendiente director'){x.status='Rechazada';x.dirBy=n;x.dirAt=nowStr();x.dirNote=why.trim();}else return;
+  flash('Petición rechazada.','success');stay();};
+C.satdel=function(b){var x=byId(S.satreq,+b.dataset.id);if(!x||!confirm('¿Quitar esta petición de sábado?'))return;S.satreq=S.satreq.filter(function(y){return y.id!==x.id;});stay();};
+
+/* --- RR. HH.: asignar secciones a encargados y directores --- */
+function allSections(){var m={};S.employees.forEach(function(e){[e.center].concat(e.supSecs||[],e.dirSecs||[]).forEach(function(s){s=String(s||'').trim();if(s&&!m[secNorm(s)])m[secNorm(s)]=s;});});return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return a.localeCompare(b);});}
+function scopeChips(e){return ((e.supSecs||[]).length?' <span class="chip chip-pend">🧭 Encargado: '+esc(e.supSecs.join(', '))+'</span>':'')+((e.dirSecs||[]).length?' <span class="chip chip-ok">🎯 Director: '+esc(e.dirSecs.join(', '))+'</span>':'');}
+function scopeForm(e){var secs=allSections();function boxes(nm,have){return secs.map(function(s){return '<label class="scope-chk"><input type="checkbox" name="'+nm+'" value="'+esc(s)+'"'+(inScope(s,have)?' checked':'')+'> '+esc(s)+'</label>';}).join('')||'<small class="muted">Aún no hay secciones en las fichas.</small>';}
+  return '<details class="scope-box"><summary>🧭 Encargado / 🎯 director de secciones (sábados)</summary><form data-a="scopes" data-id="'+e.id+'"><div class="grid two" style="margin:8px 0"><div><b>Es encargado de:</b><div class="scope-list">'+boxes('sup',e.supSecs)+'</div><input name="supNew" placeholder="Otra sección (separa con comas)"></div><div><b>Es director de:</b><div class="scope-list">'+boxes('dir',e.dirSecs)+'</div><input name="dirNew" placeholder="Otra sección (separa con comas)"></div></div><button>Guardar secciones</button></form></details>';}
+A.scopes=function(f,form){var e=byId(S.employees,+form.dataset.id);if(!e)return stay();
+  function pick(nm,extra){var a=[].map.call(form.querySelectorAll('input[name='+nm+']:checked'),function(i){return i.value;});String(extra||'').split(',').forEach(function(s){s=s.trim();if(s)a.push(s);});return a;}
+  var sup=pick('sup',f.supNew),dir=pick('dir',f.dirNew);
+  rpc('p_set_scopes',{p_target:e.id,p_sup:sup,p_dir:dir}).then(function(){return fullLoad();}).then(function(){flash('Secciones guardadas para '+e.name+'. '+(sup.length||dir.length?'Al volver a entrar le saldrá la opción de portal de '+(sup.length?'encargado':'')+(sup.length&&dir.length?' y de ':'')+(dir.length?'dirección':'')+'.':''),'success');stay();},function(x){flash('No se ha podido guardar: '+(x.message||x),'error');stay();});};
 
 boot();
 })();
