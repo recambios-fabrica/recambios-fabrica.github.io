@@ -59,16 +59,23 @@
       if (!IMP[k]) continue;
       const sn = await db.collection(k).get();
       const docs = new Map(sn.docs.map(d => [d.id, d.data()]));
-      let maxOrden = 0; for (const [id, d] of docs) if (/^xl-/.test(id) && typeof d.orden === 'number' && d.orden > maxOrden) maxOrden = d.orden;
+      // Filas borradas en la web: están en la papelera (no se recrean). Antes se usaba el «orden» más alto,
+      // pero una fila basura del final del Excel (1.048.560) hacía que se saltaran todas las filas nuevas.
+      let borradas = null;
+      try { borradas = new Set((await db.collection('papelera').get()).docs.map(d => d.id)); } catch (e) { borradas = null; }
+      let maxOrden = 0; for (const [id, d] of docs) if (/^xl-/.test(id) && typeof d.orden === 'number' && d.orden < 1000000 && d.orden > maxOrden) maxOrden = d.orden;
       for (const c of list) {
         if (c.r - 1 < IMP[k].start) continue;
         const raw = (c.vals || []).map(v => (typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()) ? Number(v) : (v === '' ? null : v)));
         let body; try { body = IMP[k].map(raw); } catch (e) { continue; }
-        if (!Object.values(body).some(v => v !== '' && v != null)) continue;
+        if (!Object.values(body).some(v => v != null && /[0-9A-Za-zÀ-ÿ]/.test(String(v)))) continue; // fila sin datos reales (p. ej. solo «/»)
         const id = `xl-${k}-${String(c.r).padStart(5, '0')}`;
         const cur = docs.get(id);
         if (!cur) {
-          if (c.r <= maxOrden) continue; // fila que se borró en la web: no se recrea
+          if (borradas ? borradas.has(k + '__' + id) : c.r <= maxOrden) continue; // fila que se borró en la web: no se recrea
+          // Si el pedido ya existe en la web con la misma OT (p. ej. creado desde Fixner), no se duplica.
+          const otX = String(body.ot || body.reparacion || '').trim();
+          if (otX && [...docs.values()].some(d => d.ot === otX || d.reparacion === otX)) continue;
           if (c.g && GREEN_FIELD[k] && !body[GREEN_FIELD[k]]) body[GREEN_FIELD[k]] = 'LLEGADO';
           await db.collection(k).doc(id).set({ ...body, orden: c.r, creadoEn: Date.now(), importado: true, origen: 'excel' });
           creados++; nuevos.push(`${k} fila ${c.r}: ${body.descripcion || body.trabajo || body.maquina || ''}`);
