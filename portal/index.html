@@ -1061,7 +1061,11 @@ A.document=function(f,form){
 A.newemp=function(f){
   if(!f.employee_no.trim()||!f.full_name.trim()){flash('Indica el número de empleado y el nombre.','error');return stay();}
   var pin;do{pin=String(100000+Math.floor(Math.random()*900000));}while(WEAK.indexOf(pin)>=0||/^(\d)\1+$/.test(pin));
-  if(S.employees.some(function(e){return e.no===f.employee_no.trim();})){flash('Ese número de empleado ya existe.','error');return stay();}
+  var dupE=S.employees.filter(function(e){return String(e.no).trim()===f.employee_no.trim();})[0];
+  if(dupE){var want=f.acc_role||'employee',lbl={employee:'Trabajador',committee:'Comité de empresa',hr:'RR. HH.'};
+    if(want!==dupE.role&&dupE.id!==(me()||{}).id&&confirm('El nº '+dupE.no+' ya tiene cuenta: '+dupE.name+' ('+(lbl[dupE.role]||dupE.role)+').\n\nNo hace falta crearla otra vez. ¿Quieres cambiar su tipo de cuenta a «'+lbl[want]+'»?\n\nConserva su PIN y todos sus datos.')){
+      rpc('p_set_role',{p_target:dupE.id,p_role:want}).then(function(){return fullLoad();}).then(function(){flash(dupE.name+' ahora es «'+lbl[want]+'». '+(want==='committee'?'Al entrar podrá elegir su portal personal o el del comité.':''),'success');stay();},function(x){flash('No se ha podido cambiar: '+(x.message||x),'error');stay();});return;}
+    flash('El nº '+dupE.no+' ya tiene cuenta: '+dupE.name+(dupE.id===(me()||{}).id?' (es tu propia cuenta: tu tipo de cuenta solo lo puede cambiar otra persona de RR. HH.)':'. Búscala en el «Listado de cuentas» de abajo.'),'error');return stay();}
   var rl=f.acc_role||'employee';
   rpc('p_create_user',{p_no:f.employee_no.trim(),p_pin:pin,p_role:rl,p_data:{name:f.full_name.trim(),center:f.center.trim(),category:f.category.trim(),start:'',phone:''}})
   .then(function(){return fullLoad();}).then(function(){lastCredentials=[{no:f.employee_no.trim(),name:f.full_name.trim(),pin:pin}];IMPORT_CRED=lastCredentials.slice();flash('Cuenta creada. Apunta el PIN provisional y entrégalo en mano: el portal le obligará a cambiarlo al entrar.','success');stay();},
