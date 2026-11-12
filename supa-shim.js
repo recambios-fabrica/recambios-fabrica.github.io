@@ -26,28 +26,52 @@
   function loadSession() { try { session = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { session = null; } }
   function saveSession(s) { session = s; try { if (s) localStorage.setItem(LS, JSON.stringify(s)); else localStorage.removeItem(LS); } catch (e) {} }
   async function authCall(path, body) {
-    const r = await realFetch(URL0 + '/auth/v1/' + path, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let r;
+    try { r = await realFetch(URL0 + '/auth/v1/' + path, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch (e) { throw err('unavailable', 'Sin conexión con el servidor'); }
+    if (r.status >= 500 || r.status === 429) throw err('unavailable', 'El servidor no responde');
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw err('auth', j.error_description || j.msg || j.message || 'No se pudo entrar');
     return j;
   }
   function keepSession(j) { saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: j.expires_at || (Math.floor(Date.now() / 1000) + (j.expires_in || 3600)), user: j.user }); }
   let refreshing = null;
-  async function token() {
+  // Otra pestaña puede haber renovado la sesión: se lee siempre la más reciente de localStorage.
+  function freshest() { try { const s = JSON.parse(localStorage.getItem(LS) || 'null'); if (s && (!session || (s.expires_at || 0) >= (session.expires_at || 0))) session = s; } catch (e) {} return session; }
+  window.addEventListener('storage', e => { if (e.key === LS && e.newValue) { try { session = JSON.parse(e.newValue); } catch (x) {} } });
+  async function token(force) {
+    freshest();
     if (!session) throw err('revoked', 'Sesión no iniciada');
-    if (session.expires_at - 60 > Date.now() / 1000) return session.access_token;
-    if (!refreshing) refreshing = authCall('token?grant_type=refresh_token', { refresh_token: session.refresh_token })
-      .then(keepSession).catch(e => { saveSession(null); throw err('revoked', 'Sesión caducada'); }).finally(() => { refreshing = null; });
+    if (!force && session.expires_at - 60 > Date.now() / 1000) return session.access_token;
+    if (!refreshing) {
+      const used = session.refresh_token;
+      refreshing = (async () => {
+        for (let i = 0; i < 3; i++) {
+          try { keepSession(await authCall('token?grant_type=refresh_token', { refresh_token: used })); return; }
+          catch (e) {
+            // ¿La ha renovado otra pestaña mientras tanto? Entonces se usa esa.
+            freshest(); if (session && session.refresh_token !== used) return;
+            if (e.code === 'unavailable') { if (i < 2) { await new Promise(r => setTimeout(r, 1500 * (i + 1))); continue; } throw e; } // sin red: NO se cierra la sesión
+            saveSession(null); throw err('revoked', 'Sesión caducada');
+          }
+        }
+      })().finally(() => { refreshing = null; });
+    }
     await refreshing; return session.access_token;
   }
 
   async function rest(method, path, body, extraHeaders) {
-    let t; try { t = await token(); } catch (e) { showLogin(); throw e; }
-    const headers = { apikey: KEY, Authorization: 'Bearer ' + t, ...(extraHeaders || {}) };
+    let t; try { t = await token(); } catch (e) { if (e.code === 'revoked') showLogin(); throw e; }
+    const headers = { apikey: KEY, Authorization: 'Bearer ' + t, ...(extraHeaders || {}) }; delete headers.__retry;
     if (body !== undefined && !(body instanceof Blob)) headers['Content-Type'] = 'application/json';
     let r;
     try { r = await realFetch(URL0 + path, { method, headers, body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body) }); }
     catch (e) { throw err('unavailable', 'Sin conexión con el servidor'); }
+    if (r.status === 401 && !(extraHeaders && extraHeaders.__retry)) {
+      // Antes de pedir la contraseña, se intenta renovar la sesión una vez y repetir la petición.
+      try { await token(true); } catch (e) { if (e.code === 'revoked') showLogin('La sesión ha caducado. Vuelve a entrar.'); throw e; }
+      const h2 = { ...(extraHeaders || {}), __retry: 1 }; return rest(method, path, body, h2);
+    }
     if (r.status === 401) { saveSession(null); showLogin('La sesión ha caducado. Vuelve a entrar.'); throw err('revoked', 'Sesión caducada'); }
     const txt = await r.text(); let j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) { j = txt; }
     if (!r.ok) {
@@ -417,7 +441,11 @@
     }
     if (!URL0 || !KEY) { showLogin('Falta configurar config.js (dirección y clave pública de Supabase).'); return; }
     if (!session) { showLogin(); return; }
-    try { await token(); } catch (e) { showLogin('La sesión ha caducado. Vuelve a entrar.'); return; }
+    // Si al abrir no hay conexión (p. ej. el ordenador acaba de despertar), se espera y se reintenta sin cerrar la sesión.
+    for (let i = 0; ; i++) {
+      try { await token(); break; }
+      catch (e) { if (e.code !== 'unavailable' || i >= 40) { showLogin('La sesión ha caducado. Vuelve a entrar.'); return; } await new Promise(r => setTimeout(r, 3000)); }
+    }
     const u = session.user || {};
     const email = String(u.email || '').toLowerCase();
     const meta = u.user_metadata || {};
