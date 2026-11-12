@@ -79,6 +79,8 @@
 .bub{max-width:78%;padding:8px 12px;border-radius:14px;font-size:15px;line-height:1.4;word-wrap:break-word}.bub.me{align-self:flex-end;background:#123f70;color:#fff;border-bottom-right-radius:4px}.bub.them{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
 .bub-who{font-size:12px;font-weight:bold;color:#123f70;margin-bottom:2px}.bub-t{font-size:11px;opacity:.7;text-align:right;margin-top:3px}
 .chat-foot{display:flex;gap:8px;align-items:flex-end}.chat-foot textarea{flex:1;margin:0;resize:vertical}.chat-foot button{margin:0}.chat-empty{margin:auto;text-align:center}.chat-new{margin-top:8px}
+.mode-card{max-width:460px}.mode-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px 16px 14px 60px;margin-top:12px;cursor:pointer;position:relative;color:var(--text)}.mode-btn:hover{border-color:#123f70;background:#f3f7fc}.mode-btn span{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:28px}.mode-btn b{font-size:17px;color:#123f70}.mode-btn small{color:var(--muted)}
+.nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
 .calendar-day.vac-ok{background:#e3f4e8;border-color:#65a978}.calendar-day.vac-pend{background:#fff4dc;border-color:#d8a63d}.calendar-day.vac-sel{background:#dbe9ff;border:2px solid #2f6fd0}
@@ -377,7 +379,7 @@ async function fullLoad(){
 }
 async function startSession(){
   var m=await rpc('p_me');if(!m)throw new Error('Tu cuenta no está activa. Habla con RRHH.');
-  S.session={eid:m.eid,role:m.role,must:false};
+  S.session={eid:m.eid,role:m.role,realRole:m.role,must:false};if(m.role==='committee'){var md=S.ui.cmode;if(md==='employee'||md==='committee'){S.session.role=md;S.session.mode=md;}else{S.session.role='employee';S.session.mode=null;}}
   await fullLoad();
   var u=me();S.session.must=!!(u&&u.must);MODE='shared';
   clearInterval(pollT);pollT=setInterval(poll,8000);
@@ -470,6 +472,7 @@ function layout(content){
   if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">Comité de empresa</a>';
   if(r==='hr')nav+=uhLink();
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
+  if(S.session&&S.session.realRole==='committee')nav+='<a href="#" data-act="cswitch" class="nav-switch">⇄ '+(r==='committee'?'Ir a mi portal personal':'Ir al portal del comité')+'</a>';
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
   nav+='<a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
   if(r==='hr')nav+='<a href="#" data-go="empleados">Empleados</a><a href="#" data-go="formaciones">Formaciones y revisiones</a><a href="#" data-go="vehiculos">Vehículos y accesos</a>';
@@ -534,7 +537,7 @@ function vHR(){
   var pend=S.leaves.slice().sort(function(a,b){return (a.status==='Pendiente'?0:1)-(b.status==='Pendiente'?0:1)||b.id-a.id;}).slice(0,15);
   var tko=S.tickets.filter(function(t){return t.status!=='Resuelto';});
   return '<h1>Panel de Recursos Humanos</h1><p class="muted">Gestión del personal y solicitudes.</p><div class="grid four"><div class="card"><small>AUSENCIAS PENDIENTES</small><h2>'+c.a+'</h2></div><div class="card"><small>TICKETS ABIERTOS</small><h2>'+c.t+'</h2></div><div class="card"><small>EMPLEADOS ACTIVOS</small><h2>'+c.e+'</h2></div><div class="card"><small>CONSULTAS AL COMITÉ</small><h2>'+c.q+'</h2></div></div>'+
-  (function(){var reqs=S.employees.filter(function(e){return e.role==='employee'&&e.active&&e.vexempt==='requested'&&!S.vehicles.some(function(v){return v.eid===e.id;});}),miss=S.employees.filter(function(e){return e.role==='employee'&&e.active&&!e.vexempt&&!S.vehicles.some(function(v){return v.eid===e.id;});}).length;
+  (function(){var reqs=S.employees.filter(function(e){return isStaffRole(e.role)&&e.active&&e.vexempt==='requested'&&!S.vehicles.some(function(v){return v.eid===e.id;});}),miss=S.employees.filter(function(e){return isStaffRole(e.role)&&e.active&&!e.vexempt&&!S.vehicles.some(function(v){return v.eid===e.id;});}).length;
     return '<section class="card vehicle-admin" id="sin-vehiculo"><div class="card-title-row"><div><h2>Personal sin vehículo propio</h2><p class="muted">Avisos de quienes no tienen vehículo. Al desbloquear, pueden usar el portal y se les preguntará cada cierto tiempo si ya disponen de uno.</p></div><span class="mini-icon">🚶</span></div>'+
     (reqs.map(function(e){return '<div class="row wrap"><div><b>'+esc(e.name)+'</b><p>Nº '+esc(e.no)+(e.center?' · '+esc(e.center):'')+' · avisó el '+fechaHora(e.vreqAt)+'</p>'+(e.vnote?'<small>«'+esc(e.vnote)+'»</small>':'')+'</div><button class="success" data-act="vexempt" data-v="approve" data-id="'+e.id+'" data-back="sin-vehiculo">Desbloquear</button></div>';}).join('')||'<p class="muted">No hay avisos pendientes.</p>')+
     (miss?'<p class="vehicle-missing">🚗 '+miss+' persona'+(miss===1?'':'s')+' todavía sin vehículo registrado ni aviso (se les pedirá al entrar).</p>':'')+'</section>';})()+
@@ -563,7 +566,7 @@ function vTurnos(){
   var hr=role()==='hr',rows;
   if(hr)rows=S.shifts.slice().sort(function(a,b){var ea=byId(S.employees,a.eid).name,eb=byId(S.employees,b.eid).name;return ea<eb?-1:ea>eb?1:a.weekday-b.weekday;});
   else rows=S.shifts.filter(function(s){return s.eid===me().id;}).sort(function(a,b){return a.weekday-b.weekday;});
-  var emps=S.employees.filter(function(e){return e.active&&e.role==='employee';});
+  var emps=S.employees.filter(function(e){return e.active&&isStaffRole(e.role);});
   return '<h1>'+(hr?'Gestión de turnos':'Mis turnos')+'</h1><p class="muted">'+(hr?'Asignación del horario semanal por empleado.':'Tu horario fijo. Los cambios puntuales los gestiona RRHH.')+'</p>'+
   (hr?'':(function(){var wd=(today().getDay()+6)%7,sh=S.shifts.filter(function(x){return x.eid===me().id&&x.weekday===wd;})[0];return '<section class="card today-shift"><div class="card-title-row"><h2>Mi turno de hoy</h2><span class="mini-icon">🕒</span></div>'+(sh?'<h2 class="highlight-value">'+esc(sh.start||'—')+' – '+esc(sh.end||'—')+'</h2><p>'+esc(sh.name)+'</p>':'<p class="muted">No tienes un turno asignado para hoy.</p>')+'</section>';})())+
   (hr?'<section class="card"><h2>Asignar o modificar turno</h2><form data-a="shift"><label>Empleado</label><select name="employee_id" required>'+emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.no)+' · '+esc(e.name)+'</option>';}).join('')+'</select><div class="grid two"><div><label>Día</label><select name="weekday">'+DAYS.map(function(d,i){return '<option value="'+i+'">'+d+'</option>';}).join('')+'</select></div><div><label>Nombre del turno</label><input name="shift_name" placeholder="Mañana / Tarde / Noche / Libre" required></div><div><label>Entrada</label><input type="time" name="start_time"></div><div><label>Salida</label><input type="time" name="end_time"></div></div><button class="primary">Guardar turno</button></form></section>':'')+
@@ -656,7 +659,7 @@ function vNominas(){
   var hr=role()==='hr',rows=hr?S.payslips.slice().reverse():S.payslips.filter(function(p){return p.eid===me().id;});
   var yearSel=S.ui.payYear,avail={},years={};years[yearSel]=1;years[today().getFullYear()]=1;
   rows.forEach(function(r){var pp=parsePeriod(r.period);if(!pp)return;years[pp[0]]=1;if(pp[0]===yearSel&&!avail[pp[1]])avail[pp[1]]=r;});
-  var mnames=MONTHS.map(cap),emps=S.employees.filter(function(e){return e.active&&e.role==='employee';});
+  var mnames=MONTHS.map(cap),emps=S.employees.filter(function(e){return e.active&&isStaffRole(e.role);});
   return '<div class="pay-heading"><div><span class="eyebrow">DOCUMENTACIÓN PERSONAL</span><h1>'+(hr?'Gestión de nóminas':'Mis nóminas')+'</h1><p class="muted">'+(hr?'Publica las nóminas para que cada trabajador vea únicamente las suyas.':'Elige un año y pulsa directamente sobre el mes que quieras consultar.')+'</p></div>'+(hr?'':'<div class="pay-lock">🔒 Acceso privado</div>')+'</div>'+
   (hr?'<section class="card pay-upload"><h2>＋ Cargar nómina</h2><p class="muted">Asigna el PDF al trabajador y escribe el periodo, por ejemplo: Octubre 2026.</p><form data-a="payslip"><div class="pay-form-grid"><div><label>Empleado</label><select name="employee_id" required>'+emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.no)+' · '+esc(e.name)+'</option>';}).join('')+'</select></div><div><label>Mes y año</label><input name="period" placeholder="Octubre 2026" required></div><div><label>Archivo PDF</label><input type="file" name="pdf" accept="application/pdf" required></div><div class="pay-submit"><button class="primary">Publicar nómina</button></div></div></form></section>':'')+
   '<section class="card pay-calendar-card"><div class="pay-calendar-head"><div><h2>'+(hr?'Nóminas por año':'Calendario de nóminas')+'</h2><p class="muted">Pulsa un mes disponible para abrir su documento.</p></div><div class="year-picker"><label for="year">Año</label><select id="year" data-act="year">'+Object.keys(years).sort().map(function(y){return '<option value="'+y+'"'+(+y===yearSel?' selected':'')+'>'+y+'</option>';}).join('')+'</select></div></div>'+
@@ -868,7 +871,7 @@ function medicalRequestsHtml(){
     return '<div class="row wrap medical-signed"><div><b>'+esc(c.title)+'</b><p>'+(r.s.decision==='acepto'?'✅ Autorizado':'⛔ Renuncia voluntaria')+' · Firmado el '+fechaHora(r.s.at)+'</p></div><button data-act="act" data-c="'+c.id+'" data-e="'+me().id+'">Ver acta</button></div>';}).join('');
 }
 function campaignsHtml(){
-  var staff=S.employees.filter(function(e){return e.active&&e.role==='employee';}).sort(function(a,b){return a.name<b.name?-1:1;});
+  var staff=S.employees.filter(function(e){return e.active&&isStaffRole(e.role);}).sort(function(a,b){return a.name<b.name?-1:1;});
   var list=S.campaigns.slice().reverse().map(function(c){
     var ppl=staff.map(function(e){return {e:e,s:consentOf(c.id,e.id)};}),acc=ppl.filter(function(x){return x.s&&x.s.decision==='acepto';}).length,dec=ppl.filter(function(x){return x.s&&x.s.decision==='renuncio';}).length;
     return '<div class="medical-campaign"><div class="medical-campaign-head"><div><h3>'+esc(c.title)+'</h3><p class="muted">'+(c.period?esc(c.period)+' · ':'')+(c.deadline?'Firmar antes del '+fechaLarga(c.deadline)+' · ':'')+(c.active?'Abierta':'Cerrada')+'</p></div><button data-act="camptoggle" data-id="'+c.id+'">'+(c.active?'Cerrar campaña':'Reabrir campaña')+'</button></div>'+
@@ -885,13 +888,13 @@ function vEmpleados(){
   (cr?'<section class="card"><h2>PIN iniciales generados</h2>'+(cr.length>1?'<p><button class="primary" data-act="printall">🖨 Imprimir todas las fichas ('+cr.length+')</button></p>':'')+'<p class="muted">Estos PIN solo se muestran ahora. Entrégalos de forma privada a cada trabajador y no compartas esta pantalla.</p><div class="table-wrap"><table><thead><tr><th>Número</th><th>Nombre</th><th>PIN inicial</th></tr></thead><tbody>'+cr.map(function(c){return '<tr><td>'+esc(c.no)+'</td><td>'+esc(c.name)+'</td><td><b style="font-size:20px;letter-spacing:3px">'+esc(c.pin)+'</b></td><td><button class="primary" data-act="printcred" data-no="'+esc(c.no)+'" data-name="'+esc(c.name)+'" data-pin="'+esc(c.pin)+'">🖨 Imprimir ficha para el operario</button></td></tr>';}).join('')+'</tbody></table></div></section>':'')+
   '<section class="card"><h2>Importar personal desde Excel</h2><p>Selecciona el Excel actualizado. Se leerán las columnas ID, NOMBRE Y APELLIDOS y GRUPOS. Los trabajadores nuevos recibirán un PIN aleatorio de 6 dígitos; se mostrará una sola vez al terminar.</p><form data-a="importxl"><input type="file" name="xl" accept=".xlsx,.xls,.csv" required><button class="primary">Importar y generar PIN</button></form><p class="muted" style="font-size:13px">También vale si las columnas se llaman Nº EMPLEADO, NOMBRE, SECCIÓN o CATEGORÍA. Las personas que ya tienen cuenta (mismo número) no se tocan.</p></section>'+
   '<section class="card"><h2>Alta manual de empleado</h2><form data-a="newemp"><div class="grid two"><div><label>Número de empleado</label><input name="employee_no" required></div><div><label>Nombre completo</label><input name="full_name" required></div><div><label>Sección</label><input name="center"></div><div><label>Categoría profesional</label><input name="category" placeholder="Ej. Categoría 11"></div><div><label>Tipo de cuenta</label><select name="acc_role"><option value="employee">Trabajador</option><option value="committee">Comité de empresa</option><option value="hr">RR. HH.</option></select></div></div><button class="primary">Crear cuenta</button></form><p class="muted" style="font-size:12px">El PIN inicial es provisional: el trabajador tendrá que cambiarlo al entrar.</p></section>'+
-  '<section class="card"><h2>Listado de cuentas</h2>'+rows.map(function(e){var isE=e.role==='employee';return '<div class="row wrap"><div><b>'+esc(e.name)+'</b><p>'+esc(e.no)+' · '+esc(e.center||'Sección pendiente')+' · '+esc(e.category||'Categoría pendiente')+'</p>'+
+  '<section class="card"><h2>Listado de cuentas</h2>'+rows.map(function(e){var isE=isStaffRole(e.role);return '<div class="row wrap"><div><b>'+esc(e.name)+'</b>'+(e.role==='committee'?' <span class="chip chip-info">👥 Comité de empresa</span>':'')+'<p>'+esc(e.no)+' · '+esc(e.center||'Sección pendiente')+' · '+esc(e.category||'Categoría pendiente')+'</p>'+
    (isE?'<form data-a="empdata" data-id="'+e.id+'" class="inline-date-form"><label>Categoría</label><input name="category" value="'+esc(e.category)+'" placeholder="Ej. Categoría 11"><label>Sección</label><input name="center" value="'+esc(e.center)+'"><button>Guardar datos</button></form><form data-a="empstart" data-id="'+e.id+'" class="inline-date-form"><label>Fecha de incorporación</label><input type="date" name="employment_start_date" value="'+esc(e.start)+'"><button>Guardar fecha</button></form>':'')+'</div>'+(isE?(function(){var n=S.vehicles.filter(function(v){return v.eid===e.id;}).length;if(n)return '<span class="privacy-badge is-signed">🚗 '+n+' vehículo'+(n===1?'':'s')+'</span>';if(e.vexempt==='approved')return '<span class="privacy-badge is-info">🚶 Sin vehículo · desbloqueado</span><button data-act="vexempt" data-v="revoke" data-id="'+e.id+'">Quitar desbloqueo</button>';return '<span class="privacy-badge is-pending">🚗 '+(e.vexempt==='requested'?'Pide desbloqueo':'Sin vehículo')+'</span><button data-act="vexempt" data-v="approve" data-id="'+e.id+'">Desbloquear sin vehículo</button>';})():'')+(function(){var sg=signatureOf(e.id);return sg?'<span class="privacy-badge is-signed">🛡️ Firmado el '+fechaHora(sg.at)+'</span>':'<span class="privacy-badge is-pending">🛡️ Pendiente de firma</span>';})()+'<em>'+(e.active?'Activo':'Desactivado')+'</em>'+
-   (isE?'<button data-act="resetpin" data-id="'+e.id+'">Restablecer PIN</button><button data-act="empstatus" data-id="'+e.id+'">'+(e.active?'Desactivar':'Activar')+'</button>':'')+'</div>';}).join('')+'</section>';
+   (isE?'<button data-act="setcomm" data-id="'+e.id+'" data-v="'+(e.role==='committee'?'employee':'committee')+'">'+(e.role==='committee'?'Quitar del comité':'👥 Hacer del comité')+'</button><button data-act="resetpin" data-id="'+e.id+'">Restablecer PIN</button><button data-act="empstatus" data-id="'+e.id+'">'+(e.active?'Desactivar':'Activar')+'</button>':'')+'</div>';}).join('')+'</section>';
 }
 
 function vFormaciones(){
-  var emps=S.employees.filter(function(e){return e.active&&e.role==='employee';}),opts='<option value="">Selecciona un trabajador</option>'+emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.no)+' · '+esc(e.name)+'</option>';}).join('');
+  var emps=S.employees.filter(function(e){return e.active&&isStaffRole(e.role);}),opts='<option value="">Selecciona un trabajador</option>'+emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.no)+' · '+esc(e.name)+'</option>';}).join('');
   return '<h1>Formaciones y revisiones</h1><p class="muted">Gestiona la información individual por número de operario. Los documentos se guardan en almacenamiento privado.</p>'+
   campaignsHtml()+'<div class="grid two"><section class="card"><h2>Añadir formación</h2><form data-a="training"><label>Trabajador</label><select name="employee_id" required>'+opts+'</select><label>Nombre de la formación</label><input name="title" required placeholder="Ej. Prevención de riesgos laborales"><div class="grid two"><div><label>Fecha de realización</label><input type="date" name="completed_on" required></div><div><label>Fecha de caducidad (si corresponde)</label><input type="date" name="expires_on"></div></div><label>Observaciones (opcional)</label><input name="notes"><button class="primary">Guardar formación</button></form></section>'+
   '<section class="card"><h2>Subir documento de revisión</h2><form data-a="medical"><label>Trabajador</label><select name="employee_id" required>'+opts+'</select><label>Tipo de documento</label><select name="doc_type" required><option value="">Selecciona</option><option>Certificado de aptitud laboral</option><option>Justificante de asistencia</option><option>Convocatoria de revisión</option></select><div class="grid two"><div><label>Fecha de revisión</label><input type="date" name="review_date"></div><div><label>Próxima revisión</label><input type="date" name="next_review"></div></div><label>Documento PDF (máx. 12 MB)</label><input type="file" name="medical_file" accept="application/pdf,.pdf" required><p class="muted" style="font-size:13px">No subas informes clínicos, diagnósticos ni resultados médicos. Utiliza solo documentos administrativos o certificados de aptitud laboral.</p><button class="primary">Publicar documento privado</button></form></section></div>'+
@@ -908,6 +911,7 @@ function render(scrollTop){
   if(MODE==='setup'){root.innerHTML=vSetup();return;}
   if(MODE==='empty'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Demo compartida sin datos</h1><p class="muted">Todavía no hay datos de ejemplo. Cárgalos para que todos los que abran la página vean lo mismo.</p><button class="primary" data-act="seedshared">Cargar datos de ejemplo</button>'+(readOnly?'<p class="flash error">Solo el propietario o quien tenga permiso de edición puede cargarlos.</p>':'')+'</div>';return;}
   if(!S.session){root.innerHTML=S.ui.publicPrivacy?demoBar()+'<main class="main public-main">'+vPrivacy(true)+'</main>':vLogin();save();window.scrollTo(0,0);return;}
+  if(S.session.realRole==='committee'&&!S.session.mode){root.innerHTML=vModeChoice();save();window.scrollTo(0,0);return;}
   if(S.session.must&&S.ui.view!=='misdatos'){flash('Por seguridad, cambia tu PIN provisional antes de continuar.','error');S.ui.view='misdatos';}
   else if(!S.session.must&&!signatureOf(S.session.eid)&&S.ui.view!=='privacidad'&&role()!=='hr'){S.ui.view='privacidad';}
   else if(!S.session.must&&role()==='employee'&&S.ui.view==='mivehiculo'&&!S.ui.vadded&&!S.ui.vregister&&vehicleState(S.session.eid)==='ok'){S.ui.view='inicio';}
@@ -1122,7 +1126,7 @@ C.closeprivacy=function(){S.ui.publicPrivacy=false;render();};
 C.logout=function(){
   var t=AUTH&&AUTH.access_token;clearInterval(pollT);
   if(t)realFetch(URL0+'/auth/v1/logout?scope=local',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+t}}).catch(function(){});
-  saveAuth(null);known={};lastSeq=0;DIR=[];var ui=S.ui;emptyState(ui);S.ui.view='inicio';S.ui.vadded=false;S.ui.vregister=false;render();
+  saveAuth(null);known={};lastSeq=0;DIR=[];var ui=S.ui;ui.cmode=null;emptyState(ui);S.ui.view='inicio';S.ui.vadded=false;S.ui.vregister=false;render();
 };
 C.reset=function(){};
 C.resetcancel=function(){resetArmed=false;render(false);};
@@ -1199,15 +1203,15 @@ A.importxl=function(f,form){
   if(typeof XLSX==='undefined'){flash('No se ha podido cargar el lector de Excel. Recarga la página.','error');return stay();}
   var rd=new FileReader();rd.onload=function(){
     var rows;try{var wb=XLSX.read(new Uint8Array(rd.result),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''});}catch(e){flash('No se puede leer el archivo. ¿Es un Excel?','error');return stay();}
-    var hi=-1,cNo=-1,cName=-1,cSec=-1,cCat=-1;
+    var hi=-1,cNo=-1,cName=-1,cSec=-1,cCat=-1,cCom=-1;
     for(var i=0;i<Math.min(rows.length,15)&&hi<0;i++){var r=rows[i].map(function(x){return String(x).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');});
-      r.forEach(function(h,j){if(cNo<0&&/^(ID|N[O°º]?\.?|NUM\.?|NUMERO|N[O°º]?\.? ?(DE )?EMPLEADO|NUMERO (DE )?EMPLEADO|COD(IGO)?|COD\.? EMPLEADO)$/.test(h))cNo=j;else if(cName<0&&/NOMBRE/.test(h))cName=j;else if(cSec<0&&/GRUPO|SECCION|DEPARTAMENTO|SECCIO/.test(h))cSec=j;else if(cCat<0&&/CATEGOR/.test(h))cCat=j;});
-      if(cNo>=0&&cName>=0)hi=i;else{cNo=cName=cSec=cCat=-1;}}
+      r.forEach(function(h,j){if(cNo<0&&/^(ID|N[O°º]?\.?|NUM\.?|NUMERO|N[O°º]?\.? ?(DE )?EMPLEADO|NUMERO (DE )?EMPLEADO|COD(IGO)?|COD\.? EMPLEADO)$/.test(h))cNo=j;else if(cName<0&&/NOMBRE/.test(h))cName=j;else if(cSec<0&&/GRUPO|SECCION|DEPARTAMENTO|SECCIO/.test(h))cSec=j;else if(cCat<0&&/CATEGOR/.test(h))cCat=j;else if(cCom<0&&/COMITE/.test(h))cCom=j;});
+      if(cNo>=0&&cName>=0)hi=i;else{cNo=cName=cSec=cCat=cCom=-1;}}
     if(hi<0){flash('No encuentro las columnas del número de empleado (ID) y del nombre (NOMBRE Y APELLIDOS) en la primera hoja.','error');return stay();}
     var have={};S.employees.forEach(function(e){have[String(e.no).trim()]=1;});
     var todo=[],seen={};
     rows.slice(hi+1).forEach(function(r){var no=String(r[cNo]||'').trim().replace(/\.0+$/,''),name=String(r[cName]||'').trim().replace(/\s+/g,' ');
-      if(!no||!name||have[no]||seen[no])return;seen[no]=1;todo.push({no:no,name:name,center:cSec>=0?String(r[cSec]||'').trim():'',category:cCat>=0?String(r[cCat]||'').trim():''});});
+      if(!no||!name||have[no]||seen[no])return;seen[no]=1;todo.push({no:no,name:name,center:cSec>=0?String(r[cSec]||'').trim():'',category:cCat>=0?String(r[cCat]||'').trim():'',com:cCom>=0&&/^(SI|SÍ|S|X|1|YES|COMITE|COMITÉ)$/i.test(String(r[cCom]||'').trim())});});
     if(!todo.length){flash('No hay personas nuevas en el Excel: todas tienen ya cuenta.','success');return stay();}
     if(!confirm('Se van a crear '+todo.length+' cuenta'+(todo.length===1?'':'s')+' nueva'+(todo.length===1?'':'s')+' con PIN automático.\n\nEjemplo: '+todo[0].no+' · '+todo[0].name+'\n\n¿Continuar?'))return stay();
     var done=[],fail=[],k=0;
@@ -1215,7 +1219,7 @@ A.importxl=function(f,form){
       if(k>=todo.length){fullLoad().then(fin,fin);return;}
       var t=todo[k++],pin;do{pin=String(100000+Math.floor(Math.random()*900000));}while(WEAK.indexOf(pin)>=0||/^(\d)\1+$/.test(pin));
       var box=document.querySelector('form[data-a=importxl] button');if(box)box.textContent='Creando '+k+' de '+todo.length+'…';
-      rpc('p_create_user',{p_no:t.no,p_pin:pin,p_role:'employee',p_data:{name:t.name,center:t.center,category:t.category,start:'',phone:''}})
+      rpc('p_create_user',{p_no:t.no,p_pin:pin,p_role:t.com?'committee':'employee',p_data:{name:t.name,center:t.center,category:t.category,start:'',phone:''}})
         .then(function(){done.push({no:t.no,name:t.name,pin:pin});},function(e){fail.push(t.no+' ('+(e.message||'error')+')');}).then(next);
     })();
     function fin(){IMPORT_CRED=done.slice();lastCredentials=done;
@@ -1418,6 +1422,19 @@ A.uhour=function(f){var h=+String(f.hours).replace(',','.');if(!f.date||!(h>0)){
 C.uhok=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;h.status='Autorizada';h.resolvedBy=(me()||{}).name||'RR. HH.';h.resolvedAt=nowStr();flash('Horas autorizadas.','success');stay();};
 C.uhno=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;h.status='Denegada';h.resolvedBy=(me()||{}).name||'RR. HH.';h.resolvedAt=nowStr();flash('Horas denegadas.','success');stay();};
 C.uhdel=function(b){var h=byId(S.uhours,+b.dataset.id);if(!h)return;if(role()!=='hr'&&(h.eid!==me().id||uhSt(h)!=='Pendiente'))return;if(!confirm('¿Quitar esta petición de horas sindicales?'))return;S.uhours=S.uhours.filter(function(x){return x.id!==h.id;});flash('Petición quitada.','success');stay();};
+
+/* ===== 14) Miembros del comité = trabajadores: al entrar eligen portal personal o portal del comité ===== */
+function isStaffRole(r){return r==='employee'||r==='committee';}
+function vModeChoice(){var u=me()||{};
+  return '<div class="login-page"><div class="login-card mode-card"><div class="crest big">G</div><h1>Hola, '+esc(String(u.name||'').split(' ')[0]||'')+'</h1><p>Formas parte del <b>comité de empresa</b>. ¿Cómo quieres entrar?</p>'+
+  '<button class="mode-btn" data-act="cmode" data-v="employee"><span>👤</span><b>Mi portal personal</b><small>Turnos, nóminas, vacaciones, ausencias, tickets a RR. HH.…</small></button>'+
+  '<button class="mode-btn" data-act="cmode" data-v="committee"><span>👥</span><b>Portal del comité de empresa</b><small>Información para la plantilla, consultas recibidas y horas sindicales</small></button>'+
+  '<p class="muted" style="font-size:13px;margin-top:14px">Dentro del portal puedes cambiar de uno a otro cuando quieras desde el menú.</p><button class="ghost" data-act="logout" style="margin-top:6px">Cerrar sesión</button></div></div>';}
+C.cmode=function(b){var v=b.dataset.v==='committee'?'committee':'employee';S.session.mode=v;S.session.role=v;S.ui.cmode=v;S.ui.view='inicio';render();};
+C.cswitch=function(){if(!S.session||S.session.realRole!=='committee')return;var v=S.session.role==='committee'?'employee':'committee';S.session.mode=v;S.session.role=v;S.ui.cmode=v;S.ui.view='inicio';flash(v==='committee'?'Estás en el portal del comité de empresa.':'Estás en tu portal personal.','success');render();};
+C.setcomm=function(b){var e=byId(S.employees,+b.dataset.id);if(!e)return;var to=b.dataset.v;
+  if(!confirm(to==='committee'?'¿Marcar a '+e.name+' como miembro del comité de empresa?\n\nPodrá entrar en su portal personal y también en el del comité.':'¿Quitar a '+e.name+' del comité de empresa?\n\nSolo podrá entrar en su portal personal.'))return;
+  b.disabled=true;rpc('p_set_role',{p_target:e.id,p_role:to}).then(function(){e.role=to;return fullLoad();}).then(function(){flash(to==='committee'?e.name+' ya es miembro del comité.':e.name+' ya no es del comité.','success');stay();},function(x){flash('No se ha podido cambiar: '+(x.message||x),'error');stay();});};
 
 boot();
 })();
