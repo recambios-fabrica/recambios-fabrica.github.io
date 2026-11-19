@@ -102,6 +102,14 @@
 @media (max-width:760px){.org-tree{width:auto}.org-tree,.org-tree ul{display:block;padding-left:16px;padding-top:0}.org-tree>li{padding-left:0}.org-tree li{display:block;padding:6px 0 0 14px;border-left:2px solid #b8c4d4}.org-tree>li{border-left:0}
 .org-tree li::before,.org-tree li::after,.org-tree ul::before{display:none}.org-card{max-width:none;text-align:left}.org-btns{justify-content:flex-start}}
 @media print{.sidebar,.org-actions,.org-btns,.org-form,.org-tip,.demo-bar{display:none!important}.main{margin:0!important;padding:0!important}.org-wrap{box-shadow:none;border:0;overflow:visible}}
+.abs-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}.abs-nav input{width:auto;margin:0}.abs-nav button{margin:0}
+.abs-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}.abs-kpi{background:#fff;border:1px solid var(--line);border-left:5px solid #123f70;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column}
+.abs-kpi small{color:#4a5568;font-size:12px}.abs-kpi b{font-size:28px;line-height:1.15;color:#1f2937}.abs-kpi span{font-size:13px;color:#4a5568;font-weight:bold}
+.abs-kpi.k-baja{border-left-color:#dc2626}.abs-kpi.k-vac{border-left-color:#0284c7}.abs-kpi.k-otr{border-left-color:#d97706}.abs-kpi.k-pres{border-left-color:#16a34a}.abs-kpi.k-aus{border-left-color:#6d28d9;background:#f7f4ff}
+.abs-table td small{color:#6b7280;font-size:12px;margin-left:3px}.abs-table tr.abs-total td{border-top:2px solid #123f70;background:#f3f7fc}.abs-hi{color:#b42318}
+.abs-bar{display:flex;height:6px;border-radius:4px;background:#e5efe8;overflow:hidden;margin-top:4px;min-width:120px}.abs-bar i,.abs-legend i{display:block;height:100%}
+.b-baja{background:#dc2626}.b-vac{background:#0284c7}.b-otr{background:#d97706}.abs-legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12px;color:#4a5568;margin-top:10px}.abs-legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px}
+.abs-names{margin:6px 0}.abs-names summary{cursor:pointer;font-weight:bold;color:#123f70}.abs-names ul{margin:6px 0 0 18px;line-height:1.6;font-size:14px}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -494,6 +502,7 @@ function layout(content){
   if(r==='employee'||r==='committee')nav+='<a href="#" data-go="comite">Comité de empresa</a>';
   if(r==='hr')nav+=uhLink();
   if(r==='sup'||r==='dir'||r==='hr')nav+=satLink();
+  if(r==='dir'||r==='hr')nav+=absLink();
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
   nav+=modeSwitchLinks();
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
@@ -927,7 +936,7 @@ function vFormaciones(){
 }
 
 /* ---------- navegación y permisos ---------- */
-var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],organigrama:[vOrganigrama,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
+var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],plantilla:[vAusHoy,['hr','dir']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],organigrama:[vOrganigrama,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
 function render(scrollTop){
   var root=document.getElementById('app');
   if(MODE==='loading'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Portal del empleado</h1><p class="muted">Cargando…</p></div>';return;}
@@ -1620,7 +1629,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795086316';
+var LANG_V='1795087197';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -1709,6 +1718,44 @@ A.orgsave=function(f,form){if(role()!=='hr')return;orgMaterialize();var id=form.
   if(id==='new'){var mx=0;S.org.forEach(function(x){if((x.parent||0)===par&&(x.ord||0)>=mx)mx=(x.ord||0)+1;});S.org.push(Object.assign({id:nextId(),ord:mx},d));}
   else{var n=byId(S.org,+id);if(!n)return stay();Object.assign(n,d);}
   S.ui.orgSel=null;flash('Organigrama guardado.','success');stay();};
+
+/* ===== 19) Plantilla del día: cuántos están de baja, de vacaciones, con otro permiso y % (RR. HH. todo; director, sus secciones) ===== */
+function absLink(){return '<a href="#" data-go="plantilla">📊 Plantilla hoy</a>';}
+function absDate(){return S.ui.absDate||isoD(today());}
+function absLoad(d){S._abs={date:d,loading:true};
+  rpc('p_absence',{p_date:d}).then(function(rows){if(!S._abs||S._abs.date!==d)return;S._abs={date:d,rows:rows||[]};if(S.ui.view==='plantilla')remoteRender();},
+    function(e){if(!S._abs||S._abs.date!==d)return;S._abs={date:d,err:(e&&e.message)||'error'};if(S.ui.view==='plantilla')remoteRender();});}
+function pct(n,t){return t?Math.round(n*1000/t)/10:0;}
+function pctTxt(n,t){return t?String(pct(n,t)).replace('.',',')+' %':'—';}
+function absNames(d){if(role()!=='hr')return '';var g={baja:[],vac:[],otros:[]},seen={};
+  S.leaves.filter(function(l){return l.status==='Aprobada'&&l.start<=d&&(l.end||l.start)>=d;})
+    .sort(function(a,b){var o={'Baja médica':0,'Vacaciones':1};return (o[a.kind]!=null?o[a.kind]:2)-(o[b.kind]!=null?o[b.kind]:2);})
+    .forEach(function(l){if(seen[l.eid])return;seen[l.eid]=1;var e=byId(S.employees,l.eid);if(!e||e.active===0)return;var t=l.kind==='Baja médica'?'baja':l.kind==='Vacaciones'?'vac':'otros';g[t].push(e.name+(e.center?' · '+e.center:'')+(t==='otros'?' ('+l.kind+')':'')+' — hasta el '+fDMY(l.end||l.start));});
+  function box(k,lbl){return g[k].length?'<details class="abs-names"><summary>'+lbl+' ('+g[k].length+')</summary><ul>'+g[k].sort().map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></details>':'';}
+  var h=box('baja','🤒 De baja')+box('vac','🏖️ De vacaciones')+box('otros','📝 Otros permisos');
+  return h?'<section class="card"><h2>Quién falta</h2><p class="muted" style="font-size:13px">Solo lo ve RR. HH. Los directores ven únicamente los números.</p>'+h+'</section>':'';}
+function vAusHoy(){var d=absDate(),r=role();
+  if(!S._abs||S._abs.date!==d)absLoad(d);var A=S._abs||{};
+  var dt=parseD(d),wd=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][dt.getDay()];
+  var head='<div class="card-title-row"><div><h1>📊 Plantilla hoy</h1><p class="muted">Cuántas personas están de baja, de vacaciones o con otro permiso, y qué porcentaje de la plantilla supone.'+(r==='dir'?' Solo tus secciones: <b>'+esc(((S.session||{}).dir||[]).join(', ')||'ninguna')+'</b>.':'')+'</p></div></div>'+
+    '<div class="abs-nav"><button class="ghost" data-act="absday" data-d="-1">‹</button><input type="date" id="absdate" value="'+d+'"><button class="ghost" data-act="absday" data-d="1">›</button>'+(d!==isoD(today())?'<button data-act="absday" data-d="0">Hoy</button>':'')+'<span class="muted">'+wd+' '+esc(fDMY(d))+'</span></div>';
+  if(A.loading)return head+'<section class="card"><p class="muted">Cargando…</p></section>';
+  if(A.err)return head+'<section class="card"><div class="flash error">No se han podido cargar los datos: '+esc(A.err)+'</div><button data-act="absretry">Reintentar</button></section>';
+  var rows=A.rows||[];if(!rows.length)return head+'<section class="card"><p class="muted">'+(r==='dir'?'No hay personas en tus secciones o no tienes secciones asignadas. RR. HH. las asigna en tu ficha.':'No hay personal dado de alta.')+'</p></section>';
+  var T={total:0,baja:0,vac:0,otros:0};rows.forEach(function(x){['total','baja','vac','otros'].forEach(function(k){T[k]+=+x[k]||0;});});
+  var aus=T.baja+T.vac+T.otros,pres=T.total-aus;
+  function kpi(lbl,n,cls,sub){return '<div class="abs-kpi '+cls+'"><small>'+lbl+'</small><b>'+n+'</b><span>'+sub+'</span></div>';}
+  var kp='<div class="abs-kpis">'+kpi('Plantilla',T.total,'k-tot','personas')+kpi('🤒 De baja',T.baja,'k-baja',pctTxt(T.baja,T.total))+kpi('🏖️ De vacaciones',T.vac,'k-vac',pctTxt(T.vac,T.total))+kpi('📝 Otros permisos',T.otros,'k-otr',pctTxt(T.otros,T.total))+kpi('✅ Disponibles',pres,'k-pres',pctTxt(pres,T.total))+kpi('Total ausentes',aus,'k-aus',pctTxt(aus,T.total)+' de la plantilla')+'</div>';
+  function bar(x){var t=+x.total||0;if(!t)return '';return '<div class="abs-bar" title="Baja '+pctTxt(x.baja,t)+' · Vacaciones '+pctTxt(x.vac,t)+' · Otros '+pctTxt(x.otros,t)+'"><i class="b-baja" style="width:'+pct(x.baja,t)+'%"></i><i class="b-vac" style="width:'+pct(x.vac,t)+'%"></i><i class="b-otr" style="width:'+pct(x.otros,t)+'%"></i></div>';}
+  function tr(x,tot){var t=+x.total||0,a=(+x.baja||0)+(+x.vac||0)+(+x.otros||0);return '<tr'+(tot?' class="abs-total"':'')+'><td><b>'+esc(tot?'Total':x.section)+'</b>'+bar(x)+'</td><td>'+t+'</td><td>'+x.baja+' <small>'+pctTxt(x.baja,t)+'</small></td><td>'+x.vac+' <small>'+pctTxt(x.vac,t)+'</small></td><td>'+x.otros+' <small>'+pctTxt(x.otros,t)+'</small></td><td>'+(t-a)+' <small>'+pctTxt(t-a,t)+'</small></td><td><b class="'+(pct(a,t)>=20?'abs-hi':'')+'">'+pctTxt(a,t)+'</b></td></tr>';}
+  var tbl='<section class="card"><h2>Por sección</h2><div style="overflow-x:auto"><table class="vac-table abs-table"><thead><tr><th>Sección</th><th>Plantilla</th><th>🤒 Baja</th><th>🏖️ Vacaciones</th><th>📝 Otros permisos</th><th>✅ Disponibles</th><th>% ausencia</th></tr></thead><tbody>'+
+    rows.map(function(x){return tr(x,false);}).join('')+(rows.length>1?tr(Object.assign({section:'Total'},T),true):'')+'</tbody></table></div>'+
+    '<div class="abs-legend"><span><i class="b-baja"></i>Baja</span><span><i class="b-vac"></i>Vacaciones</span><span><i class="b-otr"></i>Otros permisos (asuntos propios, permiso retribuido, cita médica…)</span></div>'+
+    '<p class="muted" style="font-size:12px;margin-top:8px">Cuenta las ausencias <b>aprobadas</b> que incluyen ese día (las pendientes no). Si una persona tiene dos cosas el mismo día, cuenta una sola vez: primero baja, después vacaciones. Plantilla = cuentas activas del portal. Los porcentajes son sobre la plantilla de cada sección.</p></section>';
+  return head+kp+tbl+absNames(d);}
+C.absday=function(b){var n=+b.dataset.d;if(!n){S.ui.absDate=isoD(today());}else{var x=parseD(absDate());x.setDate(x.getDate()+n);S.ui.absDate=isoD(x);}stay();};
+C.absretry=function(){S._abs=null;stay();};
+document.addEventListener('change',function(ev){if(ev.target&&ev.target.id==='absdate'&&/^\d{4}-\d{2}-\d{2}$/.test(ev.target.value)){S.ui.absDate=ev.target.value;stay();}});
 
 boot();
 })();
