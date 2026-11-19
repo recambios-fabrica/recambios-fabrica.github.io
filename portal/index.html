@@ -1641,7 +1641,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795089408';
+var LANG_V='1795089771';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -1775,7 +1775,7 @@ var SCOPE_SUG=[
  {sec:'Cartón',sup:['Pedro Luis Garcia Carrasco'],dir:['Samuel Parejo']},
  {sec:'Servilletas 1',sup:['Marina Bacalla','Naoual El Yahiaoui'],dir:['Marc Gudayol']},
  {sec:'Servilletas 2',sup:['Ramon Ladron de Guevara'],dir:['Marc Gudayol']},
- {sec:'Manteles',sup:['Jugo Conejo']},
+ {sec:'Manteles',sup:['Jugo Conejo'],dir:['Marc Gudayol']},
  {sec:'Bolsas',sup:['Luis Mariano Sanchez Arenas','Federico Lavin'],dir:['Enric Salleras']},
  {sec:'Dispensing',sup:['Ana Maria Alba Martin']},
  {sec:'Personalizados',sup:['Jordi Viñas']},
@@ -1801,7 +1801,7 @@ function vAccesos(){if(role()!=='hr')return '';var secs=scopeSecs(),act=S.employ
   var dirHint=SCOPE_DIRS.map(function(n){var m=nameMatches(n);return '<b>'+esc(n)+'</b>'+(m.length===1?'':' <small class="muted">('+(m.length?'varias cuentas':'sin cuenta en el portal')+')</small>');}).join(', ');
   return '<h1>🧭 Directores y encargados por sección</h1><p class="muted">Aquí RR. HH. decide a qué secciones tiene acceso cada director y cada encargado. Con eso:</p>'+
     '<ul class="acc-help"><li><b>Encargado</b> de una sección: da el visto bueno a los sábados de esa sección.</li><li><b>Director</b> de una sección: autoriza los sábados y ve «Plantilla hoy» (bajas, vacaciones, %) de esa sección. No ve las de otras secciones.</li><li>Al volver a entrar, a esa persona le saldrá la opción de portal de encargado o de dirección, además de su portal personal.</li></ul>'+
-    '<div class="flash org-tip">💡 Las sugerencias salen de la lista de teléfonos internos. Directores: <b>Samuel Parejo</b> → Cartón · <b>Marc Gudayol</b> → Servilletas · <b>Enric Salleras</b> → Bolsas. Pulsa cada 💡 para confirmarlo; lo demás, con «＋ Añadir…». ('+dirHint+')</div>'+
+    '<div class="flash org-tip">💡 Las sugerencias salen de la lista de teléfonos internos. Directores: <b>Samuel Parejo</b> → Cartón · <b>Marc Gudayol</b> → Servilletas y Manteles · <b>Enric Salleras</b> → Bolsas. Pulsa cada 💡 para confirmarlo; lo demás, con «＋ Añadir…». ('+dirHint+')</div>'+
     '<section class="card"><div style="overflow-x:auto"><table class="vac-table acc-table"><thead><tr><th>Sección</th><th>🧭 Encargado(s)</th><th>🎯 Director(es)</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<form data-a="accsec" class="acc-new"><input name="sec" maxlength="60" placeholder="Nombre de otra sección" required><button>＋ Añadir sección</button></form>'+
     '<p class="muted" style="font-size:12px;margin-top:10px">El nombre de la sección tiene que ser <b>igual</b> que el que pone en la ficha de los trabajadores (campo «Centro / sección»), si no, el director no verá a esas personas. Las secciones marcadas con ⚠ no las tiene nadie en su ficha.</p></section>';}
