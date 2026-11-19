@@ -1242,6 +1242,12 @@ function printCreds(list){
   w.document.close();setTimeout(function(){try{w.focus();w.print();}catch(e){}},400);
 }
 C.printall=function(){if(IMPORT_CRED)printCreds(IMPORT_CRED);};
+/* centros de coste del programa de nóminas → nombre de la sección en el portal */
+var CC_MAP={'11211':'Servilletas 1','11212':'Servilletas 2','11221':'Manteles','11231':'Cartón','11261':'Bolsas','11302':'Logística interna','11303':'Personalizados','15001':'Dispensing','15002':'Laboratorio','20100':'Administración fábrica','20510':'Mantenimiento'};
+function ccName(v){v=String(v==null?'':v).trim().replace(/\.0+$/,'');return CC_MAP[v]||(/^\d{4,6}$/.test(v)?'Centro '+v:v);}
+function niceName(n){n=String(n||'').replace(/\s+/g,' ').trim();var suf='',p=/\s*(\([^)]*\))\s*/.exec(n);if(p){suf=' '+p[1].toUpperCase();n=n.replace(p[0],' ').trim();}
+  var m=/^([^,]+),\s*(.+)$/.exec(n);if(m)n=m[2]+' '+m[1];
+  return n.toLowerCase().replace(/(^|[\s\-'.])([a-zà-ÿñç])/g,function(a,b,c){return b+c.toUpperCase();}).replace(/(\s)(De|Del|La|Las|Los|Y|I)(?=\s)/g,function(w,a,b){return a+b.toLowerCase();})+suf;}
 A.importxl=function(f,form){
   var file=form.querySelector('[name=xl]').files[0];if(!file){flash('Elige el Excel de personal.','error');return stay();}
   if(typeof XLSX==='undefined'){flash('No se ha podido cargar el lector de Excel. Recarga la página.','error');return stay();}
@@ -1249,13 +1255,13 @@ A.importxl=function(f,form){
     var rows;try{var wb=XLSX.read(new Uint8Array(rd.result),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''});}catch(e){flash('No se puede leer el archivo. ¿Es un Excel?','error');return stay();}
     var hi=-1,cNo=-1,cName=-1,cSec=-1,cCat=-1,cCom=-1;
     for(var i=0;i<Math.min(rows.length,15)&&hi<0;i++){var r=rows[i].map(function(x){return String(x).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');});
-      r.forEach(function(h,j){if(cNo<0&&/^(ID|N[O°º]?\.?|NUM\.?|NUMERO|N[O°º]?\.? ?(DE )?EMPLEADO|NUMERO (DE )?EMPLEADO|COD(IGO)?|COD\.? EMPLEADO)$/.test(h))cNo=j;else if(cName<0&&/NOMBRE/.test(h))cName=j;else if(cSec<0&&/GRUPO|SECCION|DEPARTAMENTO|SECCIO/.test(h))cSec=j;else if(cCat<0&&/CATEGOR/.test(h))cCat=j;else if(cCom<0&&/COMITE/.test(h))cCom=j;});
+      r.forEach(function(h,j){if(cNo<0&&/^(ID|N[O°º]?\.?|NUM\.?|NUMERO|N[O°º]?\.? ?(DE )?EMPLEADO|NUMERO (DE )?EMPLEADO|COD(IGO)?|COD\.? EMPLEADO|EMPLEADO)$/.test(h))cNo=j;else if(cName<0&&/NOMBRE/.test(h))cName=j;else if(cSec<0&&/GRUPO|SECCION|DEPARTAMENTO|SECCIO|CENTRO/.test(h))cSec=j;else if(cCat<0&&/CATEGOR/.test(h))cCat=j;else if(cCom<0&&/COMITE/.test(h))cCom=j;});
       if(cNo>=0&&cName>=0)hi=i;else{cNo=cName=cSec=cCat=cCom=-1;}}
     if(hi<0){flash('No encuentro las columnas del número de empleado (ID) y del nombre (NOMBRE Y APELLIDOS) en la primera hoja.','error');return stay();}
     var have={};S.employees.forEach(function(e){have[String(e.no).trim()]=1;});
     var todo=[],seen={};
     rows.slice(hi+1).forEach(function(r){var no=String(r[cNo]||'').trim().replace(/\.0+$/,''),name=String(r[cName]||'').trim().replace(/\s+/g,' ');
-      if(!no||!name||have[no]||seen[no])return;seen[no]=1;todo.push({no:no,name:name,center:cSec>=0?String(r[cSec]||'').trim():'',category:cCat>=0?String(r[cCat]||'').trim():'',com:cCom>=0&&/^(SI|SÍ|S|X|1|YES|COMITE|COMITÉ)$/i.test(String(r[cCom]||'').trim())});});
+      if(!no||!name||have[no]||seen[no])return;seen[no]=1;todo.push({no:no,name:niceName(name),center:cSec>=0?ccName(r[cSec]):'',category:cCat>=0?String(r[cCat]||'').trim():'',com:cCom>=0&&/^(SI|SÍ|S|X|1|YES|COMITE|COMITÉ)$/i.test(String(r[cCom]||'').trim())});});
     if(!todo.length){flash('No hay personas nuevas en el Excel: todas tienen ya cuenta.','success');return stay();}
     if(!confirm('Se van a crear '+todo.length+' cuenta'+(todo.length===1?'':'s')+' nueva'+(todo.length===1?'':'s')+' con PIN automático.\n\nEjemplo: '+todo[0].no+' · '+todo[0].name+'\n\n¿Continuar?'))return stay();
     var done=[],fail=[],k=0;
@@ -1635,7 +1641,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795088150';
+var LANG_V='1795089408';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -1766,14 +1772,13 @@ document.addEventListener('change',function(ev){if(ev.target&&ev.target.id==='ab
 /* ===== 20) RR. HH.: accesos de directores y encargados por sección (tabla), con sugerencias de la lista de teléfonos internos ===== */
 /* Sacado de «VELL-TELEFONOS_INTERNOS» (hoja actual, 30/07/2026). Solo son sugerencias: RR. HH. confirma cada una. */
 var SCOPE_SUG=[
- {sec:'Cartón',sup:['Pedro Garcia'],dir:['Samuel Parejo']},
- {sec:'Servilletas 1',sup:['Marina','Naoual'],dir:['Marc Gudayol']},
- {sec:'Servilletas 2',sup:['José Ramón'],dir:['Marc Gudayol']},
- {sec:'Manteles',sup:['Julian Jugo']},
- {sec:'Bolsas',sup:['Luis Mariano','Fede Lavin'],dir:['Enric Salleras']},
- {sec:'Dispensing',sup:['Ana Alba']},
+ {sec:'Cartón',sup:['Pedro Luis Garcia Carrasco'],dir:['Samuel Parejo']},
+ {sec:'Servilletas 1',sup:['Marina Bacalla','Naoual El Yahiaoui'],dir:['Marc Gudayol']},
+ {sec:'Servilletas 2',sup:['Ramon Ladron de Guevara'],dir:['Marc Gudayol']},
+ {sec:'Manteles',sup:['Jugo Conejo']},
+ {sec:'Bolsas',sup:['Luis Mariano Sanchez Arenas','Federico Lavin'],dir:['Enric Salleras']},
+ {sec:'Dispensing',sup:['Ana Maria Alba Martin']},
  {sec:'Personalizados',sup:['Jordi Viñas']},
- {sec:'Onduladora',sup:[]},
  {sec:'Mantenimiento',dir:['Joan Peitavi'],sup:[]}
 ];
 var SCOPE_DIRS=['Samuel Parejo','Enric Salleras','Marc Gudayol'];
