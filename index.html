@@ -124,7 +124,7 @@ legend{font:600 11px "IBM Plex Sans",sans-serif;letter-spacing:.06em;text-transf
 .dwrap input{flex:1}
 .dwrap button{flex:none}
 .hint{font-size:11px;color:var(--ink3)}
-.df{border-top:1px solid var(--line);padding:12px 22px;display:flex;gap:8px;align-items:center}
+.df{border-top:1px solid var(--line);padding:12px 22px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .df .sp{flex:1}
 .meta{font-size:11.5px;color:var(--ink3)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;transition:all .2s;z-index:60;pointer-events:none}
@@ -242,6 +242,8 @@ nav button.navalert .n{background:#ffcf33;color:#3a2a00}
   <div class="df">
     <button class="btn danger" id="dDel" type="button">Eliminar</button>
     <div class="confirm" id="dConfirm">¿Seguro? <button class="btn sm danger" id="dDelYes" type="button">Sí, eliminar</button><button class="btn sm" id="dDelNo" type="button">No</button></div>
+    <button class="btn" id="dMove" type="button" title="Pasar este registro a otra pestaña">⇄ Mover a…</button>
+    <div class="confirm" id="dMoveBox"></div>
     <span class="meta" id="dMeta"></span>
     <span class="sp"></span>
     <button class="btn" id="dCancel" type="button">Cancelar</button>
@@ -505,6 +507,7 @@ function openDrawer(id){
   $('#dFix').innerHTML=codes.length?`<div class="fix">${codes.map(c=>{const o=otInfo(c);return `<div class="fixrow"><div><a class="otlink" href="${fxUrl(o)}" target="_blank" rel="noopener" title="${o&&o.fxid?'Abrir esta OT en Fixner':'Abrir el listado de Fixner'}"><b>${esc(c)}</b> ↗</a> <span class="pill ${otCls(o)}">${esc(o?o.estado:'Sin datos')}</span>${o&&o.prioridad?` <span class="hint">${esc(o.prioridad)}</span>`:''}<div class="fixd">${o?esc(o.descripcion):'Esta OT no se ha encontrado en la última lectura de Fixner.'}</div>${o?`<div class="hint">${esc([o.activo,o.tipo,o.inicio&&'Inicio '+o.inicio,o.fin&&'Finalizada '+o.fin].filter(Boolean).join(' · '))}</div>`:''}</div></div>`;}).join('')}<div class="fixfoot"><span class="hint">${S.otsSync?'Datos de Fixner leídos el '+new Date(S.otsSync).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}):''}</span><a href="${fxUrl(otInfo(codes[0]))}" target="_blank" rel="noopener">${otInfo(codes[0])&&otInfo(codes[0]).fxid?'Abrir OT en Fixner':'Abrir Fixner'} ↗</a></div></div>`:'';
   renderPresu(); renderFotos();
   $('#dDel').style.display=id&&S.canWrite?'':'none';
+  $('#dMove').style.display=id&&S.canWrite&&MOVE_TABS.includes(k)?'':'none'; $('#dMoveBox').classList.remove('show');
   $('#dConfirm').classList.remove('show');
   $('#dSave').disabled=!S.canWrite;
   $('#dForm').querySelectorAll('input,textarea,select').forEach(i=>i.disabled=!S.canWrite);
@@ -512,7 +515,7 @@ function openDrawer(id){
   $('#drawer').classList.add('show');$('#scrim').classList.add('show');$('#drawer').setAttribute('aria-hidden','false');
   setTimeout(()=>{const f=$('#dForm').querySelector('input,textarea');if(f&&!id)f.focus();},230);
 }
-const FLAB={fecha:'Fecha',descripcion:'Descripción',maquina:'Máquina',solicitante:'Quién pide',explicacion:'Explicación',numPedido:'Nº pedido',fechaPedido:'Fecha pedido',proveedor:'Proveedor',fechaPrevista:'Prevista',fechaRecepcion:'Recepción',estado:'Estado',comentarios:'Comentarios',presupuestos:'Presupuestos',urgente:'Urgente',ot:'OT Fixner',fechaLlegada:'Llegada',fechaSalida:'Salida',finalizado:'Finalizado',fechaOK:'Fecha OK',autorizadoPor:'Autorizado por',creado:'Creado'};
+const FLAB={movido:'Movido desde otra pestaña',fecha:'Fecha',descripcion:'Descripción',maquina:'Máquina',solicitante:'Quién pide',explicacion:'Explicación',numPedido:'Nº pedido',fechaPedido:'Fecha pedido',proveedor:'Proveedor',fechaPrevista:'Prevista',fechaRecepcion:'Recepción',estado:'Estado',comentarios:'Comentarios',presupuestos:'Presupuestos',urgente:'Urgente',ot:'OT Fixner',fechaLlegada:'Llegada',fechaSalida:'Salida',finalizado:'Finalizado',fechaOK:'Fecha OK',autorizadoPor:'Autorizado por',creado:'Creado'};
 async function renderHist(r){
   const box=$('#dHist'); if(!box) return; const h=Array.isArray(r.historial)?r.historial.slice().reverse():[];
   if(!h.length){box.innerHTML='';return;}
@@ -574,6 +577,31 @@ async function saveQuick(patch,label){
   try{ await write(k,id,body); toast(label+' ✓'); closeDrawer(); }catch(e){ writeErr(e); }
 }
 $('#dDel').onclick=()=>$('#dConfirm').classList.add('show');
+/* ---------- mover un registro entre pestañas (p. ej. un «pedido» que en realidad es una reparación o un rodillo) ---------- */
+const MOVE_TABS=['recambios','reparaciones','rodillos'];
+$('#dMove').onclick=()=>{const {k}=S.editing,box=$('#dMoveBox');
+  box.innerHTML='Pasar a: '+MOVE_TABS.filter(t=>t!==k).map(t=>`<button class="btn sm primary" type="button" data-mv="${t}">${SHEETS[t].label}</button>`).join('')+'<button class="btn sm" type="button" data-mv="">Cancelar</button>';
+  box.classList.add('show');
+  box.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{ if(!b.dataset.mv){box.classList.remove('show');return;} moveTo(b.dataset.mv); });};
+async function moveTo(dest){
+  const {k,id}=S.editing; if(!id||dest===k||!S.db) return;
+  const prev=S.data[k].find(x=>x.id===id); if(!prev) return;
+  const {id:_i,...rest}=prev; const d={...rest,...readForm()};
+  if(dest==='rodillos'){ d.tipo=d.tipo||d.descripcion||''; d.trabajo=d.trabajo||[d.descripcion,d.explicacion].filter(Boolean).join(' — ');
+    if(d.cantidad===undefined||d.cantidad===null||d.cantidad==='') d.cantidad=1; d.fechaLlegada=d.fechaLlegada||d.fechaRecepcion||''; d.fechaSalida=d.fechaSalida||''; }
+  if(dest==='reparaciones'){ d.descripcion=d.descripcion||d.tipo||''; d.explicacion=d.explicacion||d.trabajo||''; d.reparacion=d.reparacion||d.ot||'X'; d.fechaRecepcion=d.fechaRecepcion||d.fechaLlegada||''; if(d.fecha===undefined) d.fecha=today(); }
+  if(dest==='recambios'){ d.descripcion=d.descripcion||d.tipo||''; d.explicacion=d.explicacion||d.trabajo||''; d.compra=d.compra||'X'; d.fechaRecepcion=d.fechaRecepcion||d.fechaLlegada||''; if(d.fecha===undefined) d.fecha=today(); }
+  const txt=SHEETS[k].label+' → '+SHEETS[dest].label;
+  d.historial=(Array.isArray(prev.historial)?prev.historial:[]).concat([{t:Date.now(),u:S.uid||'',c:['movido'],a:{movido:SHEETS[k].label}}]).slice(-40);
+  d.movidoDe=k; d.movidoEn=Date.now(); d.editadoEn=Date.now(); if(S.uid) d.editadoPor=S.uid; if(!d.creadoEn) d.creadoEn=Date.now(); if(!d.orden) d.orden=d.creadoEn;
+  try{
+    await S.db.collection(dest).doc(id).set(d);
+    await S.db.collection('movidos').doc(k+'__'+id).set({col:k,docId:id,destino:dest,movidoEn:Date.now(),por:S.uid||''});
+    try{ await S.db.collection('movidos').doc(dest+'__'+id).delete(); }catch(e){}
+    await S.db.collection(k).doc(id).delete();
+    toast('Movido: '+txt); closeDrawer();
+  }catch(e){ writeErr(e); }
+}
 $('#dDelNo').onclick=()=>$('#dConfirm').classList.remove('show');
 $('#dDelYes').onclick=async()=>{const {k,id}=S.editing;try{const prev=S.data[k].find(x=>x.id===id); if(prev){const {id:_i,...rest}=prev; await S.db.collection('papelera').doc(k+'__'+id).set({col:k,docId:id,datos:rest,borradoEn:Date.now(),borradoPor:S.uid||''});} await S.db.collection(k).doc(id).delete();toast('Eliminado');closeDrawer();}catch(e){writeErr(e);}};
 
@@ -805,7 +833,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&_vP){e.stopImmediat
 async function backupAll(){
   const msg=t=>{const m=$('#bkMsg'); if(m) m.textContent=t;}; const btn=$('#bkBtn'); btn.disabled=true;
   try{
-    const cols=['recambios','reparaciones','rodillos','asistencias','fixner_ots','fixner_pa','papelera','precios','alertas_precio','presus_pendientes'];
+    const cols=['recambios','reparaciones','rodillos','asistencias','fixner_ots','fixner_pa','papelera','movidos','precios','alertas_precio','presus_pendientes'];
     const out={formato:'recambios-gdp-1',exportado:new Date().toISOString(),collections:{},files:[]};
     for(const c of cols){ msg('Leyendo '+c+'…'); const sn=await S.db.collection(c).get(); out.collections[c]=sn.docs.filter(d=>d.exists).map(d=>({id:d.id,data:d.data()})); }
     const ids=new Set();
@@ -1020,6 +1048,6 @@ function renderKpisOnly(){
 }
 init();
 </script>
-<script src="sync-recv.js?v=7"></script>
+<script src="sync-recv.js?v=8"></script>
 </body>
 </html>

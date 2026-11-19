@@ -63,6 +63,8 @@
       // pero una fila basura del final del Excel (1.048.560) hacía que se saltaran todas las filas nuevas.
       let borradas = null;
       try { borradas = new Set((await db.collection('papelera').get()).docs.map(d => d.id)); } catch (e) { borradas = null; }
+      // Filas que en la web se movieron a otra pestaña (p. ej. de Recambios a Reparaciones): tampoco se recrean.
+      let movidos = new Set(); try { movidos = new Set((await db.collection('movidos').get()).docs.map(d => d.id)); } catch (e) {}
       let maxOrden = 0; for (const [id, d] of docs) if (/^xl-/.test(id) && typeof d.orden === 'number' && d.orden < 1000000 && d.orden > maxOrden) maxOrden = d.orden;
       for (const c of list) {
         if (c.r - 1 < IMP[k].start) continue;
@@ -72,6 +74,7 @@
         const id = `xl-${k}-${String(c.r).padStart(5, '0')}`;
         const cur = docs.get(id);
         if (!cur) {
+          if (movidos.has(k + '__' + id)) continue; // movida a otra pestaña desde la web
           if (borradas ? borradas.has(k + '__' + id) : c.r <= maxOrden) continue; // fila que se borró en la web: no se recrea
           // Si el pedido ya existe en la web con la misma OT (p. ej. creado desde Fixner), no se duplica.
           const otX = String(body.ot || body.reparacion || '').trim();
