@@ -85,6 +85,23 @@
 .sat-send{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.sat-send input{margin:0;min-width:220px}.scope-box{margin:8px 0;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fbfcfe}.scope-box summary{cursor:pointer;font-weight:bold;color:#123f70}.scope-list{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0}.scope-chk{display:inline-flex;gap:4px;align-items:center;font-size:14px;margin:0}.scope-chk input{width:auto;margin:0}
 .lang-pick{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin:0 10px}.lang-pick select{width:auto;margin:0;padding:3px 6px;font-size:13px;border-radius:8px}.lang-pick.floating{position:fixed;top:10px;right:12px;z-index:60;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 8px;box-shadow:0 2px 8px #0002}
 [dir=rtl] .lang-pick.floating{right:auto;left:12px}
+.org-top{align-items:flex-start;gap:10px;flex-wrap:wrap}.org-actions{display:flex;gap:6px;flex-wrap:wrap}.org-tip{background:#eef4fb;color:#123f70;border:1px solid #c9dbef}
+.org-legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;margin:4px 0 10px;color:#4a5568}.org-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.org-wrap{overflow-x:auto;padding:22px 10px}.org-tree,.org-tree ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}
+.org-tree ul{padding-top:22px}.org-tree li{display:flex;flex-direction:column;align-items:center;position:relative;padding:22px 6px 0}
+.org-tree>li{padding-top:0}.org-tree li::before,.org-tree li::after{content:'';position:absolute;top:0;width:50%;height:22px;border-top:2px solid #b8c4d4}
+.org-tree li::before{right:50%}.org-tree li::after{left:50%;border-left:2px solid #b8c4d4}.org-tree>li::before,.org-tree>li::after{display:none}
+.org-tree li:only-child::before,.org-tree li:only-child::after{border-top:0}.org-tree li:only-child::before{display:none}
+.org-tree li:first-child::before,.org-tree li:last-child::after{border-top:0}.org-tree li:last-child::before{border-right:2px solid #b8c4d4;border-top:2px solid #b8c4d4;border-radius:0 8px 0 0}.org-tree li:first-child::after{border-radius:8px 0 0 0}.org-tree li:only-child::after{border-radius:0}
+.org-tree ul::before{content:'';position:absolute;top:0;left:50%;height:22px;border-left:2px solid #b8c4d4}
+.org-card{background:#fff;border:1px solid var(--line);border-top:5px solid #123f70;border-radius:10px;padding:8px 10px;min-width:130px;max-width:190px;text-align:center;box-shadow:0 1px 4px #0001;font-size:13px}
+.org-card b{display:block;color:#1f2937;line-height:1.25}.org-card small{display:block;color:#6b7280;font-size:11px;margin-top:3px}.org-card.sel{outline:3px solid #f59e0b}
+.org-names{display:flex;flex-direction:column;gap:1px;margin-top:4px;font-size:12px;color:#123f70}.org-names.empty{color:#9ca3af;font-style:italic;font-size:11px}
+.org-btns{display:flex;gap:2px;justify-content:center;margin-top:6px}.org-btns button{padding:2px 6px;font-size:12px;min-width:0;margin:0}
+.org-side{border-left:5px solid #64748b}
+@media (max-width:760px){.org-tree,.org-tree ul{display:block;padding-left:16px;padding-top:0}.org-tree>li{padding-left:0}.org-tree li{display:block;padding:6px 0 0 14px;border-left:2px solid #b8c4d4}.org-tree>li{border-left:0}
+.org-tree li::before,.org-tree li::after,.org-tree ul::before{display:none}.org-card{max-width:none;text-align:left}.org-btns{justify-content:flex-start}}
+@media print{.sidebar,.org-actions,.org-btns,.org-form,.org-tip,.demo-bar{display:none!important}.main{margin:0!important;padding:0!important}.org-wrap{box-shadow:none;border:0;overflow:visible}}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -334,7 +351,7 @@ function seed(){
    Cada persona entra con su nº de empleado y PIN. El servidor solo le envía lo que le corresponde
    (sus datos + lo público); RRHH ve la gestión; el comité ve las consultas. Las reglas están en el servidor,
    no en esta página: aunque alguien manipule el navegador, no recibe datos ajenos. */
-var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf','treads','satreq'];
+var SHARED=['employees','shifts','events','payroll','payslips','leaves','tickets','tmsgs','queries','posts','likes','comments','docs','trainings','medical','worklogs','signatures','vehicles','campaigns','consents','uhours','uhconf','treads','satreq','org'];
 var LOCAL_KEY='gdp_portal_ui_v1',AUTH_LS='gdp_portal_auth_v1';
 var CFG=window.PORTAL_CONFIG||{},URL0=String(CFG.url||'').replace(/\/$/,''),KEY=CFG.anonKey||'';
 var MODE='loading',personal=false,readOnly=false,resetArmed=false,ASSETS=null;
@@ -480,7 +497,7 @@ function layout(content){
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
   nav+=modeSwitchLinks();
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
-  nav+='<a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
+  nav+='<a href="#" data-go="organigrama">Organigrama</a><a href="#" data-go="empresa">Información de empresa</a><a href="#" data-go="misdatos">Mis datos</a>';
   if(r==='hr')nav+='<a href="#" data-go="empleados">Empleados</a><a href="#" data-go="formaciones">Formaciones y revisiones</a><a href="#" data-go="vehiculos">Vehículos y accesos</a>';
   var fl='';S.flash.forEach(function(f){fl+='<div class="flash '+f[0]+'">'+esc(f[1])+'</div>';});S.flash=[];
   return demoBar()+'<div class="layout"><aside class="sidebar"><div class="brand"><span class="crest">G</span><b>GARCIA DE POU</b></div><nav>'+nav+'</nav><button class="logout" data-act="logout">Cerrar sesión</button></aside><main class="main"><header class="topbar"><span>Portal del empleado</span><span>'+esc(u.name)+' · '+{employee:'EMPLEADO',hr:'RRHH',committee:'COMITÉ',sup:'ENCARGADO',dir:'DIRECCIÓN'}[r]+'</span></header>'+fl+content+'</main></div><footer class="mobile-nav"><a href="#" data-go="inicio">Inicio</a><a href="#" data-go="calendario">Calendario</a><a href="#" data-go="misdatos">Mis datos</a><details class="mobile-more"><summary>☰ Menú</summary><div class="mobile-more-panel">'+nav+'<button class="mobile-logout" data-act="logout">Cerrar sesión</button></div></details></footer>';
@@ -910,7 +927,7 @@ function vFormaciones(){
 }
 
 /* ---------- navegación y permisos ---------- */
-var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
+var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],organigrama:[vOrganigrama,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
 function render(scrollTop){
   var root=document.getElementById('app');
   if(MODE==='loading'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Portal del empleado</h1><p class="muted">Cargando…</p></div>';return;}
@@ -1603,8 +1620,93 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1794486537';
+var LANG_V='1795086109';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
+
+/* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
+var ORG_AREAS={dir:['Dirección','#123f70'],prod:['Producción','#1d7a43'],tec:['Técnico y soporte','#b45309'],adm:['Administración y gestión','#6d28d9'],rep:['Representación','#64748b']};
+/* Estructura tipo: solo cargos. Los nombres los pone RR. HH. */
+var ORG_TPL=[
+ ['g','', 'Dirección General / Gerencia','dir',''],
+ ['adm','g','Dirección de Administración y Finanzas','adm',''],
+ ['cont','adm','Contabilidad y Tesorería','adm',''],
+ ['admo','adm','Administración','adm',''],
+ ['rh','g','Recursos Humanos','adm','Personal, nóminas, contratación y formación'],
+ ['prl','rh','Prevención de Riesgos Laborales','adm',''],
+ ['com','g','Dirección Comercial','adm',''],
+ ['vent','com','Ventas y Atención al cliente','adm',''],
+ ['compr','g','Compras','adm',''],
+ ['dcart','g','Dirección de Cartón','dir','Autoriza los sábados de las secciones de cartón'],
+ ['ecart','dcart','Encargados de sección · Cartón','prod','Visto bueno de los sábados de su sección'],
+ ['ocart','ecart','Operarios · Cartón','prod',''],
+ ['dserv','g','Dirección de Servilletas, Bolsas y Manteles','dir','Autoriza los sábados de sus secciones'],
+ ['eserv','dserv','Encargado · Servilletas','prod',''],
+ ['oserv','eserv','Operarios · Servilletas','prod',''],
+ ['ebols','dserv','Encargado · Bolsas','prod',''],
+ ['obols','ebols','Operarios · Bolsas','prod',''],
+ ['emant','dserv','Encargado · Manteles','prod',''],
+ ['omant','emant','Operarios · Manteles','prod',''],
+ ['mto','g','Mantenimiento','tec','Recambios y reparaciones'],
+ ['mtot','mto','Técnicos de mantenimiento','tec',''],
+ ['cal','g','Calidad','tec',''],
+ ['log','g','Logística y Almacén','tec',''],
+ ['exp','log','Expediciones','tec',''],
+ ['alm','log','Almacén y carretilleros','tec',''],
+ ['it','g','Informática y Sistemas','tec','']
+];
+function orgTplNodes(){var ids={},b=Date.now()%1000000*1000;ORG_TPL.forEach(function(t,i){ids[t[0]]=b+i+1;});
+  return ORG_TPL.map(function(t,i){return {id:ids[t[0]],parent:t[1]?ids[t[1]]:0,title:t[2],area:t[3],note:t[4],name:'',ord:i};});}
+function orgNodes(){return (S.org&&S.org.length)?S.org:(S._orgTpl||(S._orgTpl=orgTplNodes()));}
+function orgIsTpl(){return !(S.org&&S.org.length);}
+function orgMaterialize(){if(orgIsTpl()){S.org=orgNodes().map(function(n){return Object.assign({},n);});S._orgTpl=null;}}
+function orgKids(p){return orgNodes().filter(function(n){return (n.parent||0)===p;}).sort(function(a,b){return (a.ord||0)-(b.ord||0);});}
+function orgRoots(){var ids={};orgNodes().forEach(function(n){ids[n.id]=1;});return orgNodes().filter(function(n){return !n.parent||!ids[n.parent];}).sort(function(a,b){return (a.ord||0)-(b.ord||0);});}
+function orgCard(n){var a=ORG_AREAS[n.area]||ORG_AREAS.dir,ed=S.ui.orgEditMode&&role()==='hr';
+  var names=String(n.name||'').split(/\n|;/).map(function(s){return s.trim();}).filter(Boolean);
+  return '<div class="org-card'+(S.ui.orgSel===n.id?' sel':'')+'" style="border-top-color:'+a[1]+'"><b>'+esc(n.title||'(sin cargo)')+'</b>'+
+    (names.length?'<div class="org-names">'+names.map(function(x){return '<span>👤 '+esc(x)+'</span>';}).join('')+'</div>':'<div class="org-names empty">'+(ed?'Sin nombre asignado':'')+'</div>')+
+    (n.note?'<small>'+esc(n.note)+'</small>':'')+
+    (ed?'<div class="org-btns"><button class="ghost" data-act="orged" data-id="'+n.id+'" title="Editar">✏️</button><button class="ghost" data-act="orgadd" data-id="'+n.id+'" title="Añadir un puesto que dependa de este">＋</button><button class="ghost" data-act="orgmv" data-id="'+n.id+'" data-d="-1" title="Mover a la izquierda">◀</button><button class="ghost" data-act="orgmv" data-id="'+n.id+'" data-d="1" title="Mover a la derecha">▶</button><button class="ghost" data-act="orgdel" data-id="'+n.id+'" title="Quitar">🗑</button></div>':'')+'</div>';}
+function orgBranch(n,depth){if(depth>12)return '';var k=orgKids(n.id);
+  return '<li>'+orgCard(n)+(k.length?'<ul>'+k.map(function(c){return orgBranch(c,depth+1);}).join('')+'</ul>':'')+'</li>';}
+function orgForm(){var id=S.ui.orgSel;if(!S.ui.orgEditMode||role()!=='hr'||id==null)return '';
+  var isNew=id==='new',n=isNew?{id:0,parent:S.ui.orgNewParent||0,title:'',name:'',area:'',note:''}:byId(orgNodes(),id);if(!n)return '';
+  var par=(byId(orgNodes(),n.parent)||{});if(isNew&&!n.area)n.area=par.area||'prod';
+  function desc(x){var out=[x.id];orgKids(x.id).forEach(function(c){out=out.concat(desc(c));});return out;}
+  var bad=isNew?[]:desc(n);
+  var opts='<option value="0"'+(!n.parent?' selected':'')+'>— Nadie (arriba del todo) —</option>'+orgNodes().filter(function(x){return bad.indexOf(x.id)<0;}).map(function(x){return '<option value="'+x.id+'"'+(x.id===n.parent?' selected':'')+'>'+esc(x.title||'(sin cargo)')+'</option>';}).join('');
+  var dl='<datalist id="orgpeople">'+S.employees.filter(function(e){return e.active!==0;}).map(function(e){return '<option value="'+esc(e.name)+'">';}).join('')+'</datalist>';
+  return '<section class="card org-form" id="orgform"><h2>'+(isNew?'Nuevo puesto':'Editar puesto')+'</h2><form data-a="orgsave" data-id="'+(isNew?'new':n.id)+'"><div class="grid two"><div><label>Cargo o departamento</label><input name="title" maxlength="80" required value="'+esc(n.title)+'" placeholder="Ej. Jefe de turno · Cartón"></div><div><label>Depende de</label><select name="parent">'+opts+'</select></div></div>'+
+    '<label>Persona (si son varias, sepáralas con «;»). Se puede dejar vacío</label><input name="name" maxlength="400" list="orgpeople" value="'+esc(n.name||'')+'" placeholder="Nombre y apellidos">'+dl+
+    '<div class="grid two"><div><label>Color / tipo</label><select name="area">'+Object.keys(ORG_AREAS).map(function(k){return '<option value="'+k+'"'+(n.area===k?' selected':'')+'>'+ORG_AREAS[k][0]+'</option>';}).join('')+'</select></div><div><label>Nota (opcional)</label><input name="note" maxlength="120" value="'+esc(n.note||'')+'" placeholder="Ej. Turno de noche, ext. 214…"></div></div>'+
+    '<button class="primary">Guardar</button> <button type="button" class="ghost" data-act="orgcancel">Cancelar</button></form></section>';}
+function vOrganigrama(){var hr=role()==='hr',ed=hr&&S.ui.orgEditMode,roots=orgRoots();
+  var legend='<div class="org-legend">'+Object.keys(ORG_AREAS).filter(function(k){return k!=='rep';}).map(function(k){return '<span><i style="background:'+ORG_AREAS[k][1]+'"></i>'+ORG_AREAS[k][0]+'</span>';}).join('')+'</div>';
+  var comm=S.employees.filter(function(e){return e.role==='committee';}).length;
+  return '<div class="card-title-row org-top"><div><h1>Organigrama</h1><p class="muted">Cómo está organizada y dirigida la empresa.</p></div><div class="org-actions">'+
+    (hr?(ed?'<button data-act="orgadd" data-id="0">＋ Puesto arriba del todo</button> <button class="success" data-act="orgedit">✓ Terminar de editar</button>':'<button data-act="orgedit">✏️ Editar organigrama</button>'):'')+
+    ' <button class="ghost" data-act="orgprint">🖨 Imprimir</button></div></div>'+
+    (orgIsTpl()?'<div class="flash org-tip">'+(hr?'Esta es la <b>estructura tipo</b> (solo cargos). Pulsa «Editar organigrama» para poner los nombres y adaptarla: al primer cambio se guarda para todos.':'El organigrama está pendiente de completar por RR. HH.')+'</div>':'')+
+    (ed?'<p class="muted" style="font-size:13px">✏️ editar · ＋ añadir un puesto que dependa de ese · ◀ ▶ cambiar el orden · 🗑 quitar (lo que dependía de él pasa a depender de su superior).</p>':'')+
+    orgForm()+legend+
+    '<section class="card org-wrap"><ul class="org-tree">'+roots.map(function(n){return orgBranch(n,0);}).join('')+'</ul></section>'+
+    '<section class="card org-side"><h2>👥 Representación de los trabajadores</h2><p><b>Comité de empresa</b>'+(comm?' · '+comm+' miembros':'')+'. No depende de la dirección: representa a la plantilla ante la empresa. Puedes escribirle desde «Comité de empresa».</p></section>';}
+C.orgedit=function(){S.ui.orgEditMode=!S.ui.orgEditMode;S.ui.orgSel=null;stay();};
+C.orgprint=function(){window.print();};
+C.orgcancel=function(){S.ui.orgSel=null;stay();};
+C.orged=function(b){S.ui.orgSel=+b.dataset.id;stay('orgform');};
+C.orgadd=function(b){S.ui.orgSel='new';S.ui.orgNewParent=+b.dataset.id||0;stay('orgform');};
+C.orgmv=function(b){orgMaterialize();var n=byId(S.org,+b.dataset.id);if(!n)return;var sib=orgKids(n.parent||0);sib.forEach(function(x,i){x.ord=i;});var i=sib.indexOf(n),j=i+(+b.dataset.d);if(j<0||j>=sib.length)return stay();
+  var t=sib[j].ord;sib[j].ord=n.ord;n.ord=t;var y=window.scrollY;stay();window.scrollTo(0,y);};
+C.orgdel=function(b){var n=byId(orgNodes(),+b.dataset.id);if(!n)return;var k=orgKids(n.id);
+  if(!confirm('¿Quitar «'+(n.title||'')+'» del organigrama?'+(k.length?'\n\nLos '+k.length+' puestos que dependen de él pasarán a depender de su superior.':'')))return;
+  orgMaterialize();n=byId(S.org,n.id);S.org.forEach(function(x){if(x.parent===n.id)x.parent=n.parent||0;});S.org=S.org.filter(function(x){return x.id!==n.id;});S.ui.orgSel=null;flash('Puesto quitado.','success');stay();};
+A.orgsave=function(f,form){if(role()!=='hr')return;orgMaterialize();var id=form.dataset.id,par=+f.parent||0;
+  var d={title:String(f.title||'').trim().slice(0,80),name:String(f.name||'').trim().slice(0,400),area:ORG_AREAS[f.area]?f.area:'prod',note:String(f.note||'').trim().slice(0,120),parent:par};
+  if(!d.title){flash('Pon el nombre del cargo.','error');return stay();}
+  if(id==='new'){var mx=0;S.org.forEach(function(x){if((x.parent||0)===par&&(x.ord||0)>=mx)mx=(x.ord||0)+1;});S.org.push(Object.assign({id:nextId(),ord:mx},d));}
+  else{var n=byId(S.org,+id);if(!n)return stay();Object.assign(n,d);}
+  S.ui.orgSel=null;flash('Organigrama guardado.','success');stay();};
 
 boot();
 })();
