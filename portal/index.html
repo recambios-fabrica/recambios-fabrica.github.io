@@ -110,6 +110,11 @@
 .abs-bar{display:flex;height:6px;border-radius:4px;background:#e5efe8;overflow:hidden;margin-top:4px;min-width:120px}.abs-bar i,.abs-legend i{display:block;height:100%}
 .b-baja{background:#dc2626}.b-vac{background:#0284c7}.b-otr{background:#d97706}.abs-legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12px;color:#4a5568;margin-top:10px}.abs-legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px}
 .abs-names{margin:6px 0}.abs-names summary{cursor:pointer;font-weight:bold;color:#123f70}.abs-names ul{margin:6px 0 0 18px;line-height:1.6;font-size:14px}
+.acc-help{margin:4px 0 12px 18px;line-height:1.6;font-size:14px}.acc-table td{vertical-align:top}.acc-cell{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.acc-chip{display:inline-flex;align-items:center;gap:2px;border-radius:14px;padding:2px 4px 2px 10px;font-size:13px;font-weight:bold}.acc-chip.sup{background:#fff3d6;color:#7a4d00}.acc-chip.dir{background:#e3f5ea;color:#1d6b3c}
+.acc-chip button{padding:0 6px;min-width:0;margin:0;font-size:14px;line-height:1.2;border:0;background:transparent;color:inherit}
+.acc-sug{font-size:12px;border:1px dashed #9db8d9;background:#eef4fb;color:#123f70;border-radius:14px;padding:3px 9px;margin:0;cursor:pointer}.acc-sug.off{cursor:default;color:#6b7280;border-color:#d1d5db;background:#f9fafb}
+.acc-add{width:auto;max-width:210px;margin:0;padding:3px 6px;font-size:13px}.acc-warn{color:#b45309}.acc-new{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}.acc-new input{width:auto;min-width:220px;margin:0}.acc-new button{margin:0}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -503,6 +508,7 @@ function layout(content){
   if(r==='hr')nav+=uhLink();
   if(r==='sup'||r==='dir'||r==='hr')nav+=satLink();
   if(r==='dir'||r==='hr')nav+=absLink();
+  if(r==='hr')nav+=scopeLink();
   nav+='<a href="#" data-go="convenio">Convenio y salarios</a>';
   nav+=modeSwitchLinks();
   if(r==='committee')nav+='<a href="#" data-go="calendario">Calendario</a>';
@@ -936,7 +942,7 @@ function vFormaciones(){
 }
 
 /* ---------- navegación y permisos ---------- */
-var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],plantilla:[vAusHoy,['hr','dir']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],organigrama:[vOrganigrama,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
+var VIEWS={inicio:[vInicio,['employee','hr','committee','sup','dir']],sabados:[vSabados,['sup','dir','hr']],plantilla:[vAusHoy,['hr','dir']],accesos:[vAccesos,['hr']],turnos:[vTurnos,['employee','hr']],calendario:[vCalendario,['employee','hr','committee']],fichaje:[vFichaje,['employee','hr']],nominas:[vNominas,['employee','hr']],ausencias:[vAusencias,['employee','hr']],tickets:[vTickets,['employee','hr']],comite:[vComite,['employee','committee','hr']],convenio:[vConvenio,['employee','hr','committee','sup','dir']],empresa:[vEmpresa,['employee','hr','committee','sup','dir']],organigrama:[vOrganigrama,['employee','hr','committee','sup','dir']],misdatos:[vMisDatos,['employee','hr','committee','sup','dir']],empleados:[vEmpleados,['hr']],formaciones:[vFormaciones,['hr']],privacidad:[function(){return vPrivacy(false);},['employee','hr','committee','sup','dir']],vehiculos:[vVehiculos,['hr']],mivehiculo:[vVehicleRequired,['employee']],recordatorio:[vReminder,['employee']]};
 function render(scrollTop){
   var root=document.getElementById('app');
   if(MODE==='loading'){root.innerHTML='<div class="demo-state"><div class="crest big">G</div><h1>Portal del empleado</h1><p class="muted">Cargando…</p></div>';return;}
@@ -1629,7 +1635,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795087197';
+var LANG_V='1795087975';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -1756,6 +1762,52 @@ function vAusHoy(){var d=absDate(),r=role();
 C.absday=function(b){var n=+b.dataset.d;if(!n){S.ui.absDate=isoD(today());}else{var x=parseD(absDate());x.setDate(x.getDate()+n);S.ui.absDate=isoD(x);}stay();};
 C.absretry=function(){S._abs=null;stay();};
 document.addEventListener('change',function(ev){if(ev.target&&ev.target.id==='absdate'&&/^\d{4}-\d{2}-\d{2}$/.test(ev.target.value)){S.ui.absDate=ev.target.value;stay();}});
+
+/* ===== 20) RR. HH.: accesos de directores y encargados por sección (tabla), con sugerencias de la lista de teléfonos internos ===== */
+/* Sacado de «VELL-TELEFONOS_INTERNOS» (hoja actual, 30/07/2026). Solo son sugerencias: RR. HH. confirma cada una. */
+var SCOPE_SUG=[
+ {sec:'Cartón',sup:['Pedro Garcia']},
+ {sec:'Servilletas 1',sup:['Marina','Naoual']},
+ {sec:'Servilletas 2',sup:['José Ramón']},
+ {sec:'Manteles',sup:['Julian Jugo']},
+ {sec:'Bolsas',sup:['Luis Mariano','Fede Lavin']},
+ {sec:'Dispensing',sup:['Ana Alba']},
+ {sec:'Personalizados',sup:['Jordi Viñas']},
+ {sec:'Onduladora',sup:[]},
+ {sec:'Mantenimiento',dir:['Joan Peitavi'],sup:[]}
+];
+var SCOPE_DIRS=['Samuel Parejo','Enric Salleras','Marc Gudayol'];
+function nTok(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean);}
+function nameMatches(sug){var t=nTok(sug);if(!t.length)return [];return S.employees.filter(function(e){if(e.active===0)return false;var et=nTok(e.name);return t.every(function(x){return et.indexOf(x)>=0;});});}
+function scopeSecs(){var m={};function add(s){s=String(s||'').trim();if(s&&!m[secNorm(s)])m[secNorm(s)]=s;}
+  allSections().forEach(add);(S.ui.scopeExtra||[]).forEach(add);SCOPE_SUG.forEach(function(x){add(x.sec);});
+  return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return a.localeCompare(b);});}
+function scopeLink(){return '<a href="#" data-go="accesos">🧭 Directores y encargados</a>';}
+function vAccesos(){if(role()!=='hr')return '';var secs=scopeSecs(),act=S.employees.filter(function(e){return e.active!==0;}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+  var opts=act.map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+' · nº '+esc(e.no)+(e.center?' · '+esc(e.center):'')+'</option>';}).join('');
+  function chips(sec,kind){var k=kind==='sup'?'supSecs':'dirSecs';return S.employees.filter(function(e){return inScope(sec,e[k]);}).map(function(e){return '<span class="acc-chip '+kind+'">'+esc(e.name)+'<button class="ghost" title="Quitar el acceso" data-act="accdel" data-id="'+e.id+'" data-k="'+kind+'" data-s="'+esc(sec)+'">×</button></span>';}).join('');}
+  function sugg(sec,kind){var s=SCOPE_SUG.filter(function(x){return secNorm(x.sec)===secNorm(sec);})[0],names=(s&&s[kind])||[],k=kind==='sup'?'supSecs':'dirSecs';
+    return names.map(function(n){var m=nameMatches(n);if(m.some(function(e){return inScope(sec,e[k]);}))return '';
+      if(m.length===1)return '<button class="acc-sug" data-act="accadd1" data-id="'+m[0].id+'" data-k="'+kind+'" data-s="'+esc(sec)+'" title="Según la lista de teléfonos internos">💡 Asignar a '+esc(m[0].name)+'</button>';
+      return '<span class="acc-sug off" title="'+(m.length?'Hay '+m.length+' personas que coinciden: elígela en la lista':'No hay ninguna cuenta del portal con ese nombre')+'">💡 '+esc(n)+(m.length?' (varias coincidencias)':' (sin cuenta en el portal)')+'</span>';}).join('');}
+  function cell(sec,kind){return '<div class="acc-cell">'+chips(sec,kind)+sugg(sec,kind)+'<select class="acc-add" data-k="'+kind+'" data-s="'+esc(sec)+'"><option value="">＋ Añadir…</option>'+opts+'</select></div>';}
+  var staff={};S.employees.forEach(function(e){if(e.active!==0&&e.center){var k=secNorm(e.center);staff[k]=(staff[k]||0)+1;}});
+  var rows=secs.map(function(s){var n=staff[secNorm(s)]||0;return '<tr><td><b>'+esc(s)+'</b><br><small class="'+(n?'muted':'acc-warn')+'">'+(n?n+' persona'+(n===1?'':'s'):'⚠ nadie tiene esta sección en su ficha')+'</small></td><td>'+cell(s,'sup')+'</td><td>'+cell(s,'dir')+'</td></tr>';}).join('');
+  var dirHint=SCOPE_DIRS.map(function(n){var m=nameMatches(n);return '<b>'+esc(n)+'</b>'+(m.length===1?'':' <small class="muted">('+(m.length?'varias cuentas':'sin cuenta en el portal')+')</small>');}).join(', ');
+  return '<h1>🧭 Directores y encargados por sección</h1><p class="muted">Aquí RR. HH. decide a qué secciones tiene acceso cada director y cada encargado. Con eso:</p>'+
+    '<ul class="acc-help"><li><b>Encargado</b> de una sección: da el visto bueno a los sábados de esa sección.</li><li><b>Director</b> de una sección: autoriza los sábados y ve «Plantilla hoy» (bajas, vacaciones, %) de esa sección. No ve las de otras secciones.</li><li>Al volver a entrar, a esa persona le saldrá la opción de portal de encargado o de dirección, además de su portal personal.</li></ul>'+
+    '<div class="flash org-tip">💡 Las sugerencias salen de la lista de teléfonos internos. En la lista figuran como dirección de fábrica: '+dirHint+', pero no dice de qué secciones es cada uno: elígelo con «＋ Añadir…» en la columna Director.</div>'+
+    '<section class="card"><div style="overflow-x:auto"><table class="vac-table acc-table"><thead><tr><th>Sección</th><th>🧭 Encargado(s)</th><th>🎯 Director(es)</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<form data-a="accsec" class="acc-new"><input name="sec" maxlength="60" placeholder="Nombre de otra sección" required><button>＋ Añadir sección</button></form>'+
+    '<p class="muted" style="font-size:12px;margin-top:10px">El nombre de la sección tiene que ser <b>igual</b> que el que pone en la ficha de los trabajadores (campo «Centro / sección»), si no, el director no verá a esas personas. Las secciones marcadas con ⚠ no las tiene nadie en su ficha.</p></section>';}
+function accSet(id,kind,sec,on){var e=byId(S.employees,+id);if(!e)return;var sup=(e.supSecs||[]).slice(),dir=(e.dirSecs||[]).slice(),arr=kind==='sup'?sup:dir;
+  var i=arr.map(secNorm).indexOf(secNorm(sec));if(on&&i<0)arr.push(sec);else if(!on&&i>=0)arr.splice(i,1);else return;
+  rpc('p_set_scopes',{p_target:e.id,p_sup:sup,p_dir:dir}).then(function(){return fullLoad();}).then(function(){flash((on?'Acceso dado: ':'Acceso quitado: ')+e.name+' · '+(kind==='sup'?'encargado':'director')+' de '+sec+'.','success');stay();},
+    function(x){flash('No se ha podido guardar: '+(x.message||x),'error');stay();});}
+C.accadd1=function(b){accSet(b.dataset.id,b.dataset.k,b.dataset.s,true);};
+C.accdel=function(b){var e=byId(S.employees,+b.dataset.id);if(!e||!confirm('¿Quitar a '+e.name+' como '+(b.dataset.k==='sup'?'encargado':'director')+' de '+b.dataset.s+'?'))return;accSet(b.dataset.id,b.dataset.k,b.dataset.s,false);};
+A.accsec=function(f){var s=String(f.sec||'').trim();if(!s)return stay();S.ui.scopeExtra=(S.ui.scopeExtra||[]).concat([s]);flash('Sección «'+s+'» añadida a la tabla. Asígnale encargado o director.','success');stay();};
+document.addEventListener('change',function(ev){var t=ev.target;if(!t||!t.classList||!t.classList.contains('acc-add')||!t.value)return;accSet(t.value,t.dataset.k,t.dataset.s,true);});
 
 boot();
 })();
