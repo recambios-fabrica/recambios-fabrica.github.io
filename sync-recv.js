@@ -8,6 +8,10 @@
   'use strict';
   const ALLOWED = ['https://app3.fixner.com', 'https://garciadepou0-my.sharepoint.com'];
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  // Códigos de OT que aparecen en una línea (OT, reparación, explicación, comentarios…), tolerando «T25/14465», «OT 25 / 14465»…
+  const otCodes = r => { const out = new Set(); const t = [r.ot, r.reparacion, r.explicacion, r.comentarios, r.otros].join(' ');
+    for (const m of t.matchAll(/(?:^|[^A-Z])O?T\s*(\d{2})\s*\/\s*(\d{3,6})/gi)) out.add(`OT${m[1]}/${m[2].padStart(5, '0')}`); return out; };
+  const otNorm = c => { const m = /O?T\s*(\d{2})\s*\/\s*(\d{3,6})/i.exec(String(c || '')); return m ? `OT${m[1]}/${m[2].padStart(5, '0')}` : ''; };
   const U = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toUpperCase();
 
   async function doFixner(rows) {
@@ -29,7 +33,7 @@
         await db.collection('fixner_ots').doc(id).update({ estado: estado || '', ...(fxid ? { fxid } : {}) }); cambios++;
       }
       if (pa.has(id)) continue;
-      const ya = rec.some(r => r.ot === code || r.reparacion === code);
+      const ya = rec.some(r => r.ot === code || r.reparacion === code || otCodes(r).has(otNorm(code)));
       if (ya) { await db.collection('fixner_pa').doc(id).set({ codigo: code, visto: hoy, pedido: 'ya existía' }); pa.add(id); continue; }
       const motivo = /bloqueada\s*op/i.test(estado) ? 'Bloqueada OP (falta material, máquina en marcha)'
         : /bloqueada\s*pa/i.test(estado) ? 'Bloqueada PA (falta material, máquina parada)'
@@ -78,7 +82,7 @@
           if (borradas ? borradas.has(k + '__' + id) : c.r <= maxOrden) continue; // fila que se borró en la web: no se recrea
           // Si el pedido ya existe en la web con la misma OT (p. ej. creado desde Fixner), no se duplica.
           const otX = String(body.ot || body.reparacion || '').trim();
-          if (otX && [...docs.values()].some(d => d.ot === otX || d.reparacion === otX)) continue;
+          if (otX && [...docs.values()].some(d => d.ot === otX || d.reparacion === otX || (otNorm(otX) && d.origen === 'fixner' && otCodes(d).has(otNorm(otX))))) continue;
           if (c.g && GREEN_FIELD[k] && !body[GREEN_FIELD[k]]) body[GREEN_FIELD[k]] = 'LLEGADO';
           await db.collection(k).doc(id).set({ ...body, orden: c.r, creadoEn: Date.now(), importado: true, origen: 'excel' });
           creados++; nuevos.push(`${k} fila ${c.r}: ${body.descripcion || body.trabajo || body.maquina || ''}`);
