@@ -87,19 +87,19 @@
 [dir=rtl] .lang-pick.floating{right:auto;left:12px}
 .org-top{align-items:flex-start;gap:10px;flex-wrap:wrap}.org-actions{display:flex;gap:6px;flex-wrap:wrap}.org-tip{background:#eef4fb;color:#123f70;border:1px solid #c9dbef}
 .org-legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;margin:4px 0 10px;color:#4a5568}.org-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.org-wrap{overflow-x:auto;padding:22px 10px}.org-tree,.org-tree ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}
+.org-wrap{overflow-x:auto;padding:22px 10px}.org-tree,.org-tree ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}.org-tree{width:max-content;min-width:100%;margin:0 auto}
 .org-tree ul{padding-top:22px}.org-tree li{display:flex;flex-direction:column;align-items:center;position:relative;padding:22px 6px 0}
 .org-tree>li{padding-top:0}.org-tree li::before,.org-tree li::after{content:'';position:absolute;top:0;width:50%;height:22px;border-top:2px solid #b8c4d4}
 .org-tree li::before{right:50%}.org-tree li::after{left:50%;border-left:2px solid #b8c4d4}.org-tree>li::before,.org-tree>li::after{display:none}
 .org-tree li:only-child::before,.org-tree li:only-child::after{border-top:0}.org-tree li:only-child::before{display:none}
 .org-tree li:first-child::before,.org-tree li:last-child::after{border-top:0}.org-tree li:last-child::before{border-right:2px solid #b8c4d4;border-top:2px solid #b8c4d4;border-radius:0 8px 0 0}.org-tree li:first-child::after{border-radius:8px 0 0 0}.org-tree li:only-child::after{border-radius:0}
 .org-tree ul::before{content:'';position:absolute;top:0;left:50%;height:22px;border-left:2px solid #b8c4d4}
-.org-card{background:#fff;border:1px solid var(--line);border-top:5px solid #123f70;border-radius:10px;padding:8px 10px;min-width:130px;max-width:190px;text-align:center;box-shadow:0 1px 4px #0001;font-size:13px}
-.org-card b{display:block;color:#1f2937;line-height:1.25}.org-card small{display:block;color:#6b7280;font-size:11px;margin-top:3px}.org-card.sel{outline:3px solid #f59e0b}
+.org-card{background:#fff;border:1px solid var(--line);border-top:5px solid #123f70;border-radius:10px;padding:8px 9px;min-width:110px;max-width:160px;text-align:center;box-shadow:0 1px 4px #0001;font-size:13px}
+.org-card b{display:block;color:#1f2937;line-height:1.25}.org-card small{display:block;color:#6b7280;font-size:11px;margin-top:3px;letter-spacing:0;text-transform:none}.org-card.sel{outline:3px solid #f59e0b}
 .org-names{display:flex;flex-direction:column;gap:1px;margin-top:4px;font-size:12px;color:#123f70}.org-names.empty{color:#9ca3af;font-style:italic;font-size:11px}
 .org-btns{display:flex;gap:2px;justify-content:center;margin-top:6px}.org-btns button{padding:2px 6px;font-size:12px;min-width:0;margin:0}
 .org-side{border-left:5px solid #64748b}
-@media (max-width:760px){.org-tree,.org-tree ul{display:block;padding-left:16px;padding-top:0}.org-tree>li{padding-left:0}.org-tree li{display:block;padding:6px 0 0 14px;border-left:2px solid #b8c4d4}.org-tree>li{border-left:0}
+@media (max-width:760px){.org-tree{width:auto}.org-tree,.org-tree ul{display:block;padding-left:16px;padding-top:0}.org-tree>li{padding-left:0}.org-tree li{display:block;padding:6px 0 0 14px;border-left:2px solid #b8c4d4}.org-tree>li{border-left:0}
 .org-tree li::before,.org-tree li::after,.org-tree ul::before{display:none}.org-card{max-width:none;text-align:left}.org-btns{justify-content:flex-start}}
 @media print{.sidebar,.org-actions,.org-btns,.org-form,.org-tip,.demo-bar{display:none!important}.main{margin:0!important;padding:0!important}.org-wrap{box-shadow:none;border:0;overflow:visible}}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
@@ -1620,7 +1620,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795086109';
+var LANG_V='1795086316';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -1681,6 +1681,8 @@ function orgForm(){var id=S.ui.orgSel;if(!S.ui.orgEditMode||role()!=='hr'||id==n
     '<div class="grid two"><div><label>Color / tipo</label><select name="area">'+Object.keys(ORG_AREAS).map(function(k){return '<option value="'+k+'"'+(n.area===k?' selected':'')+'>'+ORG_AREAS[k][0]+'</option>';}).join('')+'</select></div><div><label>Nota (opcional)</label><input name="note" maxlength="120" value="'+esc(n.note||'')+'" placeholder="Ej. Turno de noche, ext. 214…"></div></div>'+
     '<button class="primary">Guardar</button> <button type="button" class="ghost" data-act="orgcancel">Cancelar</button></form></section>';}
 function vOrganigrama(){var hr=role()==='hr',ed=hr&&S.ui.orgEditMode,roots=orgRoots();
+  var ow=document.querySelector&&document.querySelector('.org-wrap'),sl=ow?ow.scrollLeft:null;
+  setTimeout(function(){var w=document.querySelector&&document.querySelector('.org-wrap');if(w&&w.scrollWidth>w.clientWidth)w.scrollLeft=sl!=null?sl:(w.scrollWidth-w.clientWidth)/2;},0);
   var legend='<div class="org-legend">'+Object.keys(ORG_AREAS).filter(function(k){return k!=='rep';}).map(function(k){return '<span><i style="background:'+ORG_AREAS[k][1]+'"></i>'+ORG_AREAS[k][0]+'</span>';}).join('')+'</div>';
   var comm=S.employees.filter(function(e){return e.role==='committee';}).length;
   return '<div class="card-title-row org-top"><div><h1>Organigrama</h1><p class="muted">Cómo está organizada y dirigida la empresa.</p></div><div class="org-actions">'+
@@ -1690,7 +1692,7 @@ function vOrganigrama(){var hr=role()==='hr',ed=hr&&S.ui.orgEditMode,roots=orgRo
     (ed?'<p class="muted" style="font-size:13px">✏️ editar · ＋ añadir un puesto que dependa de ese · ◀ ▶ cambiar el orden · 🗑 quitar (lo que dependía de él pasa a depender de su superior).</p>':'')+
     orgForm()+legend+
     '<section class="card org-wrap"><ul class="org-tree">'+roots.map(function(n){return orgBranch(n,0);}).join('')+'</ul></section>'+
-    '<section class="card org-side"><h2>👥 Representación de los trabajadores</h2><p><b>Comité de empresa</b>'+(comm?' · '+comm+' miembros':'')+'. No depende de la dirección: representa a la plantilla ante la empresa. Puedes escribirle desde «Comité de empresa».</p></section>';}
+    '<section class="card org-side"><h2>👥 Representación de los trabajadores</h2><p><b>Comité de empresa</b>'+(comm?' · '+comm+' miembro'+(comm===1?'':'s'):'')+'. No depende de la dirección: representa a la plantilla ante la empresa. Puedes escribirle desde «Comité de empresa».</p></section>';}
 C.orgedit=function(){S.ui.orgEditMode=!S.ui.orgEditMode;S.ui.orgSel=null;stay();};
 C.orgprint=function(){window.print();};
 C.orgcancel=function(){S.ui.orgSel=null;stay();};
