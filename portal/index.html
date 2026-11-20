@@ -954,7 +954,7 @@ function vEmpleados(){
   '<section class="card"><h2>Importar personal desde Excel</h2><p>Selecciona el Excel actualizado. Se leerán las columnas ID, NOMBRE Y APELLIDOS y GRUPOS. Los trabajadores nuevos recibirán un PIN aleatorio de 6 dígitos; se mostrará una sola vez al terminar.</p><form data-a="importxl"><input type="file" name="xl" accept=".xlsx,.xls,.csv" required><button class="primary">Importar y generar PIN</button></form><p class="muted" style="font-size:13px">También vale si las columnas se llaman Nº EMPLEADO, NOMBRE, SECCIÓN o CATEGORÍA. Las personas que ya tienen cuenta (mismo número) no se tocan.</p></section>'+
   '<section class="card"><h2>Alta manual de empleado</h2><form data-a="newemp"><div class="grid two"><div><label>Número de empleado</label><input name="employee_no" required></div><div><label>Nombre completo</label><input name="full_name" required></div><div><label>Sección</label>'+secSelect('')+'</div><div><label>Categoría profesional</label><input name="category" placeholder="Ej. Categoría 11"></div><div><label>Tipo de cuenta</label><select name="acc_role"><option value="employee">Trabajador</option><option value="committee">Comité de empresa</option><option value="hr">RR. HH.</option></select></div></div><button class="primary">Crear cuenta</button></form><p class="muted" style="font-size:12px">El PIN inicial es provisional: el trabajador tendrá que cambiarlo al entrar.</p></section>'+
   '<section class="card" id="emplist"><h2>Listado de cuentas</h2>'+secMgr()+empSearchBar(rows)+empPage(rows).map(function(e){var isE=isStaffRole(e.role);return '<div class="row wrap"><div><b>'+esc(e.name)+'</b>'+(e.role==='committee'?' <span class="chip chip-info">👥 Comité de empresa</span>':'')+scopeChips(e)+'<p>'+esc(e.no)+' · '+esc(e.center||'Sección pendiente')+' · '+esc(e.category||'Categoría pendiente')+'</p>'+
-   scopeForm(e)+(isE?'<form data-a="empdata" data-id="'+e.id+'" class="inline-date-form"><label>Categoría</label><input name="category" value="'+esc(e.category)+'" placeholder="Ej. Categoría 11"><label>Sección</label>'+secSelect(e.center)+'<button>Guardar datos</button></form><form data-a="empstart" data-id="'+e.id+'" class="inline-date-form"><label>Fecha de incorporación</label><input type="date" name="employment_start_date" value="'+esc(e.start)+'"><button>Guardar fecha</button></form>':'')+'</div>'+(isE?(function(){var n=S.vehicles.filter(function(v){return v.eid===e.id;}).length;if(n)return '<span class="privacy-badge is-signed">🚗 '+n+' vehículo'+(n===1?'':'s')+'</span>';if(e.vexempt==='approved')return '<span class="privacy-badge is-info">🚶 Sin vehículo · desbloqueado</span><button data-act="vexempt" data-v="revoke" data-id="'+e.id+'">Quitar desbloqueo</button>';return '<span class="privacy-badge is-pending">🚗 '+(e.vexempt==='requested'?'Pide desbloqueo':'Sin vehículo')+'</span><button data-act="vexempt" data-v="approve" data-id="'+e.id+'">Desbloquear sin vehículo</button>';})():'')+(function(){var sg=signatureOf(e.id);return sg?'<span class="privacy-badge is-signed">🛡️ Firmado el '+fechaHora(sg.at)+'</span>':'<span class="privacy-badge is-pending">🛡️ Pendiente de firma</span>';})()+'<em>'+(e.active?'Activo':'Desactivado')+'</em>'+
+   scopeForm(e)+(isE?'<form data-a="empdata" data-id="'+e.id+'" class="inline-date-form"><label>Nombre y apellidos</label><input name="ename" value="'+esc(e.name)+'" maxlength="120"><label>Categoría</label><input name="category" value="'+esc(e.category)+'" placeholder="Ej. Categoría 11"><label>Sección</label>'+secSelect(e.center)+'<button>Guardar datos</button></form><form data-a="empstart" data-id="'+e.id+'" class="inline-date-form"><label>Fecha de incorporación</label><input type="date" name="employment_start_date" value="'+esc(e.start)+'"><button>Guardar fecha</button></form>':'')+'</div>'+(isE?(function(){var n=S.vehicles.filter(function(v){return v.eid===e.id;}).length;if(n)return '<span class="privacy-badge is-signed">🚗 '+n+' vehículo'+(n===1?'':'s')+'</span>';if(e.vexempt==='approved')return '<span class="privacy-badge is-info">🚶 Sin vehículo · desbloqueado</span><button data-act="vexempt" data-v="revoke" data-id="'+e.id+'">Quitar desbloqueo</button>';return '<span class="privacy-badge is-pending">🚗 '+(e.vexempt==='requested'?'Pide desbloqueo':'Sin vehículo')+'</span><button data-act="vexempt" data-v="approve" data-id="'+e.id+'">Desbloquear sin vehículo</button>';})():'')+(function(){var sg=signatureOf(e.id);return sg?'<span class="privacy-badge is-signed">🛡️ Firmado el '+fechaHora(sg.at)+'</span>':'<span class="privacy-badge is-pending">🛡️ Pendiente de firma</span>';})()+'<em>'+(e.active?'Activo':'Desactivado')+'</em>'+
    (isE?'<button data-act="setcomm" data-id="'+e.id+'" data-v="'+(e.role==='committee'?'employee':'committee')+'">'+(e.role==='committee'?'Quitar del comité':'👥 Hacer del comité')+'</button><button data-act="resetpin" data-id="'+e.id+'">Restablecer PIN</button><button data-act="empstatus" data-id="'+e.id+'">'+(e.active?'Desactivar':'Activar')+'</button>':'')+'</div>';}).join('')+empMore(rows)+'</section>';
 }
 
@@ -1285,10 +1285,19 @@ A.importxl=function(f,form){
       if(cNo>=0&&cName>=0)hi=i;else{cNo=cName=cSec=cCat=cCom=-1;}}
     if(hi<0){flash('No encuentro las columnas del número de empleado (ID) y del nombre (NOMBRE Y APELLIDOS) en la primera hoja.','error');return stay();}
     var have={};S.employees.forEach(function(e){have[String(e.no).trim()]=1;});
-    var todo=[],seen={};
+    var todo=[],seen={},upd=[];
     rows.slice(hi+1).forEach(function(r){var no=String(r[cNo]||'').trim().replace(/\.0+$/,''),name=String(r[cName]||'').trim().replace(/\s+/g,' ');
-      if(!no||!name||have[no]||seen[no])return;seen[no]=1;todo.push({no:no,name:niceName(name),center:cSec>=0?ccName(r[cSec]):'',category:cCat>=0?String(r[cCat]||'').trim():'',com:cCom>=0&&/^(SI|SÍ|S|X|1|YES|COMITE|COMITÉ)$/i.test(String(r[cCom]||'').trim())});});
-    if(!todo.length){flash('No hay personas nuevas en el Excel: todas tienen ya cuenta.','success');return stay();}
+      if(!no||!name||seen[no])return;
+      if(have[no]){seen[no]=1;var e=S.employees.filter(function(x){return String(x.no).trim()===no;})[0];if(!e)return;var ch={};
+        var nn=niceName(name);if(nTok(nn).join(' ')!==nTok(e.name).join(' '))ch.name=nn;
+        if(cSec>=0){var c=ccName(r[cSec]);if(c&&secNorm(c)!==secNorm(e.center))ch.center=c;}
+        if(cCat>=0){var g=String(r[cCat]||'').trim();if(g&&g!==String(e.category||''))ch.category=g;}
+        if(Object.keys(ch).length)upd.push({e:e,ch:ch});return;}seen[no]=1;todo.push({no:no,name:niceName(name),center:cSec>=0?ccName(r[cSec]):'',category:cCat>=0?String(r[cCat]||'').trim():'',com:cCom>=0&&/^(SI|SÍ|S|X|1|YES|COMITE|COMITÉ)$/i.test(String(r[cCom]||'').trim())});});
+    if(upd.length){var ej=upd.slice(0,4).map(function(u){return u.e.no+' · '+u.e.name+': '+Object.keys(u.ch).map(function(k){return (k==='center'?'sección':k==='category'?'categoría':'nombre')+' → '+u.ch[k];}).join(', ');}).join('\n');
+      if(confirm('El Excel tiene cambios en '+upd.length+' persona'+(upd.length===1?'':'s')+' que ya tienen cuenta:\n\n'+ej+(upd.length>4?'\n…':'')+'\n\n¿Actualizar sus fichas? (se cambia en todo el portal)')){
+        upd.forEach(function(u){if(u.ch.name){orgRename(u.e.name,u.ch.name);u.e.name=u.ch.name;}if(u.ch.center)u.e.center=u.ch.center;if(u.ch.category)u.e.category=u.ch.category;});empChanged();
+        flash(upd.length+' ficha'+(upd.length===1?'':'s')+' actualizada'+(upd.length===1?'':'s')+' desde el Excel.','success');}}
+    if(!todo.length){flash((upd.length?'':'No hay personas nuevas en el Excel: todas tienen ya cuenta.'),'success');return stay();}
     if(!confirm('Se van a crear '+todo.length+' cuenta'+(todo.length===1?'':'s')+' nueva'+(todo.length===1?'':'s')+' con PIN automático.\n\nEjemplo: '+todo[0].no+' · '+todo[0].name+'\n\n¿Continuar?'))return stay();
     var done=[],fail=[],k=0;
     (function next(){
@@ -1691,7 +1700,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795183118';
+var LANG_V='1795209672';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2054,7 +2063,8 @@ C.secdo=function(b){var k=b.dataset.k,m=b.dataset.m,to,old=(empSections().filter
   else{to=String((document.getElementById('secdest')||{}).value||'').trim();}
   var ppl=S.employees.filter(function(e){return secNorm(e.center)===k;});
   if(!confirm(m==='ren'?'¿Renombrar «'+old+'» a «'+to+'»? Se cambia a '+ppl.length+' personas.':'¿Eliminar la sección «'+old+'»? Sus '+ppl.length+' personas pasan a '+(to?'«'+to+'»':'«Sin sección»')+'.'))return;
-  ppl.forEach(function(e){e.center=to;});S.ui.secEd=null;
+  ppl.forEach(function(e){e.center=to;});S.ui.secEd=null;empChanged();
+  scopesRename(old,to).then(function(n){if(n)flash('También actualizado en «Directores y encargados» ('+n+' persona'+(n===1?'':'s')+' con acceso a «'+old+'»).','success');stay();},function(x){flash('Sección cambiada, pero no se han podido actualizar los accesos de directores/encargados: '+(x.message||x),'error');stay();});
   flash(m==='ren'?'Sección renombrada: '+old+' → '+to+' ('+ppl.length+' personas).':'Sección «'+old+'» eliminada. '+ppl.length+' personas pasan a '+(to||'Sin sección')+'.','success');stay();};
 function secSelect(cur){cur=String(cur||'').trim();var l=empSections(),has=!cur||l.some(function(s){return secNorm(s)===secNorm(cur);});
   return '<select name="center" class="sec-sel"><option value="">— Elige la sección —</option>'+l.map(function(s){return '<option'+(secNorm(s)===secNorm(cur)?' selected':'')+'>'+esc(s)+'</option>';}).join('')+(has?'':'<option selected>'+esc(cur)+'</option>')+'<option value="__otra">➕ Otra sección (escribirla)…</option></select>';}
@@ -2080,6 +2090,31 @@ document.addEventListener('change',function(ev){var t=ev.target;if(!t||!t.classL
     function(e){if(lab)lab.classList.remove('busy');flash('No se ha podido subir: '+(e.message||e),'error');stay();});});
 document.addEventListener('change',function(e){var t=e.target;if(!t||t.name!=='lvfiles')return;var sp=t.closest('form')&&t.closest('form').querySelector('.tf-names');
   if(sp)sp.textContent=[].map.call(t.files,function(f){return f.name;}).join(', ');});
+
+/* ===== 25) Un cambio en la ficha del empleado se aplica en todo el portal =====
+   Casi todo se calcula al momento a partir de la ficha (Plantilla hoy, calendario, turnos, ausencias, sábados, buscadores).
+   Lo que se guarda aparte y aquí se mantiene al día: nombres del organigrama, accesos de directores/encargados por sección
+   y los datos ya cargados en pantalla. */
+function empChanged(){S._abs=null;S._absP=null;S._absM=null;S._absR=null;}
+function orgRename(oldN,newN){oldN=String(oldN||'').trim();newN=String(newN||'').trim();if(!oldN||!newN||oldN===newN||!(S.org&&S.org.length))return 0;var n=0,k=nTok(oldN).join(' ');
+  S.org.forEach(function(o){var parts=String(o.name||'').split(/\s*[;\n]\s*/);var ch=false;parts=parts.map(function(p){if(p&&nTok(p).join(' ')===k){ch=true;return newN;}return p;});if(ch){o.name=parts.join('; ');n++;}});return n;}
+/* renombrar o eliminar una sección: también en los accesos de directores y encargados */
+function scopesRename(oldS,newS){var ko=secNorm(oldS),jobs=[];
+  S.employees.forEach(function(e){var sup=(e.supSecs||[]).slice(),dir=(e.dirSecs||[]).slice(),ch=false;
+    function fix(a){var out=[];a.forEach(function(x){if(secNorm(x)===ko){ch=true;if(newS&&out.map(secNorm).indexOf(secNorm(newS))<0)out.push(newS);}else if(out.map(secNorm).indexOf(secNorm(x))<0)out.push(x);});return out;}
+    sup=fix(sup);dir=fix(dir);if(ch)jobs.push({e:e,sup:sup,dir:dir});});
+  if(!jobs.length)return Promise.resolve(0);
+  return jobs.reduce(function(p,j){return p.then(function(){return rpc('p_set_scopes',{p_target:j.e.id,p_sup:j.sup,p_dir:j.dir});});},Promise.resolve())
+    .then(function(){return fullLoad();}).then(function(){return jobs.length;});}
+A.empdata=function(f,form){var e=byId(S.employees,+form.dataset.id);if(!e)return stay();
+  var nm=String(f.ename==null?e.name:f.ename).trim().replace(/\s+/g,' '),cat=String(f.category||'').trim(),cen=String(f.center||'').trim();
+  if(!nm){flash('El nombre no puede quedar vacío.','error');return stay();}
+  var msg=[],oldN=e.name,oldC=e.center;
+  if(nm!==oldN){e.name=nm;var o=orgRename(oldN,nm);msg.push('nombre'+(o?' (también en el organigrama)':''));}
+  if(cat!==(e.category||'')){e.category=cat;msg.push('categoría');}
+  if(secNorm(cen)!==secNorm(oldC)){e.center=cen;msg.push('sección: '+(oldC||'—')+' → '+(cen||'—'));}
+  empChanged();
+  flash(msg.length?'Guardado ('+msg.join(', ')+'). Ya sale así en Plantilla hoy, turnos, ausencias, sábados y en lo que ve su encargado y su director.':'No había cambios.','success');stay();};
 
 boot();
 })();
