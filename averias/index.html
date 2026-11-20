@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B66C3">
+<title>Averías · Garcia de Pou</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="../logo.png">
+<style>
+:root{--blue:#0B66C3;--blue-d:#08508f;--blue-bg:#e8f1fb;--orange:#e8590c;--ink:#1c1f22;--mut:#5f6670;--line:#e3e1da;--bg:#f4f3ef;--card:#fff;
+--red:#c8102e;--red-bg:#fde8eb;--amber:#b45309;--amber-bg:#fff4e0;--green:#1a7f37;--green-bg:#e6f4ea;--violet:#6d28d9;--violet-bg:#f1ebff;--grey-bg:#eef0f2}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+.topw{position:sticky;top:0;z-index:50}header.top{background:var(--blue);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 18px}
+header.top img{height:22px}header.top .ttl{font-weight:700;font-size:15px}header.top .sub{opacity:.8;font-size:12px}
+header.top .sp{flex:1}#who{font-size:13px;opacity:.9}
+nav.tabs{display:flex;gap:2px;background:var(--blue);padding:0 14px;overflow-x:auto}
+nav.tabs a{color:#fff;opacity:.85;text-decoration:none;padding:9px 13px;border-radius:8px 8px 0 0;white-space:nowrap;font-weight:600;font-size:14px}
+nav.tabs a.on{background:var(--bg);color:var(--ink);opacity:1}nav.tabs a .n{background:#fff3;border-radius:9px;padding:0 6px;font-size:12px;margin-left:4px}nav.tabs a.on .n{background:var(--blue-bg);color:var(--blue)}
+main{max-width:1280px;margin:0 auto;padding:16px 16px 90px}
+h1{font-size:21px;margin:4px 0 12px}h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.muted{color:var(--mut)}.small{font-size:13px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{flex:1}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:#c9c6bc}.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--red)}.btn.sm{padding:4px 9px;font-size:13px}.btn.big{padding:12px 18px;font-size:16px}.btn:disabled{opacity:.5;cursor:default}
+input,select,textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
+textarea{min-height:70px;resize:vertical}label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px;font-weight:600}
+.grid{display:grid;gap:10px}.g2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left}
+.kpi b{display:block;font-size:30px;line-height:1.1}.kpi span{font-size:13px;color:var(--mut)}.kpi.red{border-color:#f3b4be;background:var(--red-bg)}.kpi.red b{color:var(--red)}
+.kpi.amber b{color:var(--amber)}.kpi.violet b{color:var(--violet)}.kpi.blue b{color:var(--blue)}
+.pill{display:inline-block;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.e-abierta{background:var(--amber-bg);color:var(--amber)}.e-asignada{background:var(--blue-bg);color:var(--blue)}.e-curso{background:#fff7c2;color:#7a5c00}
+.e-op{background:#ffe5d0;color:#b44a00}.e-pa{background:var(--red);color:#fff}.e-pausa{background:var(--grey-bg);color:#4a5058}.e-fin{background:var(--green-bg);color:var(--green)}.e-anul{background:var(--grey-bg);color:#8a9099;text-decoration:line-through}
+.p-Crítica{background:var(--red-bg);color:var(--red)}.p-Alta{background:#ffe5d0;color:#b44a00}.p-Media{background:var(--blue-bg);color:var(--blue)}.p-Baja{background:var(--grey-bg);color:#4a5058}
+.tag{display:inline-block;background:var(--grey-bg);border-radius:6px;padding:0 7px;font-size:12px;color:#4a5058}.tag.stop{background:var(--red);color:#fff;font-weight:700}
+.list{display:flex;flex-direction:column;gap:8px}
+.otc{background:#fff;border:1px solid var(--line);border-left:5px solid var(--amber);border-radius:10px;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:4px 10px}
+.otc:hover{box-shadow:0 2px 10px #0001}.otc .c{font:600 12px ui-monospace,monospace;color:var(--mut)}.otc .t{font-weight:700}.otc .m{font-size:13px;color:var(--mut)}
+.otc.stop{border-left-color:var(--red);background:#fff8f9}.otc.fin{border-left-color:var(--green);opacity:.8}.otc.curso{border-left-color:#e0b400}.otc.asig{border-left-color:var(--blue)}.otc.op{border-left-color:#e07b00}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}.filters input[type=search]{flex:1 1 240px;width:auto}.filters select{width:auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.chip{border:1px solid var(--line);background:#fff;border-radius:18px;padding:4px 11px;font-size:13px;cursor:pointer;font-weight:600}.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tl{border-left:2px solid var(--line);margin-left:6px;padding-left:12px}.tl .it{margin-bottom:9px;font-size:14px}.tl .it .w{font-size:12px;color:var(--mut)}
+.int{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:6px;background:#fcfcfb}.int.run{border-color:#e0b400;background:#fffbe6}
+.fotos{display:flex;gap:8px;flex-wrap:wrap}.fotos .ph{position:relative}.fotos img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:#eee}
+.fotos .x{position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid var(--line);border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;line-height:18px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}@media(max-width:900px){.two{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:14px}.kv dt{color:var(--mut)}.kv dd{margin:0}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-weight:600;box-shadow:0 6px 20px #0003}
+.modal{position:fixed;inset:0;background:#0006;z-index:150;display:flex;align-items:center;justify-content:center;padding:14px}
+.modal>div{background:#fff;border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:18px}
+.fab{position:fixed;right:18px;bottom:18px;background:var(--orange);color:#fff;border:0;border-radius:30px;padding:14px 20px;font-weight:800;font-size:16px;box-shadow:0 6px 18px #e8590c66;cursor:pointer;z-index:60}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}th{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}
+tr.clk{cursor:pointer}tr.clk:hover td{background:#fafaf7}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}.dot.r{background:var(--red)}.dot.a{background:#e0a400}.dot.g{background:#2fb35a}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}.seg button{border:0;background:#fff;padding:9px 14px;font-weight:700;cursor:pointer}.seg button.on{background:var(--ink);color:#fff}.seg button.on.r{background:var(--red)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:6px}.bars div{flex:1;background:var(--blue);border-radius:4px 4px 0 0;position:relative;min-height:2px}
+.bars div span{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:11px;color:var(--mut)}.barl{display:flex;gap:6px}.barl div{flex:1;text-align:center;font-size:11px;color:var(--mut)}
+.hbar{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}.hbar .b{height:10px;background:var(--orange);border-radius:5px}.hbar .l{width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:26px;text-align:center;color:var(--mut)}
+.check{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.check input{width:auto;margin-top:3px}
+.mat{display:grid;grid-template-columns:1fr 70px auto;gap:6px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+@media(max-width:600px){main{padding:12px 10px 90px}.kv{grid-template-columns:100px 1fr}header.top .sub{display:none}.otc{grid-template-columns:1fr}}
+</style>
+<script>window.RG_LITE=true;window.RG_TITLE='Averías · Mantenimiento';window.RG_COLS=['av_ot','av_maq','av_prev','av_cfg','recambios','fixner_ots'];</script>
+<script src="config.js"></script>
+<script src="supa-shim.js?v=1"></script>
+</head>
+<body>
+<div class="topw"><header class="top"><img src="../logo.png" alt="Garcia de Pou"><div><div class="ttl">Averías y mantenimiento</div><div class="sub">Órdenes de trabajo · Máquinas · Preventivo</div></div><span class="sp"></span><span id="who"></span></header>
+<nav class="tabs" id="tabs"></nav></div>
+<main id="app"><div class="empty">Cargando…</div></main>
+<button class="fab" id="fab" title="Dar un aviso de avería">＋ Avería</button>
+<script>
+(function(){
+'use strict';
+/* ====== estado ====== */
+const S={ots:new Map(),maq:new Map(),prev:new Map(),rec:[],fx:new Map(),cfg:null,me:null,admin:false,db:null,assets:null,view:'panel',arg:null,
+  f:{q:'',estado:'abiertas',prio:'',tec:'',sec:'',tipo:''},mf:{q:''},ready:false};
+const DEF_CFG={tecnicos:['Gabriel','Jordi','Xavi','Joan','José'],
+  secciones:['Cartón','Servilletas 1','Servilletas 2','Manteles','Bolsas','Dispensing','Personalizados','Logística interna','Mantenimiento','Instalaciones'],
+  clases:['Mecánica','Eléctrica','Electrónica','Neumática','Hidráulica','Automatización / PLC','Seguridad','Utillaje','Otros'],
+  tipos:['Avería','Preventivo','Correctivo programado','Mejora','Seguridad / normativa'],
+  origenes:['Operario de máquina','Jefe de turno','Encargado','Técnico de mantenimiento','Llamada / WhatsApp','Revisión preventiva'],
+  causas:['Desgaste','Rotura','Mal uso / ajuste','Falta de limpieza','Falta de lubricación','Fallo eléctrico','Fallo de material','Desconocida']};
+const ESTADOS=['Abierta','Asignada','En curso','Bloqueada OP','Bloqueada PA','Pausada','Finalizada','Anulada'];
+const OPEN=e=>!['Finalizada','Anulada'].includes(e);
+const PRIOS=['Crítica','Alta','Media','Baja'];
+const ECLS={'Abierta':'e-abierta','Asignada':'e-asignada','En curso':'e-curso','Bloqueada OP':'e-op','Bloqueada PA':'e-pa','Pausada':'e-pausa','Finalizada':'e-fin','Anulada':'e-anul'};
+const EHELP={'Bloqueada OP':'Falta material · máquina en marcha','Bloqueada PA':'Falta material · máquina parada'};
+/* ====== utilidades ====== */
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>iso(new Date());
+const fD=t=>{if(!t)return '';const d=new Date(t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2);};
+const fDT=t=>{if(!t)return '';const d=new Date(t);return fD(t)+' '+pad(d.getHours())+':'+pad(d.getMinutes());};
+const fISO=s=>{if(!s)return '';const m=/(\d{4})-(\d\d)-(\d\d)/.exec(s);return m?m[3]+'/'+m[2]+'/'+m[1].slice(2):s;};
+const hrs=ms=>{if(!ms||ms<0)return '0 h';const h=ms/3600000;return h<1?Math.round(h*60)+' min':(Math.round(h*10)/10).toString().replace('.',',')+' h';};
+const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<60)return 'hace '+m+' min';const h=Math.round(m/60);if(h<48)return 'hace '+h+' h';return 'hace '+Math.round(h/24)+' días';};
+const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const turnoAhora=()=>{const h=new Date().getHours();return h>=6&&h<14?'Mañana':h>=14&&h<22?'Tarde':'Noche';};
+const cfg=()=>Object.assign({},DEF_CFG,S.cfg||{});
+function toast(t){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600);}
+function modal(html,onMount){const m=document.createElement('div');m.className='modal';m.innerHTML='<div>'+html+'</div>';m.addEventListener('click',e=>{if(e.target===m)m.remove();});document.body.appendChild(m);if(onMount)onMount(m);return m;}
+const meName=()=>(S.me&&S.me.name)||'';
+/* ====== datos ====== */
+async function saveOT(id,patch,histTxt){
+  const cur=S.ots.get(id)||{};const h=histTxt?[...(cur.historial||[]),{t:Date.now(),u:meName(),c:histTxt}].slice(-80):cur.historial;
+  const d=Object.assign({},patch,{editadaEn:Date.now(),editadaPor:meName()},h?{historial:h}:{});
+  S.ots.set(id,Object.assign({},cur,d));render();
+  try{ if(S.ots.has(id)&&cur.codigo) await S.db.collection('av_ot').doc(id).update(d); else await S.db.collection('av_ot').doc(id).set(Object.assign({},cur,d)); }
+  catch(e){toast('No se ha podido guardar: '+(e.message||e));}
+}
+function nextCode(){const y=String(new Date().getFullYear()).slice(2);let mx=0;
+  for(const o of S.ots.values()){const m=/^AV(\d\d)\/(\d+)$/.exec(o.codigo||'');if(m&&m[1]===y)mx=Math.max(mx,+m[2]);}
+  return 'AV'+y+'/'+String(mx+1).padStart(4,'0');}
+async function createOT(d){
+  const id=d._id||('av'+uid());delete d._id;const t=Date.now();
+  const o=Object.assign({codigo:nextCode(),estado:d.asignados&&d.asignados.length?'Asignada':'Abierta',creadaEn:t,creadaPor:meName(),intervenciones:[],material:[],fotos:[],comentarios:[],
+    historial:[{t,u:meName(),c:'Creada'}],turno:turnoAhora()},d);
+  if(o.parada&&!o.paradaDesde)o.paradaDesde=t;
+  S.ots.set(id,o);render();
+  await S.db.collection('av_ot').doc(id).set(o);return id;}
+async function saveMaq(id,d){S.maq.set(id,Object.assign({},S.maq.get(id)||{},d));render();await S.db.collection('av_maq').doc(id).set(S.maq.get(id));}
+async function savePrev(id,d){S.prev.set(id,Object.assign({},S.prev.get(id)||{},d));render();await S.db.collection('av_prev').doc(id).set(S.prev.get(id));}
+async function saveCfg(d){S.cfg=Object.assign({},cfg(),d);render();await S.db.collection('av_cfg').doc('main').set(S.cfg);}
+/* fotos: se suben al almacenamiento privado y se ven con una URL temporal del navegador */
+const blobCache=new Map();
+function hydrate(){document.querySelectorAll('img[data-blob]').forEach(img=>{const u=img.dataset.blob;if(blobCache.has(u)){img.src=blobCache.get(u);return;}
+  fetch(u).then(r=>r.ok?r.blob():Promise.reject()).then(b=>{const x=URL.createObjectURL(b);blobCache.set(u,x);document.querySelectorAll('img[data-blob="'+u+'"]').forEach(i=>i.src=x);}).catch(()=>{});});}
+function shrink(file){return new Promise(res=>{if(!/^image\//.test(file.type)||file.size<500*1024)return res(file);const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>res(b||file),'image/jpeg',.85);};
+  img.onerror=()=>{URL.revokeObjectURL(u);res(file);};img.src=u;});}
+async function uploadFotos(files){const out=[];for(const f of [...files].slice(0,6)){const b=await shrink(f);const r=await S.assets.upload(b,{type:b.type||'image/jpeg'});out.push({url:r.url,name:f.name,t:Date.now()});}return out;}
+function verFoto(u){modal('<img data-blob="'+esc(u)+'" style="width:100%;border-radius:10px"><div class="row" style="margin-top:10px"><span class="sp"></span><button class="btn" onclick="this.closest(\'.modal\').remove()">Cerrar</button></div>',()=>hydrate());}
+/* ====== cálculo ====== */
+function maqName(o){const m=S.maq.get(o.maqId);return m?m.nombre:(o.maqNombre||'—');}
+function maqSec(o){const m=S.maq.get(o.maqId);return (m&&m.seccion)||o.seccion||'';}
+function runInt(o){return (o.intervenciones||[]).find(i=>!i.fin);}
+function horasOT(o){return (o.intervenciones||[]).reduce((a,i)=>a+((i.fin||Date.now())-i.inicio),0);}
+function paradaMs(o){if(!o.paradaDesde)return 0;return (o.paradaHasta||(o.parada&&OPEN(o.estado)?Date.now():o.cerradaEn||Date.now()))-o.paradaDesde;}
+function isStop(o){return OPEN(o.estado)&&(o.parada||o.estado==='Bloqueada PA');}
+function stateCls(o){return isStop(o)?'stop':o.estado==='Finalizada'||o.estado==='Anulada'?'fin':o.estado==='En curso'?'curso':o.estado==='Bloqueada OP'?'op':o.estado==='Asignada'?'asig':'';}
+function addDays(s,n,u){const d=new Date(s+'T12:00');if(u==='semanas')d.setDate(d.getDate()+7*n);else if(u==='meses')d.setMonth(d.getMonth()+n);else d.setDate(d.getDate()+n);return iso(d);}
+/* ====== preventivo: genera la OT cuando vence (id fijo: nunca se duplica) ====== */
+async function genPreventivos(){if(!S.ready)return;const t=today();
+  for(const [pid,p] of S.prev){if(!p.activo||!p.proxima)continue;const lead=addDays(t,+(p.antelacion||0),'dias');if(p.proxima>lead)continue;
+    const oid='pv-'+pid+'-'+p.proxima;if(S.ots.has(oid))continue;
+    const abierta=[...S.ots.values()].some(o=>o.planId===pid&&OPEN(o.estado));if(abierta)continue;
+    await createOT({_id:oid,titulo:'Preventivo: '+p.tarea,descripcion:(p.checklist||[]).length?'Revisar:\n'+(p.checklist||[]).map(x=>'· '+x).join('\n'):p.tarea,maqId:p.maqId,maqNombre:(S.maq.get(p.maqId)||{}).nombre||p.maqNombre||'',
+      tipo:'Preventivo',clase:p.clase||'Mecánica',prioridad:p.prioridad||'Media',parada:false,origen:'Revisión preventiva',solicitante:'Plan preventivo',asignados:p.tecnico?[p.tecnico]:[],
+      planId:pid,previsto:p.proxima,checklist:(p.checklist||[]).map(x=>({txt:x,ok:false}))});}}
+/* ====== render ====== */
+const VIEWS={panel:['Panel',vPanel],ots:['Órdenes de trabajo',vOTs],mis:['Mis OT',vMis],maquinas:['Máquinas',vMaquinas],preventivo:['Preventivo',vPrev],informes:['Informes',vInformes],ajustes:['Ajustes',vAjustes]};
+function nav(){const open=[...S.ots.values()].filter(o=>OPEN(o.estado));const mine=open.filter(o=>(o.asignados||[]).some(a=>nrm(a)===nrm(meName()))).length;
+  const venc=[...S.prev.values()].filter(p=>p.activo&&p.proxima&&p.proxima<=today()).length;
+  const n={ots:open.length,mis:mine,preventivo:venc};
+  $('#tabs').innerHTML=Object.keys(VIEWS).map(k=>'<a href="#'+k+'" class="'+(S.view===k||(S.view==='ot'&&k==='ots')||(S.view==='maq'&&k==='maquinas')?'on':'')+'">'+VIEWS[k][0]+(n[k]?'<span class="n">'+n[k]+'</span>':'')+'</a>').join('');}
+let rT=null;function render(){clearTimeout(rT);rT=setTimeout(doRender,30);}
+function doRender(){if(!S.ready)return;const ae=document.activeElement;if(ae&&ae.closest&&ae.closest('#app')&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName)&&!ae.dataset.live)return;
+  nav();const v=S.view==='ot'?vOT:S.view==='maq'?vMaq:S.view==='nueva'?vNueva:(VIEWS[S.view]||VIEWS.panel)[1];
+  const y=window.scrollY;$('#app').innerHTML=v(S.arg);window.scrollTo(0,y);hydrate();
+  $('#fab').style.display=S.view==='nueva'?'none':'';}
+function route(){const h=decodeURIComponent(location.hash.slice(1));const [v,a]=h.split('/');S.view=v||'panel';S.arg=a||null;window.scrollTo(0,0);doRender();}
+window.addEventListener('hashchange',route);
+/* ---------- tarjeta de OT ---------- */
+function otCard(id,o){const run=runInt(o);
+  return '<div class="otc '+stateCls(o)+'" data-go="ot/'+id+'"><div><div class="row" style="gap:6px"><span class="c">'+esc(o.codigo)+'</span><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA</span>':'')+(o.tipo&&o.tipo!=='Avería'?'<span class="tag">'+esc(o.tipo)+'</span>':'')+(run?'<span class="tag" style="background:#fff7c2">⏱ '+esc(run.tecnico)+' trabajando</span>':'')+'</div>'+
+    '<div class="t">'+esc(o.titulo||'(sin título)')+'</div><div class="m">'+esc(maqName(o))+(maqSec(o)?' · '+esc(maqSec(o)):'')+(o.clase?' · '+esc(o.clase):'')+'</div></div>'+
+    '<div class="m" style="text-align:right">'+fDT(o.creadaEn)+'<br>'+esc((o.asignados||[]).join(', ')||'Sin asignar')+(o.material&&o.material.some(m=>!m.recibido)?'<br>📦 falta material':'')+'</div></div>';}
+/* ---------- PANEL ---------- */
+function vPanel(){const all=[...S.ots.entries()],open=all.filter(([,o])=>OPEN(o.estado));
+  const stop=open.filter(([,o])=>isStop(o)),crit=open.filter(([,o])=>o.prioridad==='Crítica'),mat=open.filter(([,o])=>/Bloqueada/.test(o.estado)),sin=open.filter(([,o])=>!(o.asignados||[]).length),curso=open.filter(([,o])=>runInt(o));
+  const venc=[...S.prev.entries()].filter(([,p])=>p.activo&&p.proxima&&p.proxima<=today());
+  const k=(n,l,c,go)=>'<button class="kpi '+c+'" data-go="'+go+'"><b>'+n+'</b><span>'+l+'</span></button>';
+  const t30=Date.now()-30*864e5,fin30=all.filter(([,o])=>o.estado==='Finalizada'&&o.cerradaEn>t30);
+  const mttr=fin30.length?fin30.reduce((a,[,o])=>a+(o.cerradaEn-o.creadaEn),0)/fin30.length:0;
+  const carga={};cfg().tecnicos.forEach(t=>carga[t]=0);open.forEach(([,o])=>(o.asignados||[]).forEach(a=>carga[a]=(carga[a]||0)+1));const cmax=Math.max(1,...Object.values(carga));
+  return '<h1>Panel de mantenimiento</h1><div class="kpis">'+k(open.length,'OT abiertas','blue','ots/abiertas')+k(stop.length,'Máquinas paradas','red','ots/paradas')+k(crit.length,'Críticas abiertas','red','ots/criticas')+
+    k(curso.length,'Trabajando ahora','amber','ots/curso')+k(mat.length,'Bloqueadas por material','amber','ots/bloqueadas')+k(sin.length,'Sin asignar','violet','ots/sinasignar')+k(venc.length,'Preventivos vencidos','violet','preventivo')+
+    '<div class="kpi" style="cursor:default"><b>'+hrs(mttr)+'</b><span>Tiempo medio de resolución (30 días)</span></div></div>'+
+    '<div class="two"><div><section class="card"><h2>🔴 Máquinas paradas ahora ('+stop.length+')</h2>'+(stop.length?'<div class="list">'+stop.sort((a,b)=>a[1].creadaEn-b[1].creadaEn).map(([id,o])=>otCard(id,o)).join('')+'</div>':'<div class="empty">Ninguna máquina parada. ✅</div>')+'</section>'+
+    '<section class="card"><h2>Últimos avisos</h2><div class="list">'+(open.sort((a,b)=>b[1].creadaEn-a[1].creadaEn).slice(0,8).map(([id,o])=>otCard(id,o)).join('')||'<div class="empty">Sin avisos abiertos.</div>')+'</div></section></div>'+
+    '<div><section class="card"><h2>Carga por técnico</h2>'+Object.entries(carga).sort((a,b)=>b[1]-a[1]).map(([t,n])=>'<div class="hbar"><span class="l">'+esc(t)+'</span><span class="b" style="width:'+Math.round(n/cmax*150)+'px"></span><b>'+n+'</b></div>').join('')+'</section>'+
+    '<section class="card"><h2>Preventivos próximos</h2>'+prevMini()+'</section>'+
+    '<section class="card"><h2>Avisos por semana</h2>'+weekBars()+'</section></div></div>';}
+function prevMini(){const l=[...S.prev.entries()].filter(([,p])=>p.activo&&p.proxima).sort((a,b)=>a[1].proxima.localeCompare(b[1].proxima)).slice(0,6);
+  if(!l.length)return '<div class="muted small">Todavía no hay planes. Créalos en «Preventivo».</div>';
+  return '<table>'+l.map(([id,p])=>'<tr class="clk" data-go="preventivo"><td>'+(p.proxima<=today()?'<span class="dot r"></span>':p.proxima<=addDays(today(),7,'dias')?'<span class="dot a"></span>':'<span class="dot g"></span>')+fISO(p.proxima)+'</td><td><b>'+esc(p.tarea)+'</b><br><span class="muted small">'+esc((S.maq.get(p.maqId)||{}).nombre||p.maqNombre||'')+'</span></td></tr>').join('')+'</table>';}
+function weekBars(){const w=[];const now=new Date();now.setHours(0,0,0,0);const mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));
+  for(let i=7;i>=0;i--){const a=new Date(mon);a.setDate(mon.getDate()-7*i);const b=new Date(a);b.setDate(a.getDate()+7);w.push({l:pad(a.getDate())+'/'+pad(a.getMonth()+1),n:[...S.ots.values()].filter(o=>o.creadaEn>=a&&o.creadaEn<b&&o.tipo!=='Preventivo').length});}
+  const mx=Math.max(1,...w.map(x=>x.n));return '<div class="bars">'+w.map(x=>'<div style="height:'+Math.round(x.n/mx*100)+'%"><span>'+x.n+'</span></div>').join('')+'</div><div class="barl">'+w.map(x=>'<div>'+x.l+'</div>').join('')+'</div>';}
+/* ---------- LISTA DE OT ---------- */
+const PRESETS={abiertas:'Abiertas',paradas:'Máquinas paradas',criticas:'Críticas',curso:'Trabajando ahora',bloqueadas:'Bloqueadas por material',sinasignar:'Sin asignar',finalizadas:'Finalizadas',todas:'Todas'};
+function filterOTs(preset){const f=S.f,q=nrm(f.q).split(/\s+/).filter(Boolean);
+  return [...S.ots.entries()].filter(([,o])=>{
+    switch(preset){case 'abiertas':if(!OPEN(o.estado))return false;break;case 'paradas':if(!isStop(o))return false;break;case 'criticas':if(!OPEN(o.estado)||o.prioridad!=='Crítica')return false;break;
+      case 'curso':if(!runInt(o))return false;break;case 'bloqueadas':if(!/Bloqueada/.test(o.estado))return false;break;case 'sinasignar':if(!OPEN(o.estado)||(o.asignados||[]).length)return false;break;case 'finalizadas':if(o.estado!=='Finalizada')return false;break;}
+    if(f.prio&&o.prioridad!==f.prio)return false;if(f.tec&&!(o.asignados||[]).includes(f.tec))return false;if(f.sec&&maqSec(o)!==f.sec)return false;if(f.tipo&&o.tipo!==f.tipo)return false;
+    if(q.length){const h=nrm([o.codigo,o.titulo,o.descripcion,maqName(o),maqSec(o),o.clase,(o.asignados||[]).join(' '),o.solicitante,o.fxCodigo].join(' '));if(!q.every(w=>h.includes(w)))return false;}
+    return true;}).sort((a,b)=>{const pa=isStop(a[1])-isStop(b[1]);if(pa)return -pa;const pr=PRIOS.indexOf(a[1].prioridad)-PRIOS.indexOf(b[1].prioridad);if(preset!=='finalizadas'&&preset!=='todas'&&pr)return pr;return b[1].creadaEn-a[1].creadaEn;});}
+function selOpts(list,v,all){return '<option value="">'+all+'</option>'+list.map(x=>'<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>').join('');}
+function vOTs(arg){const preset=PRESETS[arg]?arg:'abiertas',l=filterOTs(preset),c=cfg();
+  return '<div class="row"><h1>Órdenes de trabajo</h1><span class="sp"></span><button class="btn primary" data-go="nueva">＋ Nueva OT</button></div>'+
+    '<div class="chips">'+Object.entries(PRESETS).map(([k,t])=>'<a class="chip'+(k===preset?' on':'')+'" href="#ots/'+k+'" style="text-decoration:none;color:inherit">'+t+'</a>').join('')+'</div>'+
+    '<div class="filters"><input type="search" id="fq" data-live="1" placeholder="🔎 Buscar: código, máquina, avería, técnico…" value="'+esc(S.f.q)+'">'+
+    '<select data-f="prio">'+selOpts(PRIOS,S.f.prio,'Prioridad')+'</select><select data-f="tec">'+selOpts(c.tecnicos,S.f.tec,'Técnico')+'</select><select data-f="sec">'+selOpts(c.secciones,S.f.sec,'Sección')+'</select><select data-f="tipo">'+selOpts(c.tipos,S.f.tipo,'Tipo')+'</select>'+
+    '<span class="muted small">'+l.length+' OT</span></div>'+
+    (l.length?'<div class="list">'+l.slice(0,300).map(([id,o])=>otCard(id,o)).join('')+'</div>':'<div class="card empty">No hay órdenes con estos filtros.</div>');}
+function vMis(){const me=nrm(meName());const l=[...S.ots.entries()].filter(([,o])=>OPEN(o.estado)&&(o.asignados||[]).some(a=>nrm(a)===me)).sort((a,b)=>isStop(b[1])-isStop(a[1])||PRIOS.indexOf(a[1].prioridad)-PRIOS.indexOf(b[1].prioridad));
+  const libres=[...S.ots.entries()].filter(([,o])=>OPEN(o.estado)&&!(o.asignados||[]).length);
+  return '<h1>Mis órdenes de trabajo</h1><p class="muted small">Las OT asignadas a <b>'+esc(meName())+'</b>. Si tu nombre no coincide con el de la lista de técnicos (Ajustes), no te saldrán aquí.</p>'+
+    (l.length?'<div class="list">'+l.map(([id,o])=>otCard(id,o)).join('')+'</div>':'<div class="card empty">No tienes OT asignadas.</div>')+
+    (libres.length?'<h2 style="margin-top:18px">Sin asignar ('+libres.length+')</h2><div class="list">'+libres.map(([id,o])=>otCard(id,o)).join('')+'</div>':'');}
+/* ---------- FICHA DE OT ---------- */
+function vOT(id){const o=S.ots.get(id);if(!o)return '<div class="card empty">Esta OT no existe o se ha borrado. <a href="#ots">Volver</a></div>';
+  const c=cfg(),run=runInt(o),open=OPEN(o.estado),mine=(o.asignados||[]).some(a=>nrm(a)===nrm(meName()));
+  const act=[];
+  if(open){
+    if(!mine)act.push('<button class="btn" data-a="asignarme">🙋 Me la quedo</button>');
+    if(run)act.push('<button class="btn blue" data-a="parar">⏹ Parar trabajo ('+esc(run.tecnico)+', '+hrs(Date.now()-run.inicio)+')</button>');else act.push('<button class="btn blue" data-a="empezar">▶ Empezar a trabajar</button>');
+    act.push('<button class="btn" data-a="estado" data-v="Bloqueada OP" title="Falta material, la máquina sigue en marcha">🔶 Bloquear OP</button><button class="btn" data-a="estado" data-v="Bloqueada PA" title="Falta material y la máquina está parada">🔴 Bloquear PA</button><button class="btn" data-a="estado" data-v="Pausada">⏸ Pausar</button>');
+    act.push('<button class="btn primary" data-a="finalizar">✅ Finalizar</button><button class="btn danger" data-a="anular">Anular</button>');
+  } else act.push('<button class="btn" data-a="reabrir">↺ Reabrir</button>');
+  const fotos='<div class="fotos">'+(o.fotos||[]).map((f,i)=>'<div class="ph"><img data-blob="'+esc(f.url)+'" alt="" data-a="verfoto" data-u="'+esc(f.url)+'"><button class="x" data-a="delfoto" data-i="'+i+'" title="Quitar">✕</button></div>').join('')+
+    '<label class="btn" style="display:inline-flex;align-items:center;margin:0;height:96px;width:96px;justify-content:center;flex-direction:column;color:var(--blue)">📷<span class="small">Añadir</span><input type="file" accept="image/*" multiple hidden data-a="addfoto"></label></div>';
+  const ints=(o.intervenciones||[]).map((i,ix)=>'<div class="int'+(i.fin?'':' run')+'"><div class="row"><b>'+esc(i.tecnico)+'</b><span class="muted small">'+fDT(i.inicio)+' → '+(i.fin?fDT(i.fin):'<b>trabajando…</b>')+' · '+hrs((i.fin||Date.now())-i.inicio)+'</span><span class="sp"></span><button class="btn sm" data-a="editint" data-i="'+ix+'">Editar</button></div>'+(i.trabajo?'<div style="white-space:pre-wrap">'+esc(i.trabajo)+'</div>':'')+'</div>').join('');
+  const mats=(o.material||[]).map((m,ix)=>{const r=m.recId&&S.rec.find(x=>x.id===m.recId);const st=m.recibido?'<span class="pill e-fin">Recibido</span>':r?'<span class="pill e-asignada" title="Línea en la web de recambios">'+esc(recState(r))+'</span>':'<span class="pill e-abierta">Sin pedir</span>';
+    return '<div class="mat"><div><b>'+esc(m.desc)+'</b>'+(m.ref?' <span class="muted small">ref. '+esc(m.ref)+'</span>':'')+'</div><div>'+esc(m.cant||1)+' ud.</div><div class="row" style="gap:4px">'+st+(!m.recId&&!m.recibido?'<button class="btn sm" data-a="pedir" data-i="'+ix+'" title="Crear la línea en la web de recambios">🛒 Pedir</button>':'')+(!m.recibido?'<button class="btn sm" data-a="recibido" data-i="'+ix+'">✓</button>':'')+'<button class="btn sm" data-a="delmat" data-i="'+ix+'">✕</button></div></div>';}).join('');
+  const chk=(o.checklist||[]).length?'<section class="card"><h2>Checklist del preventivo</h2>'+o.checklist.map((x,i)=>'<label class="check"><input type="checkbox" data-a="chk" data-i="'+i+'"'+(x.ok?' checked':'')+'> <span>'+esc(x.txt)+'</span></label>').join('')+'</section>':'';
+  const hist=[...(o.comentarios||[]).map(x=>({t:x.t,h:'<b>💬 '+esc(x.u)+':</b> '+esc(x.txt)})),...(o.historial||[]).map(x=>({t:x.t,h:'<span class="muted">'+esc(x.u)+' · '+esc(x.c)+'</span>'}))].sort((a,b)=>b.t-a.t);
+  return '<div class="row"><a href="#ots" class="btn sm">‹ Volver</a><span class="muted small">'+esc(o.codigo)+(o.fxCodigo?' · Fixner '+esc(o.fxCodigo):'')+'</span></div>'+
+    '<div class="row" style="margin-top:8px;gap:8px"><h1 style="margin:0">'+esc(o.titulo||'(sin título)')+'</h1><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA · '+hrs(paradaMs(o))+'</span>':'')+'</div>'+
+    (EHELP[o.estado]?'<div class="muted small">'+EHELP[o.estado]+'</div>':'')+'<div class="actions">'+act.join('')+'</div>'+
+    '<div class="two"><div>'+
+    '<section class="card"><h2>Qué pasa</h2><div style="white-space:pre-wrap">'+esc(o.descripcion||'—')+'</div><h3 style="margin-top:12px">Fotos</h3>'+fotos+'</section>'+chk+
+    '<section class="card"><div class="row"><h2 style="margin:0">Intervenciones · '+hrs(horasOT(o))+'</h2><span class="sp"></span><button class="btn sm" data-a="addint">＋ Añadir intervención</button></div><div style="margin-top:8px">'+(ints||'<div class="muted small">Nadie ha trabajado todavía en esta OT. Pulsa «▶ Empezar a trabajar» cuando vayas a la máquina.</div>')+'</div></section>'+
+    '<section class="card"><div class="row"><h2 style="margin:0">Material necesario</h2><span class="sp"></span><button class="btn sm" data-a="addmat">＋ Añadir material</button></div><div style="margin-top:6px">'+(mats||'<div class="muted small">Sin material. Si hace falta pedir algo, añádelo aquí y pulsa «🛒 Pedir»: se crea la línea en la web de recambios con esta OT.</div>')+'</div></section>'+
+    (o.cierre?'<section class="card" style="border-color:#b6dfc1"><h2>✅ Cierre</h2><dl class="kv"><dt>Causa</dt><dd>'+esc(o.cierre.causa||'—')+'</dd><dt>Solución</dt><dd style="white-space:pre-wrap">'+esc(o.cierre.solucion||'—')+'</dd><dt>Cerrada</dt><dd>'+fDT(o.cerradaEn)+' por '+esc(o.cerradaPor||'')+'</dd>'+(o.paradaDesde?'<dt>Tiempo parada</dt><dd>'+hrs(paradaMs(o))+'</dd>':'')+'</dl></section>':'')+
+    '<section class="card"><h2>Comentarios e historial</h2><form data-a="comentar" class="row" style="margin-bottom:10px"><input name="txt" placeholder="Escribe un comentario…" style="flex:1"><button class="btn">Enviar</button></form><div class="tl">'+hist.map(x=>'<div class="it">'+x.h+'<div class="w">'+fDT(x.t)+'</div></div>').join('')+'</div></section>'+
+    '</div><div><section class="card"><div class="row"><h2 style="margin:0">Datos</h2><span class="sp"></span><button class="btn sm" data-a="editot">Editar</button></div><dl class="kv" style="margin-top:8px">'+
+    '<dt>Máquina</dt><dd>'+(o.maqId&&S.maq.has(o.maqId)?'<a href="#maq/'+esc(o.maqId)+'">'+esc(maqName(o))+'</a>':esc(maqName(o)))+'</dd><dt>Sección</dt><dd>'+esc(maqSec(o)||'—')+'</dd>'+
+    '<dt>Tipo</dt><dd>'+esc(o.tipo||'—')+'</dd><dt>Avería</dt><dd>'+esc(o.clase||'—')+'</dd><dt>¿Parada?</dt><dd>'+(o.parada?'<b style="color:var(--red)">Sí</b>':'No')+'</dd>'+
+    '<dt>Asignada a</dt><dd>'+esc((o.asignados||[]).join(', ')||'Nadie')+'</dd><dt>Avisa</dt><dd>'+esc(o.solicitante||'—')+'</dd><dt>Origen</dt><dd>'+esc(o.origen||'—')+'</dd><dt>Turno</dt><dd>'+esc(o.turno||'—')+'</dd>'+
+    '<dt>Creada</dt><dd>'+fDT(o.creadaEn)+' por '+esc(o.creadaPor||'')+'</dd>'+(o.previsto?'<dt>Prevista</dt><dd>'+fISO(o.previsto)+'</dd>':'')+'</dl></section>'+
+    maqHistMini(o.maqId,id)+'</div></div>';}
+function recState(r){const e=String(r.estado||'').toUpperCase();if(e==='OK')return 'Recibido OK';if(e==='PARCIAL')return 'Entrada parcial';if(r.fechaRecepcion)return 'Recibido';if(r.numPedido||r.fechaPedido)return 'Pedido';if(Array.isArray(r.presupuestos)&&r.presupuestos.length)return 'Presupuestado';return 'Pendiente pedir';}
+function maqHistMini(mid,except){if(!mid)return '';const l=[...S.ots.entries()].filter(([id,o])=>o.maqId===mid&&id!==except).sort((a,b)=>b[1].creadaEn-a[1].creadaEn).slice(0,6);
+  return '<section class="card"><h2>Historial de la máquina</h2>'+(l.length?'<table>'+l.map(([id,o])=>'<tr class="clk" data-go="ot/'+id+'"><td class="small">'+fD(o.creadaEn)+'</td><td><b>'+esc(o.titulo)+'</b><br><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span></td></tr>').join('')+'</table>':'<div class="muted small">Sin otras OT en esta máquina.</div>')+'</section>';}
+/* ---------- NUEVA AVERÍA ---------- */
+function maqOptions(sel){const by={};for(const [id,m] of S.maq){if(m.activa===false)continue;(by[m.seccion||'Sin sección']=by[m.seccion||'Sin sección']||[]).push([id,m]);}
+  return '<option value="">— Elige la máquina —</option>'+Object.keys(by).sort().map(s=>'<optgroup label="'+esc(s)+'">'+by[s].sort((a,b)=>a[1].nombre.localeCompare(b[1].nombre)).map(([id,m])=>'<option value="'+esc(id)+'"'+(id===sel?' selected':'')+'>'+esc(m.nombre)+'</option>').join('')+'</optgroup>').join('')+'<option value="__otra">Otra (escribirla)…</option>';}
+function vNueva(){const c=cfg();
+  return '<div class="row"><a href="#panel" class="btn sm">‹ Volver</a></div><h1>Dar un aviso de avería</h1><form class="card" data-a="crear" id="fnueva">'+
+    '<label>¿En qué máquina?</label><select name="maqId" required>'+maqOptions(S.arg||'')+'</select><input name="maqOtra" placeholder="Nombre de la máquina" style="display:none;margin-top:6px">'+
+    '<label>¿Qué pasa?</label><input name="titulo" required maxlength="90" placeholder="Ej. La cuchilla no corta bien"><textarea name="descripcion" placeholder="Explica un poco más: desde cuándo, qué alarma sale, qué has probado…" style="margin-top:6px"></textarea>'+
+    '<label>¿La máquina está parada?</label><div class="seg" id="segpar"><button type="button" data-v="1">Sí, parada</button><button type="button" data-v="0" class="on">No, sigue en marcha</button></div><input type="hidden" name="parada" value="0">'+
+    '<div class="grid g3" style="margin-top:6px"><div><label>Prioridad</label><select name="prioridad">'+PRIOS.map(p=>'<option'+(p==='Media'?' selected':'')+'>'+p+'</option>').join('')+'</select></div>'+
+    '<div><label>Tipo de avería</label><select name="clase" required><option value="">— Elige —</option>'+c.clases.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div>'+
+    '<div><label>Tipo de trabajo</label><select name="tipo">'+c.tipos.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div>'+
+    '<div><label>¿Quién avisa?</label><input name="solicitante" value="'+esc(meName())+'"></div><div><label>¿Cómo llega el aviso?</label><select name="origen">'+c.origenes.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div>'+
+    '<div><label>Asignar a (opcional)</label><select name="asig"><option value="">Sin asignar</option>'+c.tecnicos.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div></div>'+
+    '<label>Fotos (opcional)</label><input type="file" name="fotos" accept="image/*" multiple>'+
+    '<div class="row" style="margin-top:14px"><span class="muted small">Turno: '+turnoAhora()+'</span><span class="sp"></span><button class="btn primary big">Crear la OT</button></div></form>';}
+/* ---------- MÁQUINAS ---------- */
+function maqStats(mid){const l=[...S.ots.values()].filter(o=>o.maqId===mid),y=Date.now()-365*864e5;
+  return {open:l.filter(o=>OPEN(o.estado)).length,stop:l.some(isStop),av12:l.filter(o=>o.creadaEn>y&&o.tipo!=='Preventivo').length,par12:l.filter(o=>o.creadaEn>y).reduce((a,o)=>a+paradaMs(o),0),total:l.length};}
+function vMaquinas(){const q=nrm(S.mf.q).split(/\s+/).filter(Boolean),by={};
+  for(const [id,m] of S.maq){if(q.length&&!q.every(w=>nrm(m.nombre+' '+m.seccion+' '+(m.codigo||'')).includes(w)))continue;(by[m.seccion||'Sin sección']=by[m.seccion||'Sin sección']||[]).push([id,m]);}
+  const secs=Object.keys(by).sort();
+  return '<div class="row"><h1>Máquinas</h1><span class="sp"></span><button class="btn" data-a="newmaq">＋ Nueva máquina</button></div>'+
+    '<div class="filters"><input type="search" id="mq" data-live="1" placeholder="🔎 Buscar máquina o sección…" value="'+esc(S.mf.q)+'"><span class="muted small">'+S.maq.size+' máquinas</span></div>'+
+    (S.maq.size?'':'<div class="card"><p>Todavía no hay máquinas. Puedes cargarlas de golpe desde Ajustes → «Cargar máquinas de Fixner y de recambios», o añadirlas una a una.</p></div>')+
+    secs.map(s=>'<section class="card"><h2>'+esc(s)+' <span class="muted small">('+by[s].length+')</span></h2><table><thead><tr><th>Máquina</th><th>Abiertas</th><th>Averías 12 m</th><th>Parada 12 m</th></tr></thead><tbody>'+
+      by[s].sort((a,b)=>a[1].nombre.localeCompare(b[1].nombre)).map(([id,m])=>{const st=maqStats(id);return '<tr class="clk" data-go="maq/'+esc(id)+'"><td><span class="dot '+(st.stop?'r':st.open?'a':'g')+'"></span><b>'+esc(m.nombre)+'</b>'+(m.critica?' <span class="tag">crítica</span>':'')+(m.activa===false?' <span class="tag">de baja</span>':'')+'</td><td>'+(st.open||'')+'</td><td>'+(st.av12||'')+'</td><td>'+(st.par12?hrs(st.par12):'')+'</td></tr>';}).join('')+'</tbody></table></section>').join('');}
+function vMaq(mid){const m=S.maq.get(mid);if(!m)return '<div class="card empty">Máquina no encontrada. <a href="#maquinas">Volver</a></div>';const st=maqStats(mid);
+  const l=[...S.ots.entries()].filter(([,o])=>o.maqId===mid).sort((a,b)=>b[1].creadaEn-a[1].creadaEn);
+  const pv=[...S.prev.entries()].filter(([,p])=>p.maqId===mid);
+  const cls={};l.forEach(([,o])=>{if(o.tipo!=='Preventivo')cls[o.clase||'Otros']=(cls[o.clase||'Otros']||0)+1;});
+  return '<div class="row"><a href="#maquinas" class="btn sm">‹ Máquinas</a></div><div class="row" style="margin-top:8px"><h1 style="margin:0">'+esc(m.nombre)+'</h1>'+(st.stop?'<span class="tag stop">PARADA</span>':'')+'<span class="sp"></span><button class="btn" data-a="editmaq" data-id="'+esc(mid)+'">Editar</button><a class="btn primary" href="#nueva/'+esc(mid)+'">＋ Avería en esta máquina</a></div>'+
+    '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>'+st.open+'</b><span>OT abiertas</span></div><div class="kpi"><b>'+st.av12+'</b><span>Averías (12 meses)</span></div><div class="kpi"><b>'+hrs(st.par12)+'</b><span>Tiempo parada (12 meses)</span></div><div class="kpi"><b>'+st.total+'</b><span>OT en total</span></div></div>'+
+    '<div class="two"><div><section class="card"><h2>Historial de OT</h2>'+(l.length?'<div class="list">'+l.map(([id,o])=>otCard(id,o)).join('')+'</div>':'<div class="muted">Sin OT todavía.</div>')+'</section></div>'+
+    '<div><section class="card"><h2>Ficha</h2><dl class="kv"><dt>Sección</dt><dd>'+esc(m.seccion||'—')+'</dd><dt>Código</dt><dd>'+esc(m.codigo||'—')+'</dd><dt>Fabricante</dt><dd>'+esc(m.fabricante||'—')+'</dd><dt>Modelo</dt><dd>'+esc(m.modelo||'—')+'</dd><dt>Ubicación</dt><dd>'+esc(m.ubicacion||'—')+'</dd><dt>Notas</dt><dd style="white-space:pre-wrap">'+esc(m.notas||'—')+'</dd></dl></section>'+
+    '<section class="card"><h2>Averías por tipo</h2>'+(Object.keys(cls).length?Object.entries(cls).sort((a,b)=>b[1]-a[1]).map(([k,n])=>'<div class="hbar"><span class="l">'+esc(k)+'</span><span class="b" style="width:'+(n*14)+'px"></span><b>'+n+'</b></div>').join(''):'<div class="muted small">—</div>')+'</section>'+
+    '<section class="card"><div class="row"><h2 style="margin:0">Preventivos</h2><span class="sp"></span><button class="btn sm" data-a="newprev" data-m="'+esc(mid)+'">＋ Plan</button></div>'+(pv.length?'<table>'+pv.map(([id,p])=>'<tr><td><b>'+esc(p.tarea)+'</b><br><span class="muted small">cada '+p.cadaN+' '+esc(p.unidad)+'</span></td><td>'+fISO(p.proxima)+'</td></tr>').join('')+'</table>':'<div class="muted small" style="margin-top:6px">Sin planes.</div>')+'</section></div></div>';}
+/* ---------- PREVENTIVO ---------- */
+function vPrev(){const l=[...S.prev.entries()].sort((a,b)=>(a[1].activo===false)-(b[1].activo===false)||String(a[1].proxima).localeCompare(String(b[1].proxima)));const t=today(),w=addDays(t,7,'dias');
+  return '<div class="row"><h1>Mantenimiento preventivo</h1><span class="sp"></span><button class="btn primary" data-a="newprev">＋ Nuevo plan</button></div>'+
+    '<p class="muted small">Cada plan crea su OT sola cuando llega la fecha (o los días de antelación que pongas). Al finalizar esa OT, la próxima fecha se calcula sola.</p>'+
+    (l.length?'<section class="card"><table><thead><tr><th></th><th>Tarea</th><th>Máquina</th><th>Cada</th><th>Próxima</th><th>Técnico</th><th></th></tr></thead><tbody>'+l.map(([id,p])=>{const open=[...S.ots.entries()].find(([,o])=>o.planId===id&&OPEN(o.estado));
+      return '<tr><td>'+(p.activo===false?'<span class="tag">pausado</span>':p.proxima<=t?'<span class="dot r"></span>':p.proxima<=w?'<span class="dot a"></span>':'<span class="dot g"></span>')+'</td><td><b>'+esc(p.tarea)+'</b>'+((p.checklist||[]).length?'<br><span class="muted small">'+p.checklist.length+' puntos de revisión</span>':'')+'</td><td>'+esc((S.maq.get(p.maqId)||{}).nombre||p.maqNombre||'—')+'</td><td>'+p.cadaN+' '+esc(p.unidad)+'</td><td>'+fISO(p.proxima)+(p.ultima?'<br><span class="muted small">últ. '+fISO(p.ultima)+'</span>':'')+'</td><td>'+esc(p.tecnico||'—')+'</td><td class="row" style="gap:4px">'+(open?'<a class="btn sm" href="#ot/'+open[0]+'">Ver OT</a>':'<button class="btn sm" data-a="genprev" data-id="'+id+'">Crear OT ya</button>')+'<button class="btn sm" data-a="editprev" data-id="'+id+'">Editar</button></td></tr>';}).join('')+'</tbody></table></section>':'<div class="card empty">Sin planes de preventivo todavía.</div>');}
+/* ---------- INFORMES ---------- */
+function vInformes(){const days=+(S.infD||30),from=Date.now()-days*864e5,l=[...S.ots.values()].filter(o=>o.creadaEn>=from);
+  const av=l.filter(o=>o.tipo!=='Preventivo'),fin=l.filter(o=>o.estado==='Finalizada');
+  const grp=(arr,f)=>{const m={};arr.forEach(o=>{const k=f(o)||'—';m[k]=(m[k]||0)+1;});return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+  const bar=(rows,unit)=>{const mx=Math.max(1,...rows.map(r=>r[1]));return rows.slice(0,10).map(([k,n])=>'<div class="hbar"><span class="l" title="'+esc(k)+'">'+esc(k)+'</span><span class="b" style="width:'+Math.round(n/mx*170)+'px"></span><b>'+(unit?hrs(n):n)+'</b></div>').join('')||'<div class="muted small">Sin datos.</div>';};
+  const par={};l.forEach(o=>{const p=paradaMs(o);if(p)par[maqName(o)]=(par[maqName(o)]||0)+p;});
+  const hT={};l.forEach(o=>(o.intervenciones||[]).forEach(i=>{hT[i.tecnico]=(hT[i.tecnico]||0)+((i.fin||Date.now())-i.inicio);}));
+  const mttr=fin.length?fin.reduce((a,o)=>a+(o.cerradaEn-o.creadaEn),0)/fin.length:0,parT=Object.values(par).reduce((a,b)=>a+b,0);
+  return '<div class="row"><h1>Informes</h1><span class="sp"></span><div class="seg">'+[7,30,90,365].map(d=>'<button data-a="infd" data-v="'+d+'" class="'+(d===days?'on':'')+'">'+(d===365?'1 año':d+' días')+'</button>').join('')+'</div><button class="btn" data-a="csv">⬇ Exportar CSV</button></div>'+
+    '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>'+av.length+'</b><span>Averías</span></div><div class="kpi"><b>'+l.filter(o=>o.tipo==='Preventivo').length+'</b><span>Preventivos</span></div><div class="kpi"><b>'+fin.length+'</b><span>Finalizadas</span></div><div class="kpi"><b>'+hrs(mttr)+'</b><span>Tiempo medio de resolución</span></div><div class="kpi red"><b>'+hrs(parT)+'</b><span>Tiempo total de máquina parada</span></div></div>'+
+    '<div class="grid g2"><section class="card"><h2>Máquinas con más averías</h2>'+bar(grp(av,maqName))+'</section><section class="card"><h2>Más tiempo parada</h2>'+bar(Object.entries(par).sort((a,b)=>b[1]-a[1]),1)+'</section>'+
+    '<section class="card"><h2>Por tipo de avería</h2>'+bar(grp(av,o=>o.clase))+'</section><section class="card"><h2>Por sección</h2>'+bar(grp(av,maqSec))+'</section>'+
+    '<section class="card"><h2>Horas por técnico</h2>'+bar(Object.entries(hT).sort((a,b)=>b[1]-a[1]),1)+'</section><section class="card"><h2>Causas (al cerrar)</h2>'+bar(grp(fin.filter(o=>o.cierre),o=>o.cierre.causa))+'</section></div>';}
+/* ---------- AJUSTES ---------- */
+function vAjustes(){const c=cfg();const box=(k,t,h)=>'<section class="card"><h2>'+t+'</h2><p class="muted small">'+h+'</p><textarea data-cfg="'+k+'" rows="6">'+esc(c[k].join('\n'))+'</textarea></section>';
+  const fxOpen=[...S.fx.values()].filter(o=>o.estado!=='Finalizada').length;
+  return '<h1>Ajustes</h1><p class="muted small">Una línea por opción. Se guarda al salir del cuadro.</p><div class="grid g2">'+box('tecnicos','Técnicos','Los nombres tienen que coincidir con el nombre con el que entra cada técnico para que le salga «Mis OT».')+box('secciones','Secciones','')+box('clases','Tipos de avería','')+box('tipos','Tipos de trabajo','')+box('origenes','Cómo llega el aviso','')+box('causas','Causas (al cerrar una OT)','')+'</div>'+
+    '<section class="card"><h2>Cargar datos de Fixner</h2><p>Para empezar sin teclear: crea las <b>máquinas</b> a partir de las de Fixner y de la web de recambios, y pasa aquí las <b>OT de Fixner que siguen abiertas</b> ('+fxOpen+'), con su estado y prioridad. Se puede repetir: no duplica nada.</p><div class="row"><button class="btn" data-a="impmaq">Cargar máquinas</button><button class="btn" data-a="impfx">Pasar OT abiertas de Fixner</button></div></section>';}
+/* ====== eventos ====== */
+document.addEventListener('click',async e=>{const g=e.target.closest('[data-go]');if(g&&!e.target.closest('[data-a]')){location.hash=g.dataset.go;return;}
+  const b=e.target.closest('[data-a]');if(!b||b.tagName==='FORM'||b.type==='file'||b.tagName==='INPUT')return;const a=b.dataset.a;const id=S.arg,o=S.ots.get(id);
+  try{switch(a){
+    case 'asignarme':{const as=[...new Set([...(o.asignados||[]),meName()])];await saveOT(id,{asignados:as,estado:o.estado==='Abierta'?'Asignada':o.estado},'Se la queda '+meName());break;}
+    case 'empezar':{const i={id:uid(),tecnico:meName(),inicio:Date.now(),fin:null,trabajo:''};const as=[...new Set([...(o.asignados||[]),meName()])];await saveOT(id,{intervenciones:[...(o.intervenciones||[]),i],estado:'En curso',asignados:as},meName()+' empieza a trabajar');break;}
+    case 'parar':{const run=runInt(o);modal('<h2>Parar trabajo</h2><label>¿Qué has hecho?</label><textarea id="mt">'+esc(run.trabajo||'')+'</textarea><label>¿Cómo queda la OT?</label><select id="ms"><option>En curso</option><option>Pausada</option><option>Bloqueada OP</option><option>Bloqueada PA</option><option value="__fin">Finalizar ahora</option></select><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="mc">Cancelar</button><button class="btn primary" id="mo">Guardar</button></div>',m=>{
+      m.querySelector('#mc').onclick=()=>m.remove();m.querySelector('#mo').onclick=async()=>{const ints=(o.intervenciones||[]).map(x=>x.id===run.id?Object.assign({},x,{fin:Date.now(),trabajo:m.querySelector('#mt').value.trim()}):x);const st=m.querySelector('#ms').value;m.remove();
+        await saveOT(id,{intervenciones:ints,estado:st==='__fin'?o.estado:st},meName()+' para el trabajo ('+hrs(Date.now()-run.inicio)+')');if(st==='__fin')finalizar(id);};});break;}
+    case 'estado':{const v=b.dataset.v;const p={estado:v};if(v==='Bloqueada PA'&&!o.parada){p.parada=true;p.paradaDesde=Date.now();}await saveOT(id,p,'Estado: '+v);break;}
+    case 'finalizar':finalizar(id);break;
+    case 'anular':if(confirm('¿Anular esta OT? Quedará en el historial como anulada.'))await saveOT(id,{estado:'Anulada',cerradaEn:Date.now(),paradaHasta:o.parada?Date.now():o.paradaHasta},'Anulada');break;
+    case 'reabrir':await saveOT(id,{estado:'Abierta',reabierta:true},'Reabierta');break;
+    case 'verfoto':verFoto(b.dataset.u);break;
+    case 'delfoto':if(confirm('¿Quitar esta foto?')){const f=[...(o.fotos||[])];f.splice(+b.dataset.i,1);await saveOT(id,{fotos:f},'Foto quitada');}break;
+    case 'addint':case 'editint':intForm(id,a==='editint'?+b.dataset.i:-1);break;
+    case 'addmat':matForm(id);break;
+    case 'delmat':{const m=[...(o.material||[])];m.splice(+b.dataset.i,1);await saveOT(id,{material:m},'Material quitado');break;}
+    case 'recibido':{const m=(o.material||[]).map((x,i)=>i===+b.dataset.i?Object.assign({},x,{recibido:Date.now()}):x);await saveOT(id,{material:m},'Material recibido: '+o.material[+b.dataset.i].desc);break;}
+    case 'pedir':await pedirMaterial(id,+b.dataset.i);break;
+    case 'chk':break;
+    case 'editot':otForm(id);break;
+    case 'newmaq':maqForm(null);break;case 'editmaq':maqForm(b.dataset.id);break;
+    case 'newprev':prevForm(null,b.dataset.m);break;case 'editprev':prevForm(b.dataset.id);break;
+    case 'genprev':{const p=S.prev.get(b.dataset.id);await savePrev(b.dataset.id,{proxima:today()});await genPreventivos();toast('OT de preventivo creada');break;}
+    case 'infd':S.infD=+b.dataset.v;render();break;
+    case 'csv':exportCSV();break;
+    case 'impmaq':await importMaq();break;case 'impfx':await importFx();break;
+  }}catch(x){toast('Error: '+(x.message||x));}
+});
+document.addEventListener('change',async e=>{const t=e.target;
+  if(t.dataset.a==='addfoto'&&t.files.length){toast('Subiendo fotos…');try{const f=await uploadFotos(t.files);const o=S.ots.get(S.arg);await saveOT(S.arg,{fotos:[...(o.fotos||[]),...f]},'Fotos añadidas ('+f.length+')');}catch(x){toast('No se han podido subir: '+(x.message||x));}return;}
+  if(t.dataset.a==='chk'){const o=S.ots.get(S.arg);const c=(o.checklist||[]).map((x,i)=>i===+t.dataset.i?Object.assign({},x,{ok:t.checked}):x);await saveOT(S.arg,{checklist:c});return;}
+  if(t.dataset.f){S.f[t.dataset.f]=t.value;render();return;}
+  if(t.dataset.cfg){const v=t.value.split('\n').map(s=>s.trim()).filter(Boolean);await saveCfg({[t.dataset.cfg]:v});toast('Guardado');return;}
+  if(t.name==='maqId'&&t.form&&t.form.id==='fnueva'){t.form.maqOtra.style.display=t.value==='__otra'?'':'none';}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='fq'){S.f.q=t.value;debR();}else if(t.id==='mq'){S.mf.q=t.value;debR();}});
+let dT=null;function debR(){clearTimeout(dT);dT=setTimeout(()=>{const ae=document.activeElement,id=ae&&ae.id,p=ae&&ae.selectionStart;doRenderForce();if(id){const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(p,p);}catch(x){}}}},200);}
+function doRenderForce(){nav();const v=S.view==='ot'?vOT:S.view==='maq'?vMaq:S.view==='nueva'?vNueva:(VIEWS[S.view]||VIEWS.panel)[1];$('#app').innerHTML=v(S.arg);hydrate();}
+document.addEventListener('click',e=>{const s=e.target.closest('#segpar button');if(!s)return;s.parentNode.querySelectorAll('button').forEach(x=>x.className='');s.className='on'+(s.dataset.v==='1'?' r':'');$('#fnueva').parada.value=s.dataset.v;
+  if(s.dataset.v==='1'){const p=$('#fnueva').prioridad;if(p.value==='Media'||p.value==='Baja')p.value='Alta';}});
+document.addEventListener('submit',async e=>{const f=e.target;if(!f.dataset.a)return;e.preventDefault();
+  if(f.dataset.a==='comentar'){const txt=f.txt.value.trim();if(!txt)return;const o=S.ots.get(S.arg);await saveOT(S.arg,{comentarios:[...(o.comentarios||[]),{t:Date.now(),u:meName(),txt}]});f.txt.value='';return;}
+  if(f.dataset.a==='crear'){const btn=f.querySelector('button.primary');btn.disabled=true;btn.textContent='Creando…';
+    try{let mid=f.maqId.value,mname='';if(mid==='__otra'){mname=f.maqOtra.value.trim();if(!mname){toast('Escribe el nombre de la máquina');btn.disabled=false;btn.textContent='Crear la OT';return;}mid='';}
+      const fotos=f.fotos.files.length?await uploadFotos(f.fotos.files):[];
+      const id=await createOT({titulo:f.titulo.value.trim(),descripcion:f.descripcion.value.trim(),maqId:mid,maqNombre:mid?(S.maq.get(mid)||{}).nombre:mname,seccion:mid?(S.maq.get(mid)||{}).seccion:'',
+        parada:f.parada.value==='1',prioridad:f.prioridad.value,clase:f.clase.value,tipo:f.tipo.value,solicitante:f.solicitante.value.trim(),origen:f.origen.value,asignados:f.asig.value?[f.asig.value]:[],fotos});
+      toast('OT creada');location.hash='ot/'+id;}catch(x){toast('No se ha podido crear: '+(x.message||x));btn.disabled=false;btn.textContent='Crear la OT';}}
+});
+$('#fab').onclick=()=>{location.hash='nueva';};
+/* ====== formularios en ventana ====== */
+function finalizar(id){const o=S.ots.get(id),c=cfg(),run=runInt(o),pend=(o.material||[]).filter(m=>!m.recibido).length;
+  modal('<h2>Finalizar '+esc(o.codigo)+'</h2>'+(pend?'<p class="small" style="color:var(--amber)">⚠ Hay '+pend+' material(es) sin recibir.</p>':'')+'<label>Causa</label><select id="fc">'+c.causas.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select><label>¿Qué se ha hecho? (solución)</label><textarea id="fs" placeholder="Ej. Cambiado rodamiento lado operador y ajustada correa">'+esc(run?run.trabajo:'')+'</textarea>'+
+    (o.parada||o.estado==='Bloqueada PA'?'<label class="check"><input type="checkbox" id="fm" checked> <span>La máquina vuelve a funcionar</span></label>':'')+'<div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="fx">Cancelar</button><button class="btn primary" id="fo">Finalizar OT</button></div>',m=>{
+    m.querySelector('#fx').onclick=()=>m.remove();
+    m.querySelector('#fo').onclick=async()=>{const t=Date.now(),ints=(o.intervenciones||[]).map(x=>x.fin?x:Object.assign({},x,{fin:t,trabajo:x.trabajo||m.querySelector('#fs').value.trim()}));
+      const p={estado:'Finalizada',cerradaEn:t,cerradaPor:meName(),intervenciones:ints,cierre:{causa:m.querySelector('#fc').value,solucion:m.querySelector('#fs').value.trim()}};
+      if(o.paradaDesde&&!o.paradaHasta)p.paradaHasta=t;m.remove();await saveOT(id,p,'Finalizada');
+      if(o.planId&&S.prev.has(o.planId)){const pl=S.prev.get(o.planId);await savePrev(o.planId,{ultima:today(),proxima:addDays(today(),+pl.cadaN||1,pl.unidad)});}
+      toast('OT finalizada');};});}
+function intForm(id,ix){const o=S.ots.get(id),c=cfg(),i=ix>=0?o.intervenciones[ix]:{tecnico:meName(),inicio:Date.now()-3600000,fin:Date.now(),trabajo:''};
+  const dl=t=>{if(!t)return '';const d=new Date(t);return iso(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes());};
+  modal('<h2>'+(ix>=0?'Editar':'Añadir')+' intervención</h2><label>Técnico</label><input id="it" list="tecs" value="'+esc(i.tecnico)+'"><datalist id="tecs">'+c.tecnicos.map(t=>'<option value="'+esc(t)+'">').join('')+'</datalist>'+
+    '<div class="grid g2"><div><label>Inicio</label><input type="datetime-local" id="ii" value="'+dl(i.inicio)+'"></div><div><label>Fin</label><input type="datetime-local" id="if" value="'+dl(i.fin)+'"></div></div><label>Trabajo hecho</label><textarea id="iw">'+esc(i.trabajo||'')+'</textarea>'+
+    '<div class="row" style="margin-top:12px">'+(ix>=0?'<button class="btn danger" id="id">Borrar</button>':'')+'<span class="sp"></span><button class="btn" id="ic">Cancelar</button><button class="btn primary" id="io">Guardar</button></div>',m=>{
+    m.querySelector('#ic').onclick=()=>m.remove();
+    if(ix>=0)m.querySelector('#id').onclick=async()=>{const l=[...o.intervenciones];l.splice(ix,1);m.remove();await saveOT(id,{intervenciones:l},'Intervención borrada');};
+    m.querySelector('#io').onclick=async()=>{const ini=new Date(m.querySelector('#ii').value).getTime(),fin=m.querySelector('#if').value?new Date(m.querySelector('#if').value).getTime():null;
+      if(!ini||(fin&&fin<ini)){toast('Revisa las horas');return;}const n=Object.assign({},i,{id:i.id||uid(),tecnico:m.querySelector('#it').value.trim()||meName(),inicio:ini,fin,trabajo:m.querySelector('#iw').value.trim()});
+      const l=[...(o.intervenciones||[])];if(ix>=0)l[ix]=n;else l.push(n);m.remove();await saveOT(id,{intervenciones:l},(ix>=0?'Intervención editada':'Intervención añadida')+' ('+n.tecnico+')');};});}
+function matForm(id){const o=S.ots.get(id);
+  modal('<h2>Añadir material</h2><label>¿Qué hace falta?</label><input id="md" placeholder="Ej. Rodamiento 6205 2RS"><div class="grid g2"><div><label>Cantidad</label><input id="mc" type="number" min="1" value="1"></div><div><label>Referencia (opcional)</label><input id="mr"></div></div>'+
+    '<label class="check"><input type="checkbox" id="mp" checked> <span>Pedirlo ya a la web de recambios</span></label><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="mx">Cancelar</button><button class="btn primary" id="mo">Añadir</button></div>',m=>{
+    m.querySelector('#mx').onclick=()=>m.remove();m.querySelector('#md').focus();
+    m.querySelector('#mo').onclick=async()=>{const d=m.querySelector('#md').value.trim();if(!d){toast('Escribe qué hace falta');return;}const it={desc:d,cant:+m.querySelector('#mc').value||1,ref:m.querySelector('#mr').value.trim(),t:Date.now()};const ped=m.querySelector('#mp').checked;m.remove();
+      const l=[...(o.material||[]),it];await saveOT(id,{material:l},'Material: '+d);if(ped)await pedirMaterial(id,l.length-1);};});}
+async function pedirMaterial(id,ix){const o=S.ots.get(id),m=o.material[ix];const rid='av-'+id+'-'+ix+'-'+(m.t||0);const t=Date.now();
+  await S.db.collection('recambios').doc(rid).set({fecha:today(),descripcion:String(m.desc).toUpperCase().slice(0,70),maquina:String(maqName(o)).toUpperCase(),solicitante:meName().toUpperCase(),ot:o.codigo,compra:'X',urgente:o.prioridad==='Crítica'||isStop(o),
+    explicacion:'Desde Averías: '+o.codigo+' «'+(o.titulo||'')+'» — '+m.cant+' ud.'+(m.ref?' · ref. '+m.ref:'')+(isStop(o)?' · MÁQUINA PARADA':''),origen:'averias',creadoEn:t,orden:t});
+  const l=(o.material||[]).map((x,i)=>i===ix?Object.assign({},x,{recId:rid}):x);
+  const p={material:l};if(o.estado==='En curso'||o.estado==='Asignada'||o.estado==='Abierta')p.estado=isStop(o)?'Bloqueada PA':'Bloqueada OP';
+  await saveOT(id,p,'Pedido a recambios: '+m.desc);toast('Pedido creado en la web de recambios');}
+function otForm(id){const o=S.ots.get(id),c=cfg();
+  modal('<h2>Editar '+esc(o.codigo)+'</h2><label>Título</label><input id="et" value="'+esc(o.titulo)+'"><label>Descripción</label><textarea id="ed">'+esc(o.descripcion||'')+'</textarea><label>Máquina</label><select id="em">'+maqOptions(o.maqId)+'</select>'+
+    '<div class="grid g2"><div><label>Prioridad</label><select id="ep">'+PRIOS.map(p=>'<option'+(p===o.prioridad?' selected':'')+'>'+p+'</option>').join('')+'</select></div><div><label>Tipo de avería</label><select id="ec">'+selOpts(c.clases,o.clase,'—')+'</select></div><div><label>Tipo de trabajo</label><select id="ey">'+selOpts(c.tipos,o.tipo,'—')+'</select></div><div><label>Estado</label><select id="es">'+ESTADOS.map(x=>'<option'+(x===o.estado?' selected':'')+'>'+x+'</option>').join('')+'</select></div></div>'+
+    '<label>Asignada a</label><div>'+c.tecnicos.map(t=>'<label class="check" style="display:inline-flex;margin-right:12px"><input type="checkbox" class="ea" value="'+esc(t)+'"'+((o.asignados||[]).includes(t)?' checked':'')+'> '+esc(t)+'</label>').join('')+'</div>'+
+    '<label class="check"><input type="checkbox" id="epa"'+(o.parada?' checked':'')+'> <span>Máquina parada</span></label><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="ex">Cancelar</button><button class="btn primary" id="eo">Guardar</button></div>',m=>{
+    m.querySelector('#ex').onclick=()=>m.remove();
+    m.querySelector('#eo').onclick=async()=>{const mid=m.querySelector('#em').value,par=m.querySelector('#epa').checked,t=Date.now();
+      const p={titulo:m.querySelector('#et').value.trim(),descripcion:m.querySelector('#ed').value.trim(),prioridad:m.querySelector('#ep').value,clase:m.querySelector('#ec').value,tipo:m.querySelector('#ey').value,estado:m.querySelector('#es').value,asignados:[...m.querySelectorAll('.ea:checked')].map(x=>x.value),parada:par};
+      if(mid&&mid!=='__otra'){p.maqId=mid;p.maqNombre=(S.maq.get(mid)||{}).nombre;p.seccion=(S.maq.get(mid)||{}).seccion;}
+      if(par&&!o.parada){p.paradaDesde=t;p.paradaHasta=null;}if(!par&&o.parada&&!o.paradaHasta)p.paradaHasta=t;m.remove();await saveOT(id,p,'Datos editados');};});}
+function maqForm(mid){const m0=mid?S.maq.get(mid):{nombre:'',seccion:'',activa:true},c=cfg();
+  modal('<h2>'+(mid?'Editar máquina':'Nueva máquina')+'</h2><label>Nombre</label><input id="qn" value="'+esc(m0.nombre)+'"><div class="grid g2"><div><label>Sección</label><input id="qs" list="secs" value="'+esc(m0.seccion||'')+'"><datalist id="secs">'+c.secciones.map(s=>'<option value="'+esc(s)+'">').join('')+'</datalist></div><div><label>Código interno</label><input id="qc" value="'+esc(m0.codigo||'')+'"></div>'+
+    '<div><label>Fabricante</label><input id="qf" value="'+esc(m0.fabricante||'')+'"></div><div><label>Modelo</label><input id="qm" value="'+esc(m0.modelo||'')+'"></div><div><label>Ubicación</label><input id="qu" value="'+esc(m0.ubicacion||'')+'"></div></div><label>Notas</label><textarea id="qt">'+esc(m0.notas||'')+'</textarea>'+
+    '<label class="check"><input type="checkbox" id="qk"'+(m0.critica?' checked':'')+'> <span>Máquina crítica</span></label><label class="check"><input type="checkbox" id="qa"'+(m0.activa!==false?' checked':'')+'> <span>En servicio (desmárcala si se da de baja)</span></label>'+
+    '<div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="qx">Cancelar</button><button class="btn primary" id="qo">Guardar</button></div>',m=>{
+    m.querySelector('#qx').onclick=()=>m.remove();
+    m.querySelector('#qo').onclick=async()=>{const n=m.querySelector('#qn').value.trim();if(!n){toast('Pon el nombre');return;}const id=mid||('m'+uid());
+      const d={nombre:n,seccion:m.querySelector('#qs').value.trim(),codigo:m.querySelector('#qc').value.trim(),fabricante:m.querySelector('#qf').value.trim(),modelo:m.querySelector('#qm').value.trim(),ubicacion:m.querySelector('#qu').value.trim(),notas:m.querySelector('#qt').value.trim(),critica:m.querySelector('#qk').checked,activa:m.querySelector('#qa').checked};
+      m.remove();await saveMaq(id,d);toast('Máquina guardada');if(!mid)location.hash='maq/'+id;};});}
+function prevForm(pid,maqPre){const p=pid?S.prev.get(pid):{tarea:'',maqId:maqPre||'',cadaN:1,unidad:'meses',proxima:today(),activo:true,checklist:[],prioridad:'Media',antelacion:0},c=cfg();
+  modal('<h2>'+(pid?'Editar plan':'Nuevo plan de preventivo')+'</h2><label>Tarea</label><input id="pt" value="'+esc(p.tarea)+'" placeholder="Ej. Engrase general y revisión de correas"><label>Máquina</label><select id="pm">'+maqOptions(p.maqId)+'</select>'+
+    '<div class="grid g3"><div><label>Cada</label><input id="pn" type="number" min="1" value="'+esc(p.cadaN)+'"></div><div><label>&nbsp;</label><select id="pu">'+['dias','semanas','meses'].map(u=>'<option'+(u===p.unidad?' selected':'')+'>'+u+'</option>').join('')+'</select></div><div><label>Próxima fecha</label><input id="pf" type="date" value="'+esc(p.proxima)+'"></div>'+
+    '<div><label>Técnico</label><select id="pk">'+selOpts(c.tecnicos,p.tecnico,'Sin asignar')+'</select></div><div><label>Prioridad</label><select id="pp">'+PRIOS.map(x=>'<option'+(x===p.prioridad?' selected':'')+'>'+x+'</option>').join('')+'</select></div><div><label>Crear OT con antelación (días)</label><input id="pa" type="number" min="0" value="'+esc(p.antelacion||0)+'"></div></div>'+
+    '<label>Puntos a revisar (uno por línea)</label><textarea id="pc" rows="5">'+esc((p.checklist||[]).join('\n'))+'</textarea><label class="check"><input type="checkbox" id="pv"'+(p.activo!==false?' checked':'')+'> <span>Plan activo</span></label>'+
+    '<div class="row" style="margin-top:12px">'+(pid?'<button class="btn danger" id="pd">Borrar plan</button>':'')+'<span class="sp"></span><button class="btn" id="px">Cancelar</button><button class="btn primary" id="po">Guardar</button></div>',m=>{
+    m.querySelector('#px').onclick=()=>m.remove();
+    if(pid)m.querySelector('#pd').onclick=async()=>{if(!confirm('¿Borrar este plan? Las OT ya creadas se quedan.'))return;m.remove();S.prev.delete(pid);render();await S.db.collection('av_prev').doc(pid).delete();};
+    m.querySelector('#po').onclick=async()=>{const t=m.querySelector('#pt').value.trim(),mid=m.querySelector('#pm').value;if(!t||!mid||mid==='__otra'){toast('Pon la tarea y elige la máquina');return;}
+      const d={tarea:t,maqId:mid,maqNombre:(S.maq.get(mid)||{}).nombre||'',cadaN:+m.querySelector('#pn').value||1,unidad:m.querySelector('#pu').value,proxima:m.querySelector('#pf').value||today(),tecnico:m.querySelector('#pk').value,prioridad:m.querySelector('#pp').value,antelacion:+m.querySelector('#pa').value||0,
+        checklist:m.querySelector('#pc').value.split('\n').map(s=>s.trim()).filter(Boolean),activo:m.querySelector('#pv').checked};m.remove();await savePrev(pid||('p'+uid()),d);toast('Plan guardado');genPreventivos();};});}
+/* ====== exportar ====== */
+function exportCSV(){const rows=[['Código','Estado','Prioridad','Tipo','Avería','Máquina','Sección','Título','Descripción','Parada','Creada','Creada por','Avisa','Asignados','Horas trabajo','Tiempo parada (h)','Cerrada','Causa','Solución']];
+  for(const o of S.ots.values())rows.push([o.codigo,o.estado,o.prioridad,o.tipo,o.clase,maqName(o),maqSec(o),o.titulo,o.descripcion,o.parada?'Sí':'No',fDT(o.creadaEn),o.creadaPor,o.solicitante,(o.asignados||[]).join(', '),(horasOT(o)/3600000).toFixed(2).replace('.',','),(paradaMs(o)/3600000).toFixed(2).replace('.',','),fDT(o.cerradaEn),o.cierre&&o.cierre.causa,o.cierre&&o.cierre.solucion]);
+  const csv='﻿'+rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='ordenes-trabajo-'+today()+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);}
+/* ====== importar desde Fixner / recambios (una vez; ids fijos para no duplicar) ====== */
+const cleanMaq=s=>String(s||'').replace(/\*[^*]*\*/g,'').replace(/\s+/g,' ').trim();
+const mKey=s=>nrm(cleanMaq(s)).replace(/[^a-z0-9]/g,'');
+function guessSec(n){const s=nrm(n);if(/holweg|newlong|bolsa|garant|fischer/.test(s))return 'Bolsas';if(/servillet|canguro|teyman|omet|fold|perini/.test(s))return 'Servilletas 1';if(/mantel|didde|resmadora/.test(s))return 'Manteles';if(/carton|jores|prensa|heiber|kolbus|sicosa|troquel/.test(s))return 'Cartón';if(/dispens|toallit/.test(s))return 'Dispensing';if(/compres|caldera|electric|instal|nave|aire/.test(s))return 'Instalaciones';if(/taller/.test(s))return 'Mantenimiento';return '';}
+async function importMaq(){const have=new Set([...S.maq.values()].map(m=>mKey(m.nombre)));const names=new Map();
+  for(const o of S.fx.values()){const n=cleanMaq(o.activo);if(n&&n.length>1)names.set(mKey(n),n);}
+  for(const r of S.rec){const n=cleanMaq(r.maquina);if(n&&n.length>1&&!/^(taller|varios|stock|general|-|x)$/i.test(n))if(!names.has(mKey(n)))names.set(mKey(n),n.toUpperCase());}
+  const nuevas=[...names.entries()].filter(([k])=>k&&!have.has(k));if(!nuevas.length){toast('No hay máquinas nuevas que cargar');return;}
+  if(!confirm('Se crearán '+nuevas.length+' máquinas (sacadas de Fixner y de la web de recambios). La sección se intenta adivinar; revísala luego. ¿Seguir?'))return;
+  let n=0;for(const [k,nm] of nuevas){await S.db.collection('av_maq').doc('mx-'+k.slice(0,40)).set({nombre:nm,seccion:guessSec(nm),activa:true,origen:'importada'});n++;}
+  toast(n+' máquinas creadas');}
+async function importFx(){const byKey=new Map([...S.maq.entries()].map(([id,m])=>[mKey(m.nombre),id]));
+  const l=[...S.fx.values()].filter(o=>o.estado&&o.estado!=='Finalizada'&&o.codigo&&!S.ots.has('fx-'+o.codigo.replace('/','-')));
+  if(!l.length){toast('No hay OT de Fixner nuevas que pasar');return;}
+  if(!confirm('Se pasarán '+l.length+' OT abiertas de Fixner, con su estado y prioridad. ¿Seguir?'))return;
+  const pm={'CRÍTICA':'Crítica','CRITICA':'Crítica','ALTA':'Alta','MEDIA':'Media','BAJA':'Baja'};
+  const em={'Abierta':'Abierta','Aceptada':'Asignada','Reabierta':'Abierta','Pausada':'Pausada','Bloqueada OP':'Bloqueada OP','Bloqueada PA':'Bloqueada PA'};
+  let n=0;for(const o of l){const id='fx-'+o.codigo.replace('/','-'),mn=cleanMaq(o.activo),mid=byKey.get(mKey(mn))||'';const m=/(\d+)\/(\d+)\/(\d+)/.exec(o.inicio||'');const t=m?new Date(+m[3],+m[2]-1,+m[1],8).getTime():Date.now();
+    const d={codigo:o.codigo,fxCodigo:o.codigo,titulo:o.descripcion||'(sin descripción en Fixner)',descripcion:'Traída de Fixner ('+o.codigo+'). Tipo en Fixner: '+(o.tipo||'—')+'.',maqId:mid,maqNombre:mn,seccion:mid?(S.maq.get(mid)||{}).seccion:'',
+      estado:em[o.estado]||'Abierta',prioridad:pm[String(o.prioridad||'').toUpperCase()]||'Media',parada:o.estado==='Bloqueada PA',tipo:/prevent/i.test(o.tipo||'')?'Preventivo':'Avería',clase:/el[eé]ctric/i.test(o.tipo||'')?'Eléctrica':/mec[aá]nic/i.test(o.tipo||'')?'Mecánica':'Otros',
+      origen:'Fixner',solicitante:'',asignados:[],creadaEn:t,creadaPor:'Importada de Fixner',intervenciones:[],material:[],fotos:[],comentarios:[],historial:[{t:Date.now(),u:meName(),c:'Importada de Fixner'}]};
+    if(d.parada)d.paradaDesde=t;await S.db.collection('av_ot').doc(id).set(d);n++;}
+  toast(n+' OT traídas de Fixner');}
+/* ====== arranque ====== */
+(async()=>{
+  S.db=await claude.use('db');S.assets=await claude.use('assets');const u=await claude.use('user');S.me=await u.me();S.admin=await u.isOwner();
+  $('#who').textContent=meName();
+  const on=(col,fn)=>S.db.collection(col).onSnapshot(sn=>{fn(sn);if(S.ready){render();if(col==='av_prev'||col==='av_ot')schedGen();}});
+  on('av_ot',sn=>{S.ots=new Map(sn.docs.map(d=>[d.id,d.data()]));});
+  on('av_maq',sn=>{S.maq=new Map(sn.docs.map(d=>[d.id,d.data()]));});
+  on('av_prev',sn=>{S.prev=new Map(sn.docs.map(d=>[d.id,d.data()]));});
+  on('av_cfg',sn=>{const d=sn.docs.find(x=>x.id==='main');S.cfg=d?d.data():null;});
+  on('recambios',sn=>{S.rec=sn.docs.map(d=>({id:d.id,...d.data()}));});
+  on('fixner_ots',sn=>{S.fx=new Map(sn.docs.filter(d=>d.id!=='_meta').map(d=>[d.id,d.data()]));});
+  await S.db.collection('av_ot').get();
+  S.ready=true;route();schedGen();
+  setInterval(()=>{if(S.view==='ot'||S.view==='panel')render();},60000);
+})();
+let gT=null;function schedGen(){clearTimeout(gT);gT=setTimeout(()=>genPreventivos().catch(()=>{}),1500);}
+window.__av=S;
+})();
+</script>
+</body>
+</html>
