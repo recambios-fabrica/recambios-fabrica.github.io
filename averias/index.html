@@ -39,7 +39,16 @@ textarea{min-height:70px;resize:vertical}label{display:block;font-size:13px;colo
 .p-Crítica{background:var(--red-bg);color:var(--red)}.p-Alta{background:#ffe5d0;color:#b44a00}.p-Media{background:var(--blue-bg);color:var(--blue)}.p-Baja{background:var(--grey-bg);color:#4a5058}
 .tag{display:inline-block;background:var(--grey-bg);border-radius:6px;padding:0 7px;font-size:12px;color:#4a5058}.tag.stop{background:var(--red);color:#fff;font-weight:700}
 .list{display:flex;flex-direction:column;gap:8px}
-.otc{background:#fff;border:1px solid var(--line);border-left:5px solid var(--amber);border-radius:10px;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:4px 10px}
+.otc{background:#fff;border:1px solid var(--line);border-left:5px solid var(--amber);border-radius:10px;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:4px 14px}
+.otc .side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;min-width:150px}.otc .who{font-size:13px;margin-top:3px}
+.crew{display:flex;flex-direction:column;gap:6px}.crew .p{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}.crew .p.on{border-color:#2fb35a;background:#effaf2}.crew .av{width:34px;height:34px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}.crew .p.on .av{background:#2fb35a;color:#fff}.crew .nm{font-weight:700}.crew .st{font-size:12px;color:var(--mut)}.crew .tm{font:700 15px ui-monospace,monospace;margin-left:auto;text-align:right}
+.tot{display:flex;justify-content:space-between;font-weight:800;border-top:2px solid var(--line);padding-top:8px;margin-top:4px}
+.drop{border:2px dashed #9db8d9;background:#f3f7fc;border-radius:12px;padding:14px;text-align:center;cursor:pointer;color:var(--blue);font-weight:700;display:block;margin:0}.drop small{display:block;font-weight:400;color:var(--mut)}
+.prev{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.prev .ph{position:relative}.prev img{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.prev .x{position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid var(--line);border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;line-height:18px;padding:0}
+.mtl{position:relative;margin-left:8px;border-left:3px solid var(--line);padding-left:16px}.mtl .ev{position:relative;margin-bottom:12px}.mtl .ev:before{content:'';position:absolute;left:-23px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ev,#9ca3af);border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.mtl .ev .h{font-size:12px;color:var(--mut)}.mtl .ev .b{font-size:14px}.mtl .ev .b a{font-weight:700}.mtl .mo{font:800 12px system-ui;text-transform:uppercase;color:var(--mut);margin:14px 0 8px -16px;letter-spacing:.05em}
+.gal{display:flex;gap:6px;flex-wrap:wrap}.gal img{width:70px;height:70px;object-fit:cover;border-radius:7px;border:1px solid var(--line);cursor:zoom-in}
+.mat .th{display:flex;gap:4px;margin-top:4px}.mat .th img{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in}
 .otc:hover{box-shadow:0 2px 10px #0001}.otc .c{font:600 12px ui-monospace,monospace;color:var(--mut)}.otc .t{font-weight:700}.otc .m{font-size:13px;color:var(--mut)}
 .otc.stop{border-left-color:var(--red);background:#fff8f9}.otc.fin{border-left-color:var(--green);opacity:.8}.otc.curso{border-left-color:#e0b400}.otc.asig{border-left-color:var(--blue)}.otc.op{border-left-color:#e07b00}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}.filters input[type=search]{flex:1 1 240px;width:auto}.filters select{width:auto}
@@ -65,11 +74,11 @@ tr.clk{cursor:pointer}tr.clk:hover td{background:#fafaf7}
 .empty{padding:26px;text-align:center;color:var(--mut)}
 .check{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.check input{width:auto;margin-top:3px}
 .mat{display:grid;grid-template-columns:1fr 70px auto;gap:6px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
-@media(max-width:600px){main{padding:12px 10px 90px}.kv{grid-template-columns:100px 1fr}header.top .sub{display:none}.otc{grid-template-columns:1fr}}
+@media(max-width:600px){main{padding:12px 10px 90px}.kv{grid-template-columns:100px 1fr}header.top .sub{display:none}.otc{grid-template-columns:1fr auto}.otc .side{min-width:0}}
 </style>
 <script>window.RG_LITE=true;window.RG_TITLE='Averías · Mantenimiento';window.RG_COLS=['av_ot','av_maq','av_prev','av_cfg','recambios','fixner_ots'];</script>
 <script src="config.js"></script>
-<script src="supa-shim.js?v=1"></script>
+<script src="supa-shim.js?v=2"></script>
 </head>
 <body>
 <div class="topw"><header class="top"><img src="../logo.png" alt="Garcia de Pou"><div><div class="ttl">Averías y mantenimiento</div><div class="sub">Órdenes de trabajo · Máquinas · Preventivo</div></div><span class="sp"></span><span id="who"></span></header>
@@ -141,7 +150,10 @@ function hydrate(){document.querySelectorAll('img[data-blob]').forEach(img=>{con
 function shrink(file){return new Promise(res=>{if(!/^image\//.test(file.type)||file.size<500*1024)return res(file);const img=new Image(),u=URL.createObjectURL(file);
   img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>res(b||file),'image/jpeg',.85);};
   img.onerror=()=>{URL.revokeObjectURL(u);res(file);};img.src=u;});}
-async function uploadFotos(files){const out=[];for(const f of [...files].slice(0,6)){const b=await shrink(f);const r=await S.assets.upload(b,{type:b.type||'image/jpeg'});out.push({url:r.url,name:f.name,t:Date.now()});}return out;}
+async function uploadFotos(files){const out=[];for(const f of [...files].slice(0,6)){const b=await shrink(f);const r=await S.assets.upload(b,{type:b.type||'image/jpeg'});out.push({url:r.url,id:r.id,name:f.name,t:Date.now()});}return out;}
+/* fotos elegidas en un formulario antes de guardar: se ven en miniatura y se pueden quitar */
+let pend=[];function pendHtml(){return pend.map((f,i)=>'<div class="ph"><img src="'+f.u+'" alt=""><button type="button" class="x" data-a="delpend" data-i="'+i+'">✕</button></div>').join('');}
+function dropZone(txt){return '<label class="drop">📷 '+txt+'<small>Desde el móvil puedes hacer la foto en el momento. Hasta 6 fotos.</small><input type="file" accept="image/*" multiple hidden data-a="pickpend"></label><div class="prev" id="pendprev">'+pendHtml()+'</div>';}
 function verFoto(u){modal('<img data-blob="'+esc(u)+'" style="width:100%;border-radius:10px"><div class="row" style="margin-top:10px"><span class="sp"></span><button class="btn" onclick="this.closest(\'.modal\').remove()">Cerrar</button></div>',()=>hydrate());}
 /* ====== cálculo ====== */
 /* la OT se une a su máquina por id; si no lo tiene (p. ej. traída de Fixner), por el nombre */
@@ -177,10 +189,11 @@ function doRender(){if(!S.ready)return;const ae=document.activeElement;if(ae&&ae
 function route(){const h=decodeURIComponent(location.hash.slice(1));const [v,a]=h.split('/');S.view=v||'panel';S.arg=a||null;window.scrollTo(0,0);doRender();}
 window.addEventListener('hashchange',route);
 /* ---------- tarjeta de OT ---------- */
-function otCard(id,o){const run=runInt(o);
-  return '<div class="otc '+stateCls(o)+'" data-go="ot/'+id+'"><div><div class="row" style="gap:6px"><span class="c">'+esc(o.codigo)+'</span><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA</span>':'')+(o.tipo&&o.tipo!=='Avería'?'<span class="tag">'+esc(o.tipo)+'</span>':'')+(run?'<span class="tag" style="background:#fff7c2">⏱ '+esc(run.tecnico)+' trabajando</span>':'')+'</div>'+
-    '<div class="t">'+esc(o.titulo||'(sin título)')+'</div><div class="m">'+esc(maqName(o))+(maqSec(o)?' · '+esc(maqSec(o)):'')+(o.clase?' · '+esc(o.clase):'')+'</div></div>'+
-    '<div class="m" style="text-align:right">'+fDT(o.creadaEn)+'<br>'+esc((o.asignados||[]).join(', ')||'Sin asignar')+(o.material&&o.material.some(m=>!m.recibido)?'<br>📦 falta material':'')+'</div></div>';}
+function otCard(id,o){const runs=(o.intervenciones||[]).filter(i=>!i.fin).map(i=>i.tecnico);
+  return '<div class="otc '+stateCls(o)+'" data-go="ot/'+id+'"><div><div class="c">'+esc(o.codigo)+' · '+fDT(o.creadaEn)+(o.tipo&&o.tipo!=='Avería'?' · '+esc(o.tipo):'')+'</div>'+
+    '<div class="t">'+esc(o.titulo||'(sin título)')+'</div><div class="m">'+esc(maqName(o))+(maqSec(o)?' · '+esc(maqSec(o)):'')+(o.clase?' · '+esc(o.clase):'')+'</div>'+
+    '<div class="who">'+(runs.length?'<b style="color:var(--green)">🟢 '+esc(runs.join(', '))+' trabajando</b>':'👷 '+esc((o.asignados||[]).join(', ')||'Sin asignar'))+(horasOT(o)?' · ⏱ '+hrs(horasOT(o)):'')+(o.material&&o.material.some(m=>!m.recibido)?' · 📦 falta material':'')+((o.fotos||[]).length?' · 📷 '+o.fotos.length:'')+'</div></div>'+
+    '<div class="side"><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA</span>':'')+'</div></div>';}
 /* ---------- PANEL ---------- */
 function vPanel(){const all=[...S.ots.entries()],open=all.filter(([,o])=>OPEN(o.estado));
   const stop=open.filter(([,o])=>isStop(o)),crit=open.filter(([,o])=>o.prioridad==='Crítica'),mat=open.filter(([,o])=>/Bloqueada/.test(o.estado)),sin=open.filter(([,o])=>!(o.asignados||[]).length),curso=open.filter(([,o])=>runInt(o));
@@ -215,7 +228,7 @@ function filterOTs(preset){const f=S.f,q=nrm(f.q).split(/\s+/).filter(Boolean);
 function selOpts(list,v,all){return '<option value="">'+all+'</option>'+list.map(x=>'<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>').join('');}
 function vOTs(arg){const preset=PRESETS[arg]?arg:'abiertas',l=filterOTs(preset),c=cfg();
   return '<div class="row"><h1>Órdenes de trabajo</h1><span class="sp"></span><button class="btn primary" data-go="nueva">＋ Nueva OT</button></div>'+
-    '<div class="chips">'+Object.entries(PRESETS).map(([k,t])=>'<a class="chip'+(k===preset?' on':'')+'" href="#ots/'+k+'" style="text-decoration:none;color:inherit">'+t+'</a>').join('')+'</div>'+
+    '<div class="chips">'+Object.entries(PRESETS).map(([k,t])=>'<a class="chip'+(k===preset?' on':'')+'" href="#ots/'+k+'" style="text-decoration:none'+(k===preset?'':';color:inherit')+'">'+t+'</a>').join('')+'</div>'+
     '<div class="filters"><input type="search" id="fq" data-live="1" placeholder="🔎 Buscar: código, máquina, avería, técnico…" value="'+esc(S.f.q)+'">'+
     '<select data-f="prio">'+selOpts(PRIOS,S.f.prio,'Prioridad')+'</select><select data-f="tec">'+selOpts(c.tecnicos,S.f.tec,'Técnico')+'</select><select data-f="sec">'+selOpts(c.secciones,S.f.sec,'Sección')+'</select><select data-f="tipo">'+selOpts(c.tipos,S.f.tipo,'Tipo')+'</select>'+
     '<span class="muted small">'+l.length+' OT</span></div>'+
@@ -230,8 +243,6 @@ function vOT(id){const o=S.ots.get(id);if(!o)return '<div class="card empty">Est
   const c=cfg(),run=runInt(o),open=OPEN(o.estado),mine=(o.asignados||[]).some(a=>nrm(a)===nrm(meName()));
   const act=[];
   if(open){
-    if(!mine)act.push('<button class="btn" data-a="asignarme">🙋 Me la quedo</button>');
-    if(run)act.push('<button class="btn blue" data-a="parar">⏹ Parar trabajo ('+esc(run.tecnico)+', '+hrs(Date.now()-run.inicio)+')</button>');else act.push('<button class="btn blue" data-a="empezar">▶ Empezar a trabajar</button>');
     act.push('<button class="btn" data-a="estado" data-v="Bloqueada OP" title="Falta material, la máquina sigue en marcha">🔶 Bloquear OP</button><button class="btn" data-a="estado" data-v="Bloqueada PA" title="Falta material y la máquina está parada">🔴 Bloquear PA</button><button class="btn" data-a="estado" data-v="Pausada">⏸ Pausar</button>');
     act.push('<button class="btn primary" data-a="finalizar">✅ Finalizar</button><button class="btn danger" data-a="anular">Anular</button>');
   } else act.push('<button class="btn" data-a="reabrir">↺ Reabrir</button>');
@@ -239,31 +250,43 @@ function vOT(id){const o=S.ots.get(id);if(!o)return '<div class="card empty">Est
     '<label class="btn" style="display:inline-flex;align-items:center;margin:0;height:96px;width:96px;justify-content:center;flex-direction:column;color:var(--blue)">📷<span class="small">Añadir</span><input type="file" accept="image/*" multiple hidden data-a="addfoto"></label></div>';
   const ints=(o.intervenciones||[]).map((i,ix)=>'<div class="int'+(i.fin?'':' run')+'"><div class="row"><b>'+esc(i.tecnico)+'</b><span class="muted small">'+fDT(i.inicio)+' → '+(i.fin?fDT(i.fin):'<b>trabajando…</b>')+' · '+hrs((i.fin||Date.now())-i.inicio)+'</span><span class="sp"></span><button class="btn sm" data-a="editint" data-i="'+ix+'">Editar</button></div>'+(i.trabajo?'<div style="white-space:pre-wrap">'+esc(i.trabajo)+'</div>':'')+'</div>').join('');
   const mats=(o.material||[]).map((m,ix)=>{const r=m.recId&&S.rec.find(x=>x.id===m.recId);const st=m.recibido?'<span class="pill e-fin">Recibido</span>':r?'<span class="pill e-asignada" title="Línea en la web de recambios">'+esc(recState(r))+'</span>':'<span class="pill e-abierta">Sin pedir</span>';
-    return '<div class="mat"><div><b>'+esc(m.desc)+'</b>'+(m.ref?' <span class="muted small">ref. '+esc(m.ref)+'</span>':'')+'</div><div>'+esc(m.cant||1)+' ud.</div><div class="row" style="gap:4px">'+st+(!m.recId&&!m.recibido?'<button class="btn sm" data-a="pedir" data-i="'+ix+'" title="Crear la línea en la web de recambios">🛒 Pedir</button>':'')+(!m.recibido?'<button class="btn sm" data-a="recibido" data-i="'+ix+'">✓</button>':'')+'<button class="btn sm" data-a="delmat" data-i="'+ix+'">✕</button></div></div>';}).join('');
+    return '<div class="mat"><div><b>'+esc(m.desc)+'</b>'+(m.ref?' <span class="muted small">ref. '+esc(m.ref)+'</span>':'')+((m.fotos||[]).length?'<div class="th">'+m.fotos.map(f=>'<img data-blob="'+esc(f.url)+'" data-a="verfoto" data-u="'+esc(f.url)+'" alt="">').join('')+'</div>':'')+'</div><div>'+esc(m.cant||1)+' ud.</div><div class="row" style="gap:4px">'+st+(!m.recId&&!m.recibido?'<button class="btn sm" data-a="pedir" data-i="'+ix+'" title="Crear la línea en la web de recambios">🛒 Pedir</button>':'')+(!m.recibido?'<button class="btn sm" data-a="recibido" data-i="'+ix+'">✓</button>':'')+'<button class="btn sm" data-a="delmat" data-i="'+ix+'">✕</button></div></div>';}).join('');
   const chk=(o.checklist||[]).length?'<section class="card"><h2>Checklist del preventivo</h2>'+o.checklist.map((x,i)=>'<label class="check"><input type="checkbox" data-a="chk" data-i="'+i+'"'+(x.ok?' checked':'')+'> <span>'+esc(x.txt)+'</span></label>').join('')+'</section>':'';
   const hist=[...(o.comentarios||[]).map(x=>({t:x.t,h:'<b>💬 '+esc(x.u)+':</b> '+esc(x.txt)})),...(o.historial||[]).map(x=>({t:x.t,h:'<span class="muted">'+esc(x.u)+' · '+esc(x.c)+'</span>'}))].sort((a,b)=>b.t-a.t);
   return '<div class="row"><a href="#ots" class="btn sm">‹ Volver</a><span class="muted small">'+esc(o.codigo)+(o.fxCodigo?' · Fixner '+esc(o.fxCodigo):'')+'</span></div>'+
-    '<div class="row" style="margin-top:8px;gap:8px"><h1 style="margin:0">'+esc(o.titulo||'(sin título)')+'</h1><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA · '+hrs(paradaMs(o))+'</span>':'')+'</div>'+
+    '<div class="row" style="margin-top:8px;gap:8px;align-items:flex-start"><div><h1 style="margin:0">'+esc(o.titulo||'(sin título)')+'</h1><div class="small">'+(maqIdOf(o)?'<a href="#maq/'+esc(maqIdOf(o))+'"><b>'+esc(maqName(o))+'</b> · ver todo lo que le ha pasado ('+[...S.ots.values()].filter(x=>maqIdOf(x)===maqIdOf(o)).length+' OT) ›</a>':esc(maqName(o)))+(maqSec(o)?' <span class="muted">· '+esc(maqSec(o))+'</span>':'')+'</div></div><span class="sp"></span><div class="row" style="gap:6px;justify-content:flex-end"><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span><span class="pill p-'+esc(o.prioridad)+'">'+esc(o.prioridad)+'</span>'+(isStop(o)?'<span class="tag stop">MÁQUINA PARADA · '+hrs(paradaMs(o))+'</span>':'')+'</div></div>'+
     (EHELP[o.estado]?'<div class="muted small">'+EHELP[o.estado]+'</div>':'')+'<div class="actions">'+act.join('')+'</div>'+
     '<div class="two"><div>'+
     '<section class="card"><h2>Qué pasa</h2><div style="white-space:pre-wrap">'+esc(o.descripcion||'—')+'</div><h3 style="margin-top:12px">Fotos</h3>'+fotos+'</section>'+chk+
-    '<section class="card"><div class="row"><h2 style="margin:0">Intervenciones · '+hrs(horasOT(o))+'</h2><span class="sp"></span><button class="btn sm" data-a="addint">＋ Añadir intervención</button></div><div style="margin-top:8px">'+(ints||'<div class="muted small">Nadie ha trabajado todavía en esta OT. Pulsa «▶ Empezar a trabajar» cuando vayas a la máquina.</div>')+'</div></section>'+
+    '<section class="card"><div class="row"><h2 style="margin:0">Intervenciones · '+hrs(horasOT(o))+'</h2><span class="sp"></span><button class="btn sm" data-a="addint">＋ Añadir intervención</button></div><div style="margin-top:8px">'+(ints||'<div class="muted small">Nadie ha trabajado todavía en esta OT. Cada técnico pulsa «▶ Iniciar» en «Técnicos en esta orden» cuando va a la máquina.</div>')+'</div></section>'+
     '<section class="card"><div class="row"><h2 style="margin:0">Material necesario</h2><span class="sp"></span><button class="btn sm" data-a="addmat">＋ Añadir material</button></div><div style="margin-top:6px">'+(mats||'<div class="muted small">Sin material. Si hace falta pedir algo, añádelo aquí y pulsa «🛒 Pedir»: se crea la línea en la web de recambios con esta OT.</div>')+'</div></section>'+
     (o.cierre?'<section class="card" style="border-color:#b6dfc1"><h2>✅ Cierre</h2><dl class="kv"><dt>Causa</dt><dd>'+esc(o.cierre.causa||'—')+'</dd><dt>Solución</dt><dd style="white-space:pre-wrap">'+esc(o.cierre.solucion||'—')+'</dd><dt>Cerrada</dt><dd>'+fDT(o.cerradaEn)+' por '+esc(o.cerradaPor||'')+'</dd>'+(o.paradaDesde?'<dt>Tiempo parada</dt><dd>'+hrs(paradaMs(o))+'</dd>':'')+'</dl></section>':'')+
     '<section class="card"><h2>Comentarios e historial</h2><form data-a="comentar" class="row" style="margin-bottom:10px"><input name="txt" placeholder="Escribe un comentario…" style="flex:1"><button class="btn">Enviar</button></form><div class="tl">'+hist.map(x=>'<div class="it">'+x.h+'<div class="w">'+fDT(x.t)+'</div></div>').join('')+'</div></section>'+
-    '</div><div><section class="card"><div class="row"><h2 style="margin:0">Datos</h2><span class="sp"></span><button class="btn sm" data-a="editot">Editar</button></div><dl class="kv" style="margin-top:8px">'+
+    '</div><div>'+crewHtml(id,o)+'<section class="card"><div class="row"><h2 style="margin:0">Datos</h2><span class="sp"></span><button class="btn sm" data-a="editot">Editar</button></div><dl class="kv" style="margin-top:8px">'+
     '<dt>Máquina</dt><dd>'+(maqIdOf(o)?'<a href="#maq/'+esc(maqIdOf(o))+'">'+esc(maqName(o))+'</a>':esc(maqName(o)))+'</dd><dt>Sección</dt><dd>'+esc(maqSec(o)||'—')+'</dd>'+
     '<dt>Tipo</dt><dd>'+esc(o.tipo||'—')+'</dd><dt>Avería</dt><dd>'+esc(o.clase||'—')+'</dd><dt>¿Parada?</dt><dd>'+(o.parada?'<b style="color:var(--red)">Sí</b>':'No')+'</dd>'+
     '<dt>Asignada a</dt><dd>'+esc((o.asignados||[]).join(', ')||'Nadie')+'</dd><dt>Avisa</dt><dd>'+esc(o.solicitante||'—')+'</dd><dt>Origen</dt><dd>'+esc(o.origen||'—')+'</dd><dt>Turno</dt><dd>'+esc(o.turno||'—')+'</dd>'+
     '<dt>Creada</dt><dd>'+fDT(o.creadaEn)+' por '+esc(o.creadaPor||'')+'</dd>'+(o.previsto?'<dt>Prevista</dt><dd>'+fISO(o.previsto)+'</dd>':'')+'</dl></section>'+
     maqHistMini(maqIdOf(o),id)+'</div></div>';}
+function crewHtml(id,o){const c=cfg(),people=[...new Set([...(o.asignados||[]),...(o.intervenciones||[]).map(i=>i.tecnico)])].filter(Boolean),open=OPEN(o.estado);
+  const rows=people.map(t=>{const ints=(o.intervenciones||[]).filter(i=>i.tecnico===t),run=ints.find(i=>!i.fin),done=ints.filter(i=>i.fin).reduce((a,i)=>a+(i.fin-i.inicio),0);
+    const ini=t.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    return '<div class="p'+(run?' on':'')+'"><div class="av">'+esc(ini)+'</div><div><div class="nm">'+esc(t)+'</div><div class="st">'+(run?'Trabajando desde las '+fDT(run.inicio).slice(-5):ints.length?ints.length+' intervención'+(ints.length>1?'es':''):'Asignado · sin empezar')+'</div></div>'+
+      '<div class="tm"><span class="live" data-base="'+done+'" data-since="'+(run?run.inicio:'')+'">'+clock(done+(run?Date.now()-run.inicio:0))+'</span></div>'+
+      (open?(run?'<button class="btn sm" data-a="parart" data-t="'+esc(t)+'">⏸ Parar</button>':'<button class="btn sm blue" data-a="iniciart" data-t="'+esc(t)+'">▶ Iniciar</button>')+(!ints.length?'<button class="btn sm" data-a="deltec" data-t="'+esc(t)+'" title="Quitar de la orden">✕</button>':''):'')+'</div>';}).join('');
+  const free=c.tecnicos.filter(t=>!people.includes(t));
+  return '<section class="card"><h2>👷 Técnicos en esta orden</h2><div class="crew">'+(rows||'<div class="muted small">Nadie asignado todavía.</div>')+'</div>'+
+    (open?'<div class="row" style="margin-top:8px">'+(!people.some(p=>nrm(p)===nrm(meName()))?'<button class="btn sm primary" data-a="iniciart" data-t="'+esc(meName())+'">▶ Empiezo yo</button>':'')+'<select data-a="addtec" style="width:auto"><option value="">＋ Añadir técnico…</option>'+free.map(t=>'<option>'+esc(t)+'</option>').join('')+'</select></div>':'')+
+    '<div class="tot"><span>Tiempo total de reparación</span><span class="live" data-base="'+(o.intervenciones||[]).filter(i=>i.fin).reduce((a,i)=>a+(i.fin-i.inicio),0)+'" data-since-multi="'+(o.intervenciones||[]).filter(i=>!i.fin).map(i=>i.inicio).join(',')+'">'+clock(horasOT(o))+'</span></div></section>';}
+function clock(ms){ms=Math.max(0,ms);const h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s2=Math.floor(ms/1000)%60;return h+':'+pad(m)+':'+pad(s2);}
+setInterval(()=>{document.querySelectorAll('.live').forEach(el=>{const b=+el.dataset.base||0;let ms=b;if(el.dataset.since)ms+=Date.now()-(+el.dataset.since);if(el.dataset.sinceMulti)el.dataset.sinceMulti.split(',').filter(Boolean).forEach(x=>ms+=Date.now()-(+x));el.textContent=clock(ms);});},1000);
 function recState(r){const e=String(r.estado||'').toUpperCase();if(e==='OK')return 'Recibido OK';if(e==='PARCIAL')return 'Entrada parcial';if(r.fechaRecepcion)return 'Recibido';if(r.numPedido||r.fechaPedido)return 'Pedido';if(Array.isArray(r.presupuestos)&&r.presupuestos.length)return 'Presupuestado';return 'Pendiente pedir';}
 function maqHistMini(mid,except){if(!mid)return '';const l=[...S.ots.entries()].filter(([id,o])=>maqIdOf(o)===mid&&id!==except).sort((a,b)=>b[1].creadaEn-a[1].creadaEn).slice(0,6);
   return '<section class="card"><h2>Historial de la máquina</h2>'+(l.length?'<table>'+l.map(([id,o])=>'<tr class="clk" data-go="ot/'+id+'"><td class="small">'+fD(o.creadaEn)+'</td><td><b>'+esc(o.titulo)+'</b><br><span class="pill '+ECLS[o.estado]+'">'+esc(o.estado)+'</span></td></tr>').join('')+'</table>':'<div class="muted small">Sin otras OT en esta máquina.</div>')+'</section>';}
 /* ---------- NUEVA AVERÍA ---------- */
 function maqOptions(sel){const by={};for(const [id,m] of S.maq){if(m.activa===false)continue;(by[m.seccion||'Sin sección']=by[m.seccion||'Sin sección']||[]).push([id,m]);}
   return '<option value="">— Elige la máquina —</option>'+Object.keys(by).sort().map(s=>'<optgroup label="'+esc(s)+'">'+by[s].sort((a,b)=>a[1].nombre.localeCompare(b[1].nombre)).map(([id,m])=>'<option value="'+esc(id)+'"'+(id===sel?' selected':'')+'>'+esc(m.nombre)+'</option>').join('')+'</optgroup>').join('')+'<option value="__otra">Otra (escribirla)…</option>';}
-function vNueva(){const c=cfg();
+function vNueva(){const c=cfg();if(S._newFresh!==location.hash){pend=[];S._newFresh=location.hash;}
   return '<div class="row"><a href="#panel" class="btn sm">‹ Volver</a></div><h1>Dar un aviso de avería</h1><form class="card" data-a="crear" id="fnueva">'+
     '<label>¿En qué máquina?</label><select name="maqId" required>'+maqOptions(S.arg||'')+'</select><input name="maqOtra" placeholder="Nombre de la máquina" style="display:none;margin-top:6px">'+
     '<label>¿Qué pasa?</label><input name="titulo" required maxlength="90" placeholder="Ej. La cuchilla no corta bien"><textarea name="descripcion" placeholder="Explica un poco más: desde cuándo, qué alarma sale, qué has probado…" style="margin-top:6px"></textarea>'+
@@ -273,7 +296,7 @@ function vNueva(){const c=cfg();
     '<div><label>Tipo de trabajo</label><select name="tipo">'+c.tipos.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div>'+
     '<div><label>¿Quién avisa?</label><input name="solicitante" value="'+esc(meName())+'"></div><div><label>¿Cómo llega el aviso?</label><select name="origen">'+c.origenes.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div>'+
     '<div><label>Asignar a (opcional)</label><select name="asig"><option value="">Sin asignar</option>'+c.tecnicos.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select></div></div>'+
-    '<label>Fotos (opcional)</label><input type="file" name="fotos" accept="image/*" multiple>'+
+    '<label>Fotos de la avería</label>'+dropZone('Hacer foto o añadir fotos')+
     '<div class="row" style="margin-top:14px"><span class="muted small">Turno: '+turnoAhora()+'</span><span class="sp"></span><button class="btn primary big">Crear la OT</button></div></form>';}
 /* ---------- MÁQUINAS ---------- */
 function maqStats(mid){const l=[...S.ots.values()].filter(o=>maqIdOf(o)===mid),y=Date.now()-365*864e5;
@@ -292,11 +315,26 @@ function vMaq(mid){const m=S.maq.get(mid);if(!m)return '<div class="card empty">
   const cls={};l.forEach(([,o])=>{if(o.tipo!=='Preventivo')cls[o.clase||'Otros']=(cls[o.clase||'Otros']||0)+1;});
   return '<div class="row"><a href="#maquinas" class="btn sm">‹ Máquinas</a></div><div class="row" style="margin-top:8px"><h1 style="margin:0">'+esc(m.nombre)+'</h1>'+(st.stop?'<span class="tag stop">PARADA</span>':'')+'<span class="sp"></span><button class="btn" data-a="editmaq" data-id="'+esc(mid)+'">Editar</button><a class="btn primary" href="#nueva/'+esc(mid)+'">＋ Avería en esta máquina</a></div>'+
     '<div class="kpis" style="margin-top:12px"><div class="kpi"><b>'+st.open+'</b><span>OT abiertas</span></div><div class="kpi"><b>'+st.av12+'</b><span>Averías (12 meses)</span></div><div class="kpi"><b>'+hrs(st.par12)+'</b><span>Tiempo parada (12 meses)</span></div><div class="kpi"><b>'+st.total+'</b><span>OT en total</span></div></div>'+
-    '<div class="two"><div><section class="card"><h2>Historial de OT</h2>'+(l.length?'<div class="list">'+l.map(([id,o])=>otCard(id,o)).join('')+'</div>':'<div class="muted">Sin OT todavía.</div>')+'</section></div>'+
+    '<div class="two"><div>'+(l.filter(([,o])=>OPEN(o.estado)).length?'<section class="card"><h2>Abiertas ahora</h2><div class="list">'+l.filter(([,o])=>OPEN(o.estado)).map(([id,o])=>otCard(id,o)).join('')+'</div></section>':'')+
+    '<section class="card"><div class="row"><h2 style="margin:0">Todo lo que le ha pasado</h2><span class="sp"></span><div class="chips" style="margin:0">'+[['','Todo'],['av','Averías'],['pv','Preventivos'],['mat','Material'],['foto','Fotos']].map(([k,t])=>'<button class="chip'+((S.mtf||'')===k?' on':'')+'" data-a="mtf" data-v="'+k+'">'+t+'</button>').join('')+'</div></div><div style="margin-top:12px">'+maqTimeline(l)+'</div></section></div>'+
     '<div><section class="card"><h2>Ficha</h2><dl class="kv"><dt>Sección</dt><dd>'+esc(m.seccion||'—')+'</dd><dt>Código</dt><dd>'+esc(m.codigo||'—')+'</dd><dt>Fabricante</dt><dd>'+esc(m.fabricante||'—')+'</dd><dt>Modelo</dt><dd>'+esc(m.modelo||'—')+'</dd><dt>Ubicación</dt><dd>'+esc(m.ubicacion||'—')+'</dd><dt>Notas</dt><dd style="white-space:pre-wrap">'+esc(m.notas||'—')+'</dd></dl></section>'+
     '<section class="card"><h2>Averías por tipo</h2>'+(Object.keys(cls).length?Object.entries(cls).sort((a,b)=>b[1]-a[1]).map(([k,n])=>'<div class="hbar"><span class="l">'+esc(k)+'</span><span class="b" style="width:'+(n*14)+'px"></span><b>'+n+'</b></div>').join(''):'<div class="muted small">—</div>')+'</section>'+
     '<section class="card"><div class="row"><h2 style="margin:0">Preventivos</h2><span class="sp"></span><button class="btn sm" data-a="newprev" data-m="'+esc(mid)+'">＋ Plan</button></div>'+(pv.length?'<table>'+pv.map(([id,p])=>'<tr><td><b>'+esc(p.tarea)+'</b><br><span class="muted small">cada '+p.cadaN+' '+esc(p.unidad)+'</span></td><td>'+fISO(p.proxima)+'</td></tr>').join('')+'</table>':'<div class="muted small" style="margin-top:6px">Sin planes.</div>')+'</section></div></div>';}
 /* ---------- PREVENTIVO ---------- */
+function maqTimeline(l){const f=S.mtf||'',ev=[];const MN=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const gal=a=>'<div class="gal" style="margin-top:4px">'+a.map(x=>'<img data-blob="'+esc(x.url)+'" data-a="verfoto" data-u="'+esc(x.url)+'" alt="">').join('')+'</div>';
+  for(const [id,o] of l){const pv=o.tipo==='Preventivo',lk='<a href="#ot/'+esc(id)+'">'+esc(o.codigo)+'</a>';
+    if(f==='foto'){if((o.fotos||[]).length)ev.push({t:o.creadaEn,c:'#0B66C3',h:fDT(o.creadaEn)+' · '+lk,b:esc(o.titulo)+gal(o.fotos)});(o.material||[]).forEach(m=>{if((m.fotos||[]).length)ev.push({t:m.t||o.creadaEn,c:'#b45309',h:fDT(m.t||o.creadaEn)+' · '+lk+' · material',b:esc(m.desc)+gal(m.fotos)});});continue;}
+    if((f==='av'&&pv)||(f==='pv'&&!pv))continue;
+    if(f!=='mat'){ev.push({t:o.creadaEn,c:pv?'#6d28d9':o.parada?'#c8102e':'#e0a400',h:fDT(o.creadaEn)+' · '+lk+' · '+(pv?'Preventivo':'Avería '+esc(o.clase||''))+(o.parada?' · <b style="color:var(--red)">máquina parada</b>':''),b:'<b>'+esc(o.titulo)+'</b>'+(o.solicitante?' <span class="muted">— avisa '+esc(o.solicitante)+'</span>':'')+((o.fotos||[]).length?gal(o.fotos.slice(0,4)):'')});
+      (o.intervenciones||[]).forEach(i=>ev.push({t:i.inicio,c:'#2fb35a',h:fDT(i.inicio)+' · '+lk+' · 👷 '+esc(i.tecnico)+' · '+(i.fin?hrs(i.fin-i.inicio):'trabajando ahora'),b:esc(i.trabajo||'(sin descripción del trabajo)')}));
+      if(o.estado==='Finalizada'&&o.cerradaEn)ev.push({t:o.cerradaEn,c:'#1a7f37',h:fDT(o.cerradaEn)+' · '+lk+' · ✅ Finalizada por '+esc(o.cerradaPor||''),b:o.cierre?'<b>Causa:</b> '+esc(o.cierre.causa||'—')+' · <b>Solución:</b> '+esc(o.cierre.solucion||'—')+(o.paradaDesde?' · parada '+hrs(paradaMs(o)):''):''});}
+    if(f==='av'||f==='pv'||f==='')(o.material||[]).forEach(m=>ev.push({t:m.t||o.creadaEn,c:'#b45309',h:fDT(m.t||o.creadaEn)+' · '+lk+' · 📦 material',b:esc(m.cant||1)+' × '+esc(m.desc)+(m.ref?' (ref. '+esc(m.ref)+')':'')+' — '+(m.recibido?'recibido':m.recId?'pedido':'sin pedir')}));
+    else if(f==='mat')(o.material||[]).forEach(m=>ev.push({t:m.t||o.creadaEn,c:'#b45309',h:fDT(m.t||o.creadaEn)+' · '+lk,b:'📦 '+esc(m.cant||1)+' × '+esc(m.desc)+(m.ref?' (ref. '+esc(m.ref)+')':'')+' — '+(m.recibido?'recibido':m.recId?'pedido':'sin pedir')+((m.fotos||[]).length?gal(m.fotos):'')}));}
+  if(!ev.length)return '<div class="muted">Nada que mostrar.</div>';
+  ev.sort((a,b)=>b.t-a.t);let last='',h='<div class="mtl">';
+  for(const e of ev.slice(0,300)){const d=new Date(e.t),mo=MN[d.getMonth()]+' '+d.getFullYear();if(mo!==last){h+='<div class="mo">'+mo+'</div>';last=mo;}h+='<div class="ev" style="--ev:'+e.c+'"><div class="h">'+e.h+'</div><div class="b">'+e.b+'</div></div>';}
+  return h+'</div>';}
 function vPrev(){const l=[...S.prev.entries()].sort((a,b)=>(a[1].activo===false)-(b[1].activo===false)||String(a[1].proxima).localeCompare(String(b[1].proxima)));const t=today(),w=addDays(t,7,'dias');
   return '<div class="row"><h1>Mantenimiento preventivo</h1><span class="sp"></span><button class="btn primary" data-a="newprev">＋ Nuevo plan</button></div>'+
     '<p class="muted small">Cada plan crea su OT sola cuando llega la fecha (o los días de antelación que pongas). Al finalizar esa OT, la próxima fecha se calcula sola.</p>'+
@@ -322,7 +360,7 @@ function vAjustes(){const c=cfg();const box=(k,t,h)=>'<section class="card"><h2>
     '<section class="card"><h2>Cargar datos de Fixner</h2><p>Para empezar sin teclear: crea las <b>máquinas</b> a partir de los activos de Fixner, y pasa aquí las <b>OT de Fixner que siguen abiertas</b> ('+fxOpen+'), con su estado y prioridad. Se puede repetir: no duplica nada.</p><div class="row"><button class="btn" data-a="impmaq">Cargar máquinas</button><button class="btn" data-a="impfx">Pasar OT abiertas de Fixner</button></div></section>';}
 /* ====== eventos ====== */
 document.addEventListener('click',async e=>{const g=e.target.closest('[data-go]');if(g&&!e.target.closest('[data-a]')){location.hash=g.dataset.go;return;}
-  const b=e.target.closest('[data-a]');if(!b||b.tagName==='FORM'||b.type==='file'||b.tagName==='INPUT')return;const a=b.dataset.a;const id=S.arg,o=S.ots.get(id);
+  const b=e.target.closest('[data-a]');if(!b||b.tagName==='FORM'||b.type==='file'||b.tagName==='INPUT'||b.tagName==='SELECT'||b.tagName==='LABEL')return;const a=b.dataset.a;const id=S.arg,o=S.ots.get(id);
   try{switch(a){
     case 'asignarme':{const as=[...new Set([...(o.asignados||[]),meName()])];await saveOT(id,{asignados:as,estado:o.estado==='Abierta'?'Asignada':o.estado},'Se la queda '+meName());break;}
     case 'empezar':{const i={id:uid(),tecnico:meName(),inicio:Date.now(),fin:null,trabajo:''};const as=[...new Set([...(o.asignados||[]),meName()])];await saveOT(id,{intervenciones:[...(o.intervenciones||[]),i],estado:'En curso',asignados:as},meName()+' empieza a trabajar');break;}
@@ -333,6 +371,11 @@ document.addEventListener('click',async e=>{const g=e.target.closest('[data-go]'
     case 'finalizar':finalizar(id);break;
     case 'anular':if(confirm('¿Anular esta OT? Quedará en el historial como anulada.'))await saveOT(id,{estado:'Anulada',cerradaEn:Date.now(),paradaHasta:o.parada?Date.now():o.paradaHasta},'Anulada');break;
     case 'reabrir':await saveOT(id,{estado:'Abierta',reabierta:true},'Reabierta');break;
+    case 'iniciart':{const t=b.dataset.t;if((o.intervenciones||[]).some(i=>i.tecnico===t&&!i.fin))break;const i={id:uid(),tecnico:t,inicio:Date.now(),fin:null,trabajo:''};
+      await saveOT(id,{intervenciones:[...(o.intervenciones||[]),i],estado:'En curso',asignados:[...new Set([...(o.asignados||[]),t])]},t+' empieza a trabajar');break;}
+    case 'parart':pararTec(id,b.dataset.t);break;
+    case 'deltec':{await saveOT(id,{asignados:(o.asignados||[]).filter(x=>x!==b.dataset.t)},'Quitado '+b.dataset.t);break;}
+    case 'delpend':{pend.splice(+b.dataset.i,1);const pv=document.getElementById('pendprev');if(pv)pv.innerHTML=pendHtml();break;}
     case 'verfoto':verFoto(b.dataset.u);break;
     case 'delfoto':if(confirm('¿Quitar esta foto?')){const f=[...(o.fotos||[])];f.splice(+b.dataset.i,1);await saveOT(id,{fotos:f},'Foto quitada');}break;
     case 'addint':case 'editint':intForm(id,a==='editint'?+b.dataset.i:-1);break;
@@ -346,12 +389,15 @@ document.addEventListener('click',async e=>{const g=e.target.closest('[data-go]'
     case 'newprev':prevForm(null,b.dataset.m);break;case 'editprev':prevForm(b.dataset.id);break;
     case 'genprev':{const p=S.prev.get(b.dataset.id);await savePrev(b.dataset.id,{proxima:today()});await genPreventivos();toast('OT de preventivo creada');break;}
     case 'infd':S.infD=+b.dataset.v;render();break;
+    case 'mtf':S.mtf=b.dataset.v;render();break;
     case 'csv':exportCSV();break;
     case 'impmaq':await importMaq();break;case 'impfx':await importFx();break;
   }}catch(x){toast('Error: '+(x.message||x));}
 });
 document.addEventListener('change',async e=>{const t=e.target;
   if(t.dataset.a==='addfoto'&&t.files.length){toast('Subiendo fotos…');try{const f=await uploadFotos(t.files);const o=S.ots.get(S.arg);await saveOT(S.arg,{fotos:[...(o.fotos||[]),...f]},'Fotos añadidas ('+f.length+')');}catch(x){toast('No se han podido subir: '+(x.message||x));}return;}
+  if(t.dataset.a==='addtec'&&t.value){const o=S.ots.get(S.arg),v=t.value;await saveOT(S.arg,{asignados:[...new Set([...(o.asignados||[]),v])],estado:o.estado==='Abierta'?'Asignada':o.estado},'Asignada a '+v);return;}
+  if(t.dataset.a==='pickpend'&&t.files.length){for(const f of [...t.files]){if(pend.length>=6)break;if(/^image\//.test(f.type))pend.push({f,u:URL.createObjectURL(f)});}t.value='';const pv=document.getElementById('pendprev');if(pv)pv.innerHTML=pendHtml();return;}
   if(t.dataset.a==='chk'){const o=S.ots.get(S.arg);const c=(o.checklist||[]).map((x,i)=>i===+t.dataset.i?Object.assign({},x,{ok:t.checked}):x);await saveOT(S.arg,{checklist:c});return;}
   if(t.dataset.f){S.f[t.dataset.f]=t.value;render();return;}
   if(t.dataset.cfg){const v=t.value.split('\n').map(s=>s.trim()).filter(Boolean);await saveCfg({[t.dataset.cfg]:v});toast('Guardado');return;}
@@ -366,13 +412,18 @@ document.addEventListener('submit',async e=>{const f=e.target;if(!f.dataset.a)re
   if(f.dataset.a==='comentar'){const txt=f.txt.value.trim();if(!txt)return;const o=S.ots.get(S.arg);await saveOT(S.arg,{comentarios:[...(o.comentarios||[]),{t:Date.now(),u:meName(),txt}]});f.txt.value='';return;}
   if(f.dataset.a==='crear'){const btn=f.querySelector('button.primary');btn.disabled=true;btn.textContent='Creando…';
     try{let mid=f.maqId.value,mname='';if(mid==='__otra'){mname=f.maqOtra.value.trim();if(!mname){toast('Escribe el nombre de la máquina');btn.disabled=false;btn.textContent='Crear la OT';return;}mid='';}
-      const fotos=f.fotos.files.length?await uploadFotos(f.fotos.files):[];
+      const fotos=pend.length?await uploadFotos(pend.map(x=>x.f)):[];pend=[];
       const id=await createOT({titulo:f.titulo.value.trim(),descripcion:f.descripcion.value.trim(),maqId:mid,maqNombre:mid?(S.maq.get(mid)||{}).nombre:mname,seccion:mid?(S.maq.get(mid)||{}).seccion:'',
         parada:f.parada.value==='1',prioridad:f.prioridad.value,clase:f.clase.value,tipo:f.tipo.value,solicitante:f.solicitante.value.trim(),origen:f.origen.value,asignados:f.asig.value?[f.asig.value]:[],fotos});
       toast('OT creada');location.hash='ot/'+id;}catch(x){toast('No se ha podido crear: '+(x.message||x));btn.disabled=false;btn.textContent='Crear la OT';}}
 });
 $('#fab').onclick=()=>{location.hash='nueva';};
 /* ====== formularios en ventana ====== */
+function pararTec(id,t){const o=S.ots.get(id),run=(o.intervenciones||[]).find(i=>i.tecnico===t&&!i.fin);if(!run)return;
+  modal('<h2>Parar el trabajo de '+esc(t)+'</h2><p class="muted small">Lleva '+hrs(Date.now()-run.inicio)+' en esta intervención.</p><label>¿Qué se ha hecho?</label><textarea id="mt" placeholder="Ej. Desmontado el rodillo, falta la junta">'+esc(run.trabajo||'')+'</textarea><label>¿Cómo queda la orden?</label><select id="ms"><option>En curso</option><option>Pausada</option><option value="Bloqueada OP">Bloqueada OP (falta material, máquina en marcha)</option><option value="Bloqueada PA">Bloqueada PA (falta material, máquina parada)</option><option value="__fin">Terminada: finalizar la orden</option></select><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="mc">Cancelar</button><button class="btn primary" id="mo">Guardar</button></div>',m=>{
+    m.querySelector('#mc').onclick=()=>m.remove();m.querySelector('#mo').onclick=async()=>{const now=Date.now(),ints=(o.intervenciones||[]).map(x=>x.id===run.id?Object.assign({},x,{fin:now,trabajo:m.querySelector('#mt').value.trim()}):x);const st=m.querySelector('#ms').value;m.remove();
+      const others=ints.some(x=>!x.fin);const p={intervenciones:ints};if(st!=='__fin'&&!(others&&st==='En curso'))p.estado=others&&st!=='En curso'?o.estado:st;if(st==='Bloqueada PA'&&!o.parada){p.parada=true;p.paradaDesde=now;}
+      await saveOT(id,p,t+' para ('+hrs(now-run.inicio)+')');if(st==='__fin')finalizar(id);};});}
 function finalizar(id){const o=S.ots.get(id),c=cfg(),run=runInt(o),pend=(o.material||[]).filter(m=>!m.recibido).length;
   modal('<h2>Finalizar '+esc(o.codigo)+'</h2>'+(pend?'<p class="small" style="color:var(--amber)">⚠ Hay '+pend+' material(es) sin recibir.</p>':'')+'<label>Causa</label><select id="fc">'+c.causas.map(x=>'<option>'+esc(x)+'</option>').join('')+'</select><label>¿Qué se ha hecho? (solución)</label><textarea id="fs" placeholder="Ej. Cambiado rodamiento lado operador y ajustada correa">'+esc(run?run.trabajo:'')+'</textarea>'+
     (o.parada||o.estado==='Bloqueada PA'?'<label class="check"><input type="checkbox" id="fm" checked> <span>La máquina vuelve a funcionar</span></label>':'')+'<div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="fx">Cancelar</button><button class="btn primary" id="fo">Finalizar OT</button></div>',m=>{
@@ -392,15 +443,18 @@ function intForm(id,ix){const o=S.ots.get(id),c=cfg(),i=ix>=0?o.intervenciones[i
     m.querySelector('#io').onclick=async()=>{const ini=new Date(m.querySelector('#ii').value).getTime(),fin=m.querySelector('#if').value?new Date(m.querySelector('#if').value).getTime():null;
       if(!ini||(fin&&fin<ini)){toast('Revisa las horas');return;}const n=Object.assign({},i,{id:i.id||uid(),tecnico:m.querySelector('#it').value.trim()||meName(),inicio:ini,fin,trabajo:m.querySelector('#iw').value.trim()});
       const l=[...(o.intervenciones||[])];if(ix>=0)l[ix]=n;else l.push(n);m.remove();await saveOT(id,{intervenciones:l},(ix>=0?'Intervención editada':'Intervención añadida')+' ('+n.tecnico+')');};});}
-function matForm(id){const o=S.ots.get(id);
+function matForm(id){const o=S.ots.get(id);pend=[];
   modal('<h2>Añadir material</h2><label>¿Qué hace falta?</label><input id="md" placeholder="Ej. Rodamiento 6205 2RS"><div class="grid g2"><div><label>Cantidad</label><input id="mc" type="number" min="1" value="1"></div><div><label>Referencia (opcional)</label><input id="mr"></div></div>'+
-    '<label class="check"><input type="checkbox" id="mp" checked> <span>Pedirlo ya a la web de recambios</span></label><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="mx">Cancelar</button><button class="btn primary" id="mo">Añadir</button></div>',m=>{
+    '<label>Fotos de la pieza (para que compras sepa qué es)</label>'+dropZone('Hacer foto de la pieza')+'<label class="check"><input type="checkbox" id="mp" checked> <span>Pedirlo ya a la web de recambios (con las fotos)</span></label><div class="row" style="margin-top:12px"><span class="sp"></span><button class="btn" id="mx">Cancelar</button><button class="btn primary" id="mo">Añadir</button></div>',m=>{
     m.querySelector('#mx').onclick=()=>m.remove();m.querySelector('#md').focus();
-    m.querySelector('#mo').onclick=async()=>{const d=m.querySelector('#md').value.trim();if(!d){toast('Escribe qué hace falta');return;}const it={desc:d,cant:+m.querySelector('#mc').value||1,ref:m.querySelector('#mr').value.trim(),t:Date.now()};const ped=m.querySelector('#mp').checked;m.remove();
+    m.querySelector('#mo').onclick=async()=>{const d=m.querySelector('#md').value.trim();if(!d){toast('Escribe qué hace falta');return;}const bt=m.querySelector('#mo');bt.disabled=true;bt.textContent=pend.length?'Subiendo fotos…':'Añadiendo…';
+      let fotos=[];try{fotos=pend.length?await uploadFotos(pend.map(x=>x.f)):[];}catch(x){toast('No se han podido subir las fotos');}pend=[];
+      const it={desc:d,cant:+m.querySelector('#mc').value||1,ref:m.querySelector('#mr').value.trim(),t:Date.now(),fotos};const ped=m.querySelector('#mp').checked;m.remove();
       const l=[...(o.material||[]),it];await saveOT(id,{material:l},'Material: '+d);if(ped)await pedirMaterial(id,l.length-1);};});}
 async function pedirMaterial(id,ix){const o=S.ots.get(id),m=o.material[ix];const rid='av-'+id+'-'+ix+'-'+(m.t||0);const t=Date.now();
   await S.db.collection('recambios').doc(rid).set({fecha:today(),descripcion:String(m.desc).toUpperCase().slice(0,70),maquina:String(maqName(o)).toUpperCase(),solicitante:meName().toUpperCase(),ot:o.codigo,compra:'X',urgente:o.prioridad==='Crítica'||isStop(o),
-    explicacion:'Desde Averías: '+o.codigo+' «'+(o.titulo||'')+'» — '+m.cant+' ud.'+(m.ref?' · ref. '+m.ref:'')+(isStop(o)?' · MÁQUINA PARADA':''),origen:'averias',creadoEn:t,orden:t});
+    explicacion:'Desde Averías: '+o.codigo+' «'+(o.titulo||'')+'» — '+m.cant+' ud.'+(m.ref?' · ref. '+m.ref:'')+(isStop(o)?' · MÁQUINA PARADA':''),origen:'averias',creadoEn:t,orden:t,
+    fotos:(m.fotos||[]).filter(f=>f.id||f.url).slice(0,4).map(f=>({id:f.id||String(f.url).split('/').pop(),nombre:f.name||'foto.jpg',fecha:today(),por:''}))});
   const l=(o.material||[]).map((x,i)=>i===ix?Object.assign({},x,{recId:rid}):x);
   const p={material:l};if(o.estado==='En curso'||o.estado==='Asignada'||o.estado==='Abierta')p.estado=isStop(o)?'Bloqueada PA':'Bloqueada OP';
   await saveOT(id,p,'Pedido a recambios: '+m.desc);toast('Pedido creado en la web de recambios');}
