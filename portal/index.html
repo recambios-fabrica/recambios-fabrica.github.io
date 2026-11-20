@@ -135,6 +135,7 @@
 @media(max-width:600px){.abs-cal-d{min-height:46px;padding:3px}.abs-cal-d .c{display:none}.abs-cal-d .p{font-size:11px}}
 .absp-tsel{width:auto;margin:0;padding:2px 4px;font-size:12px}.absp-q{flex:1 1 220px;max-width:320px;margin:0 0 0 auto;padding:7px 10px}.absp-q+.absp-only{margin-left:8px}
 .lv-btns .tf-pick{margin:0}.lv-add.busy{opacity:.5;pointer-events:none}.lv-main .bub-files{margin-top:6px}.lv-main .bub-img{max-width:110px;max-height:110px}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;align-self:flex-start}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -1661,7 +1662,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795180600';
+var LANG_V='1795181667';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
