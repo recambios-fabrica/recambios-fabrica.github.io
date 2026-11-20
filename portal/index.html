@@ -1661,7 +1661,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795180491';
+var LANG_V='1795180600';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2033,7 +2033,7 @@ document.addEventListener('change',function(ev){var t=ev.target;if(!t||!t.classL
 /* ===== 24) Ausencias: adjuntar fotos o PDF (justificante médico, citación…) al pedirla o después ===== */
 function lvFileInput(nm){return '<label class="tf-pick lv-pick" title="Adjuntar fotos o PDF">📎 <span>Adjuntar foto / PDF del justificante</span><input type="file" name="'+(nm||'lvfiles')+'" accept="image/*,application/pdf" multiple hidden></label><span class="tf-names muted"></span>';}
 function lvFiles(l){return Array.isArray(l.files)&&l.files.length?tFiles(l):'';}
-function lvAddBtn(l){return '<label class="tf-pick lv-add" title="Añadir fotos o PDF a esta ausencia">📎 <span>'+(Array.isArray(l.files)&&l.files.length?'Añadir más':'Añadir justificante')+'</span><input type="file" class="lv-addf" data-id="'+l.id+'" accept="image/*,application/pdf" multiple hidden></label>';}
+function lvAddBtn(l){if(l.kind==='Vacaciones'&&!(Array.isArray(l.files)&&l.files.length))return '';return '<label class="tf-pick lv-add" title="Añadir fotos o PDF a esta ausencia">📎 <span>'+(Array.isArray(l.files)&&l.files.length?'Añadir más':'Añadir justificante')+'</span><input type="file" class="lv-addf" data-id="'+l.id+'" accept="image/*,application/pdf" multiple hidden></label>';}
 A.leave=function(f,form){
   if(!f.kind||!f.start_date||!f.end_date||f.end_date<f.start_date){flash('Revisa el tipo y las fechas.','error');return stay();}
   var u=me(),inp=form&&form.querySelector('input[name=lvfiles]'),files=inp?inp.files:[],btn=form&&form.querySelector('button.primary');
