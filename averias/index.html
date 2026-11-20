@@ -103,7 +103,10 @@ h1.otitle{font-size:22px;font-weight:600;margin:0 0 12px}.qa{display:flex;gap:8p
 .pblink{display:inline-block;background:var(--red);color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.03em;padding:4px 9px;border-radius:3px;animation:blinkr 1s ease-in-out infinite}
 table.fx tr.mstop td{animation:blinkbg 1.4s ease-in-out infinite}table.fx tr.mstop td:first-child{box-shadow:inset 4px 0 0 var(--red)}
 .mst.stop{animation:blinkr 1s ease-in-out infinite;background:var(--red);color:#fff;padding:2px 8px;border-radius:3px}
-@media(prefers-reduced-motion:reduce){.pblink,table.fx tr.mstop td,.mst.stop{animation:none}}
+@keyframes kblink{0%,100%{background:var(--red);border-color:var(--red)}50%{background:#fff;border-color:#fca5a5}}@keyframes ktxt{0%,100%{color:#fff}50%{color:var(--red)}}
+.kpi.kblink{animation:kblink 1s ease-in-out infinite}.kpi.kblink b,.kpi.kblink span{animation:ktxt 1s ease-in-out infinite}
+.card.stoplist{border-color:#fca5a5}.card.stoplist table.fx tr.stop td{animation:blinkbg 1.4s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.pblink,table.fx tr.mstop td,.mst.stop,.kpi.kblink,.kpi.kblink b,.kpi.kblink span,.card.stoplist table.fx tr.stop td{animation:none}}
 /* ventanas */
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;z-index:200;font-weight:600}
 .modal{position:fixed;inset:0;background:#0006;z-index:150;display:flex;align-items:center;justify-content:center;padding:14px}
@@ -301,8 +304,8 @@ function vPanel(){const all=[...S.ots.entries()],open=all.filter(([,o])=>OPEN(o.
   const k=(n,l,c,go)=>'<a class="kpi '+c+'" href="#'+go+'"><b>'+n+'</b><span>'+l+'</span></a>';
   const carga={};cfg().tecnicos.forEach(t=>carga[t]=0);open.forEach(([,o])=>(o.asignados||[]).forEach(a=>carga[a]=(carga[a]||0)+1));const cmax=Math.max(1,...Object.values(carga));
   return crumbs([['Panel de mantenimiento']],'<a class="btn blue" href="#nueva">'+IC.plus+' Crear orden de trabajo</a>')+
-    '<div class="kpis">'+k(open.length,'Órdenes abiertas','','ots/abiertas')+k(stop.length,'Máquinas paradas','red','ots/paradas')+k(crit.length,'Críticas abiertas','red','ots/criticas')+k(curso.length,'Trabajando ahora','','encurso')+k(mat.length,'Bloqueadas por material','','ots/bloqueadas')+k(sin.length,'Sin asignar','','ots/sinasignar')+k(venc.length,'Preventivos vencidos','','preventivo')+'</div>'+
-    '<div class="card"><div class="ch">Máquinas paradas ahora ('+stop.length+')</div>'+(stop.length?otRowsHtml(stop.sort((a,b)=>a[1].creadaEn-b[1].creadaEn)):'<div class="empty">Ninguna máquina parada.</div>')+'</div>'+
+    '<div class="kpis">'+k(open.length,'Órdenes abiertas','','ots/abiertas')+k(stop.length,'Máquinas paradas','red'+(stop.length?' kblink':''),'ots/paradas')+k(crit.length,'Críticas abiertas','red','ots/criticas')+k(curso.length,'Trabajando ahora','','encurso')+k(mat.length,'Bloqueadas por material','','ots/bloqueadas')+k(sin.length,'Sin asignar','','ots/sinasignar')+k(venc.length,'Preventivos vencidos','','preventivo')+'</div>'+
+    '<div class="card'+(stop.length?' stoplist':'')+'"><div class="ch">'+(stop.length?'<span class="pblink">● '+stop.length+' PARADA'+(stop.length>1?'S':'')+'</span>':'')+' Máquinas paradas ahora</div>'+(stop.length?otRowsHtml(stop.sort((a,b)=>a[1].creadaEn-b[1].creadaEn)):'<div class="empty">Ninguna máquina parada.</div>')+'</div>'+
     '<div class="g2"><div class="card"><div class="ch">Carga por técnico</div><div class="cb">'+Object.entries(carga).sort((a,b)=>b[1]-a[1]).map(([t,n])=>'<div class="hbar"><span class="l">'+esc(t)+'</span><span class="b" style="width:'+Math.round(n/cmax*150)+'px"></span><b>'+n+'</b></div>').join('')+'</div></div>'+
     '<div class="card"><div class="ch">Avisos por semana</div><div class="cb">'+weekBars()+'</div></div></div>'+
     '<div class="card"><div class="ch">Preventivos próximos</div><div class="cb">'+prevMini()+'</div></div>';}
