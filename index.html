@@ -94,6 +94,7 @@ td.strong{font-weight:600}
 .p-late{background:var(--red-bg);color:var(--red)}
 .p-rec{background:var(--green-bg);color:var(--green)}
 .p-presu{background:var(--purple-bg);color:var(--purple)}
+.p-pofe{background:var(--panel);color:var(--purple);outline:1px dashed var(--purple);outline-offset:-1px}
 .p-ok{background:var(--grey-bg);color:var(--ink2)}
 .p-nook{background:var(--red);color:#fff}
 .p-parc{background:var(--blue-bg);color:var(--blue);box-shadow:inset 3px 0 0 var(--amber)}
@@ -275,7 +276,7 @@ function notice(msg){const n=$('#notice'); n.textContent=msg||''; n.classList.to
 
 /* ---------- phases ---------- */
 const PH={
-  pend:{t:'Pendiente pedir',c:'p-pend'}, presu:{t:'Presupuestado',c:'p-presu'}, ped:{t:'Pedido',c:'p-ped'}, late:{t:'Retrasado',c:'p-late'},
+  pend:{t:'Pendiente pedir',c:'p-pend'}, pofe:{t:'Pendiente de oferta',c:'p-pofe'}, presu:{t:'Presupuestado',c:'p-presu'}, ped:{t:'Pedido',c:'p-ped'}, late:{t:'Retrasado',c:'p-late'},
   rec:{t:'Recibido',c:'p-rec'}, parc:{t:'Entrada parcial',c:'p-parc'}, ok:{t:'OK',c:'p-ok'}, nook:{t:'NO OK',c:'p-nook'}, anul:{t:'Anulado',c:'p-anul'},
   env:{t:'En proveedor',c:'p-ped'}, sinEnv:{t:'Pendiente enviar',c:'p-pend'},
   abierta:{t:'Abierta',c:'p-pend'}, fin:{t:'Finalizada',c:'p-ok'},
@@ -289,7 +290,7 @@ function phasePedido(r){
   if(e==='PARCIAL') return 'parc';
   if(r.fechaRecepcion) return 'rec';
   if(r.numPedido||r.fechaPedido) return isLate(r.fechaPrevista)?'late':'ped';
-  return nPresu(r)?'presu':'pend';
+  return nPresu(r)?'presu':e==='PENDIENTE OFERTA'?'pofe':'pend';
 }
 function nFotos(r){ return Array.isArray(r.fotos)?r.fotos.length:0; }
 function nPresu(r){ return Array.isArray(r.presupuestos)?r.presupuestos.length:0; }
@@ -301,7 +302,7 @@ function phaseRepar(r){
   if(e==='PARCIAL') return 'parc';
   if(r.fechaRecepcion) return 'rec';
   if(r.fechaOK||r.numPedido||r.proveedor) return isLate(r.fechaPrevista)?'late':'ped';
-  return nPresu(r)?'presu':'pend';
+  return nPresu(r)?'presu':e==='PENDIENTE OFERTA'?'pofe':'pend';
 }
 function phaseRodillo(r){
   if(r.fechaLlegada && r.fechaLlegada!=='?') return 'rec';
@@ -319,14 +320,14 @@ const otKey=c=>c.replace('/','-');
 function otInfo(c){ return S.ots[otKey(c)]||null; }
 function otCls(o){ if(!o) return 'p-ok'; const e=norm(o.estado); if(/finaliz|cerrad|anulad|cancel/.test(e)) return 'p-ok'; if(/bloque/.test(e)) return 'p-late'; if(/abiert/.test(e)) return 'p-pend'; return 'p-ped'; }
 function isUrg(r){ if(r.urgente===false) return false; if(r.urgente===true) return true; return /\burgent/i.test([r.descripcion,r.explicacion,r.comentarios,r.trabajo].join(' ')); }
-const OPEN=new Set(['pend','presu','ped','late','parc','nook','env','sinEnv','abierta']);
+const OPEN=new Set(['pend','pofe','presu','ped','late','parc','nook','env','sinEnv','abierta']);
 
 /* ---------- sheet configs ---------- */
-const ESTADOS=['','PARCIAL','OK','NO OK','ANULADO'];
+const ESTADOS=['','PENDIENTE OFERTA','PARCIAL','OK','NO OK','ANULADO'];
 const SHEETS={
   recambios:{
     label:'Recambios', single:'recambio', phase:phasePedido, titleField:'descripcion',
-    kpis:[['open','Abiertos'],['pend','Pendiente pedir'],['presu','Con presupuesto'],['ped','Pedidos en camino'],['late','Retrasados',1],['parc','Entrada parcial'],['rec','Recibidos sin validar'],['nook','NO OK',1]],
+    kpis:[['open','Abiertos'],['pend','Pendiente pedir'],['pofe','Pendiente de oferta'],['presu','Con presupuesto'],['ped','Pedidos en camino'],['late','Retrasados',1],['parc','Entrada parcial'],['rec','Recibidos sin validar'],['nook','NO OK',1]],
     cols:[['_ph','Estado'],['_np','Presup.','presu'],['_ot','OT Fixner','ot'],['fecha','Fecha','date'],['descripcion','Descripción','strong'],['maquina','Máquina'],['solicitante','Pide'],['explicacion','Explicación','wrap'],['proveedor','Proveedor'],['numPedido','Nº pedido','mono'],['fechaPrevista','Prevista','prev'],['fechaRecepcion','Recepción','date']],
     filters:['maquina','proveedor','solicitante'],
     groups:[
@@ -335,6 +336,7 @@ const SHEETS={
       ['Recepción',[['fechaParcial','Entrada parcial (fecha)','date'],['fechaRecepcion','Fecha recepción (todo)','date'],['estado','Estado','select',0,ESTADOS],['comentarios','Comentarios (si NO OK recepción…)','area',1],['otros','Otros','area',1]]],
     ],
     quick:r=>[
+      phasePedido(r)==='pend'&&['📨 Oferta pedida',{estado:'PENDIENTE OFERTA'}],
       !r.fechaPedido&&['Pedido hoy',{fechaPedido:today()}],
       !r.fechaRecepcion&&['Recibido hoy',{fechaRecepcion:today()}],
       !['OK','ANULADO'].includes((r.estado||'').toUpperCase())&&[(r.estado||'').toUpperCase()==='PARCIAL'?'📦 Otra entrada parcial':'📦 Entrada parcial',{__parcial:1}],
@@ -345,7 +347,7 @@ const SHEETS={
   },
   reparaciones:{
     label:'Reparaciones', single:'reparación', phase:phaseRepar, titleField:'descripcion',
-    kpis:[['open','Abiertas'],['pend','Pendiente autorizar'],['presu','Con presupuesto'],['ped','En curso'],['late','Retrasadas',1],['parc','Entrada parcial'],['rec','Recibidas sin validar'],['nook','NO OK',1]],
+    kpis:[['open','Abiertas'],['pend','Pendiente autorizar'],['pofe','Pendiente de oferta'],['presu','Con presupuesto'],['ped','En curso'],['late','Retrasadas',1],['parc','Entrada parcial'],['rec','Recibidas sin validar'],['nook','NO OK',1]],
     cols:[['_ph','Estado'],['_np','Presup.','presu'],['_ot','OT Fixner','ot'],['fecha','Fecha','date'],['descripcion','Descripción','strong'],['maquina','Máquina'],['solicitante','Pide'],['explicacion','Explicación','wrap'],['proveedor','Proveedor'],['autorizadoPor','Autoriza'],['fechaPrevista','Prevista','prev'],['fechaRecepcion','Recepción','date']],
     filters:['maquina','proveedor','solicitante'],
     groups:[
@@ -354,6 +356,7 @@ const SHEETS={
       ['Recepción',[['fechaParcial','Entrada parcial (fecha)','date'],['fechaRecepcion','Fecha recepción (todo)','date'],['estado','Estado','select',0,ESTADOS],['comentarios','Comentarios (si NO OK recepción…)','area',1],['otros','Otros','area',1]]],
     ],
     quick:r=>[
+      phaseRepar(r)==='pend'&&['📨 Oferta pedida',{estado:'PENDIENTE OFERTA'}],
       !r.fechaOK&&['Autorizada hoy',{fechaOK:today()}],
       !r.fechaRecepcion&&['Recibida hoy',{fechaRecepcion:today()}],
       !['OK','ANULADO'].includes((r.estado||'').toUpperCase())&&[(r.estado||'').toUpperCase()==='PARCIAL'?'📦 Otra entrada parcial':'📦 Entrada parcial',{__parcial:1}],
@@ -442,7 +445,7 @@ function renderSheet(){
   $('#exp').onclick=exportXlsx;
   renderBody();
 }
-const PH_ORDER={late:0,nook:1,pend:2,presu:2.5,sinEnv:2,abierta:2,ped:3,env:3,rec:4,ok:5,fin:5,anul:6};
+const PH_ORDER={late:0,nook:1,pend:2,pofe:2.2,presu:2.5,sinEnv:2,abierta:2,ped:3,env:3,rec:4,ok:5,fin:5,anul:6};
 function visibleRows(){
   const k=S.tab,c=SHEETS[k]; let rows=rowsWithPhase(k);
   if(S.kpi!=='all') rows=rows.filter(r=>kpiMatchR(r,S.kpi));
@@ -997,7 +1000,7 @@ function renderProc(){
      <li><b>Autoriza el pedido de servicios <span class="who-tag">Gabriel</span></b><em>Anotar “Fecha de OK” y “Autorizado por” en la reparación.</em></li>
    </ol></div>
    <div class="card"><h3>Cómo leer los estados</h3><ol class="legend">
-     ${['pend','presu','ped','late','rec','ok','nook','anul'].map(p=>`<li><span class="pill ${PH[p].c}">${PH[p].t}</span> <em>${{pend:'sin Nº pedido ni fecha de pedido',presu:'tiene presupuesto adjunto, falta hacer el pedido',ped:'pedido hecho, esperando llegada',late:'la fecha prevista ya ha pasado y no ha llegado',rec:'ha llegado pero nadie lo ha validado',ok:'validado y cerrado',nook:'ha llegado mal: revisar comentarios',anul:'pedido anulado'}[p]}</em></li>`).join('')}
+     ${['pend','pofe','presu','ped','late','rec','ok','nook','anul'].map(p=>`<li><span class="pill ${PH[p].c}">${PH[p].t}</span> <em>${{pend:'sin Nº pedido ni fecha de pedido',pofe:'se ha pedido oferta al proveedor y aún no está adjunta; al adjuntarla pasa a Presupuestado',presu:'tiene presupuesto adjunto, falta hacer el pedido',ped:'pedido hecho, esperando llegada',late:'la fecha prevista ya ha pasado y no ha llegado',rec:'ha llegado pero nadie lo ha validado',ok:'validado y cerrado',nook:'ha llegado mal: revisar comentarios',anul:'pedido anulado'}[p]}</em></li>`).join('')}
    </ol><p class="hint" style="margin-top:10px">El estado se calcula solo a partir de las fechas y del campo “Estado”. Las fechas admiten texto (“SEMANA 45”), pero solo las fechas reales sirven para avisar de retrasos.</p></div>
    ${S.isOwner?'<div class="card" id="papelera"><h3>Papelera</h3><p class="hint">Cargando…</p></div>':''}
    ${S.isOwner?'<div class="card"><h3>Copia de seguridad completa</h3><p class="hint" style="margin:0 0 10px">Descarga todos los datos (pedidos, reparaciones, rodillos, asistencias, OT de Fixner, precios, papelera) y los presupuestos adjuntos en un solo archivo .json. Sirve para guardar una copia o para pasar la web al servidor de la empresa.</p><button class="btn primary" id="bkBtn">Descargar copia completa</button><p class="hint" id="bkMsg"></p></div>':''}
