@@ -393,6 +393,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2f7de1;box-sh
  .nt-sub{font-size:14px;margin:14px 0 6px;color:#10294a}.nt-ok{color:#17643b;font-weight:600}.nt-form label{display:block;margin:6px 0 4px;font-weight:600;font-size:14px}
  .nt-chk{display:flex!important;align-items:center;gap:8px;font-weight:500!important}.nt-chk input{width:auto}.bk-btns{display:flex;gap:8px;flex-wrap:wrap}
  .nt-form .primary{width:auto;padding-left:22px;padding-right:22px}
+ /* logo de la empresa (escudo con el pozo) */
+ .crest{font-size:0!important;color:transparent!important;background:#fff url(logo.png) center/68% auto no-repeat!important;border-radius:9px!important}
+ .login-card .crest,.crest.big{width:66px!important;height:88px!important;background:url(logo.png) center/contain no-repeat!important;box-shadow:none!important;border-radius:0!important}
+ .hero-mark,.welcome-mark,.social-avatar{font-size:0!important;color:transparent!important;background:#fff url(logo.png) center/62% auto no-repeat!important;border-color:rgba(255,255,255,.6)!important}
 </style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Portal empleado"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body><div id="app"></div>
@@ -1792,7 +1796,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795437123';
+var LANG_V='1795437952';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2366,8 +2370,7 @@ layout=function(content){
   return h;
 };
 (function(){try{
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#123f70"/><path d="M18 14h28v22c0 9-6 14-14 16-8-2-14-7-14-16z" fill="#fff"/><text x="32" y="40" font-family="Arial" font-weight="700" font-size="22" text-anchor="middle" fill="#123f70">G</text></svg>';
-  var l=document.querySelector('link[rel=icon]')||document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.href='data:image/svg+xml,'+encodeURIComponent(svg);document.head.appendChild(l);
+  var l=document.querySelector('link[rel=icon]')||document.createElement('link');l.rel='icon';l.type='image/png';l.href='favicon.png';document.head.appendChild(l);
   if(!document.querySelector('meta[name=theme-color]')){var m=document.createElement('meta');m.name='theme-color';m.content='#123f70';document.head.appendChild(m);}
 }catch(e){}})();
 
