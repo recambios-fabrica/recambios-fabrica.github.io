@@ -6,7 +6,8 @@
  */
 (function () {
   'use strict';
-  const ALLOWED = ['https://app3.fixner.com', 'https://garciadepou0-my.sharepoint.com'];
+  // Fixner puede servir a cada usuario desde app, app2, app3…; el Excel, desde el SharePoint de la empresa.
+  const okOrigin = o => /^https:\/\/[a-z0-9-]+\.fixner\.com$/i.test(o) || /^https:\/\/garciadepou0(-my)?\.sharepoint\.com$/i.test(o);
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   // Códigos de OT que aparecen en una línea (OT, reparación, explicación, comentarios…), tolerando «T25/14465», «OT 25 / 14465»…
   const otCodes = r => { const out = new Set(); const t = [r.ot, r.reparacion, r.explicacion, r.comentarios, r.otros].join(' ');
@@ -33,6 +34,10 @@
         await db.collection('fixner_ots').doc(id).update({ estado: estado || '', ...(fxid ? { fxid } : {}) }); cambios++;
       }
       if (pa.has(id)) continue;
+      // Solo generan pedido las OT bloqueadas (OP/PA) o de material almacén que sigan abiertas
+      // (si el usuario no tiene los filtros «WEB · …» en Fixner, el botón manda el listado entero).
+      if (/finaliz|anulad|cerrad/i.test(estado || '')) continue;
+      if (!/bloqueada\s*(op|pa)/i.test(estado || '') && !/material\s*almac/i.test(tipo || '')) continue;
       const ya = rec.some(r => r.ot === code || r.reparacion === code || otCodes(r).has(otNorm(code)));
       if (ya) { await db.collection('fixner_pa').doc(id).set({ codigo: code, visto: hoy, pedido: 'ya existía' }); pa.add(id); continue; }
       const motivo = /bloqueada\s*op/i.test(estado) ? 'Bloqueada OP (falta material, máquina en marcha)'
@@ -97,8 +102,49 @@
     return { creados, actualizados, nuevos };
   }
 
+
+  /* «Subir el Excel»: para quien no puede usar el botón de la barra de marcadores (sin permiso en SharePoint,
+     Excel de escritorio, otro navegador…). Lee el .xlsx descargado igual que el botón y lo pasa por doExcel. */
+  async function xlsxChanges(ab) {
+      const buf = new Uint8Array(ab); const dv = new DataView(buf.buffer);
+      let e = buf.length - 22; while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+      const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const files = {};
+      for (let i = 0; i < n; i++) { const m = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true); files[new TextDecoder().decode(buf.subarray(p + 46, p + 46 + nl))] = { m, cs, lo }; p += 46 + nl + xl + cl; }
+      const read = async name => { const f = files[name]; if (!f) return null; const ds = f.lo + 30 + dv.getUint16(f.lo + 26, true) + dv.getUint16(f.lo + 28, true); const raw = buf.subarray(ds, ds + f.cs); if (f.m === 0) return new TextDecoder().decode(raw); return await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text(); };
+      const X = s => new DOMParser().parseFromString(s, 'application/xml'); const kids = (el, tag) => [...el.getElementsByTagName(tag)];
+      const sst = []; { const s = await read('xl/sharedStrings.xml'); if (s) kids(X(s), 'si').forEach(si => sst.push(kids(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join(''))); }
+      const fills = [], xfFill = []; { const d = X(await read('xl/styles.xml')); kids(kids(d, 'fills')[0], 'fill').forEach(f => { const pf = kids(f, 'patternFill')[0]; const fg = pf && kids(pf, 'fgColor')[0]; fills.push(pf && pf.getAttribute('patternType') === 'solid' && fg && fg.getAttribute('rgb') ? fg.getAttribute('rgb').toUpperCase() : ''); }); kids(kids(d, 'cellXfs')[0], 'xf').forEach(x => xfFill.push(fills[+(x.getAttribute('fillId') || 0)] || '')); }
+      const wb = X(await read('xl/workbook.xml')), rels = X(await read('xl/_rels/workbook.xml.rels'));
+      const tgt = {}; kids(rels, 'Relationship').forEach(r => tgt[r.getAttribute('Id')] = r.getAttribute('Target'));
+      const h32 = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); };
+      const colIdx = ref => { let c = 0; for (const ch of ref) { if (ch >= 'A' && ch <= 'Z') c = c * 26 + ch.charCodeAt(0) - 64; else break; } return c - 1; };
+      const SHEETS = { recambios: /^recamb/i, reparaciones: /^repar/i, rodillos: /^rodill/i, asistencias: /^as+ist/i };
+      const GREEN = new Set(['FF92D050', 'FF00B050']); const LS = 'claude_recambios_xlsync_v1';
+      const base = null;
+      const changed = [], hashes = {};
+      for (const sh of kids(wb, 'sheet')) {
+        const k = Object.keys(SHEETS).find(k => SHEETS[k].test(sh.getAttribute('name').trim())); if (!k) continue;
+        let t = tgt[sh.getAttribute('r:id')] || tgt[sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id')]; t = t.startsWith('/') ? t.slice(1) : 'xl/' + t;
+        const d = X(await read(t)); hashes[k] = {};
+        for (const row of kids(d, 'row')) {
+          const r = +row.getAttribute('r'); const vals = new Array(17).fill(''), fl = new Array(17).fill(''); let any = false;
+          for (const c of kids(row, 'c')) { const ci = colIdx(c.getAttribute('r') || ''); if (ci < 0 || ci >= 17) continue; fl[ci] = xfFill[+(c.getAttribute('s') || 0)] || ''; const ty = c.getAttribute('t'); const v = kids(c, 'v')[0]; let val = ''; if (ty === 's') val = v ? (sst[+v.textContent] || '') : ''; else if (ty === 'inlineStr') val = kids(c, 't').map(x => x.textContent).join(''); else val = v ? v.textContent : ''; if (val.trim() !== '') any = true; vals[ci] = val; }
+          if (!any || r > 1000000) continue;
+          const g = fl.slice(0, 6).every(f => GREEN.has(f)) ? 1 : 0; const h = h32(vals.join('\u0001') + '|' + g); hashes[k][r] = h;
+          if (!base || !base[k] || base[k][r] !== h) changed.push({ k, r, g, vals });
+        }
+      }
+    return changed;
+  }
+  window.RG_EXCEL_UPLOAD = async file => {
+    const ab = await file.arrayBuffer();
+    if (new Uint8Array(ab, 0, 2)[0] !== 0x50) throw new Error('El archivo no es un Excel .xlsx.');
+    const changed = await xlsxChanges(ab);
+    if (!changed.length) throw new Error('No encuentro las hojas Recambios / Reparaciones / Rodillos en ese Excel.');
+    return await doExcel(changed);
+  };
   window.addEventListener('message', async ev => {
-    if (!ALLOWED.includes(ev.origin)) return;
+    if (!okOrigin(ev.origin)) return;
     const m = ev.data || {};
     if (m.type === 'rg-ping') { await claude.use('db'); try { ev.source.postMessage({ type: 'rg-ready' }, ev.origin); } catch (e) {} return; }
     if (m.type !== 'rg-fixner' && m.type !== 'rg-excel') return;
@@ -112,7 +158,7 @@
   // Si esta ventana la abrió el botón de sincronizar, avisa cuando la sesión está lista
   if (window.opener) {
     claude.use('db').then(() => {
-      for (const o of ALLOWED) { try { window.opener.postMessage({ type: 'rg-ready' }, o); } catch (e) {} }
+      try { window.opener.postMessage({ type: 'rg-ready' }, '*'); } catch (e) {}
     });
   }
 })();

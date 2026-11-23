@@ -370,12 +370,25 @@
         <li>Abre <a href="${fx}" target="_blank" rel="noopener">Fixner</a> (listado de órdenes de trabajo) y pulsa <b>↻ Recambios</b> en la barra de marcadores: trae las OT bloqueadas y de material almacén.</li>
         <li>Abre <a href="${xl}" target="_blank" rel="noopener">el Excel</a> y pulsa <b>↻ Recambios</b>: trae las filas nuevas o cambiadas.</li>
       </ul>
-      <p style="margin:0 0 14px;color:#55595e;font-size:13px">Nunca se borra ni se pisa lo que ya está en la web: solo se añaden pedidos nuevos y se rellenan los huecos.</p>
+      <div style="margin:0 0 14px;padding:10px 12px;background:#f4f7fb;border-radius:8px">
+        <b>¿El botón no te funciona con el Excel?</b> En el Excel: <i>Archivo → Crear una copia → Descargar una copia</i>, y súbelo aquí:
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="file" id="rg-xl-f" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"><span id="rg-xl-m" style="color:#55595e"></span></div>
+      </div>
+      <p style="margin:0 0 14px;color:#55595e;font-size:13px">Nunca se borra ni se pisa lo que ya está en la web: solo se añaden pedidos nuevos y se rellenan los huecos. Si alguien no tiene en Fixner los filtros «WEB · Bloqueadas OP y PA» y «WEB · Material almacén», el botón lee el listado abierto y se queda solo con esas OT.</p>
       <div style="text-align:right"><button id="rg-sh-c" style="padding:8px 14px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer">Cerrar</button></div></div></div>`;
     document.body.appendChild(d);
     const a = d.querySelector('#rg-bm'); a.href = window.RG_BOOKMARKLET || '#';
     a.onclick = e => { e.preventDefault(); alert('Arrástralo a la barra de marcadores (no hace falta pulsarlo aquí).'); };
     d.querySelector('#rg-sh-c').onclick = () => d.remove();
+    const xf = d.querySelector('#rg-xl-f'), xm = d.querySelector('#rg-xl-m');
+    xf.onchange = async () => {
+      const f = xf.files[0]; if (!f) return;
+      if (typeof window.RG_EXCEL_UPLOAD !== 'function') { xm.textContent = 'La web aún no ha cargado del todo; espera un momento.'; return; }
+      xf.disabled = true; xm.style.color = '#55595e'; xm.textContent = 'Leyendo el Excel… (puede tardar un minuto)';
+      try { const r = await window.RG_EXCEL_UPLOAD(f); xm.style.color = '#067647'; xm.textContent = `✓ Hecho: ${r.creados} fila(s) nueva(s), ${r.actualizados} completada(s).`; }
+      catch (e) { xm.style.color = '#b42318'; xm.textContent = '✗ ' + (e.message || e); }
+      xf.disabled = false; xf.value = '';
+    };
   }
 
   /* ---------- importar la copia de la web de Claude (solo administradores) ---------- */

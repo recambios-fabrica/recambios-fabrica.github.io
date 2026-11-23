@@ -1,7 +1,7 @@
 (async () => {
   const WEB = 'https://recambios-fabrica.github.io';
   const host = location.hostname;
-  const isFx = /(^|\.)fixner\.com$/.test(host), isSp = /sharepoint\.com$/.test(host);
+  const isFx = /(^|\.)fixner\.com$/.test(host), isSp = /sharepoint\.com$/.test(host) || /officeapps\.live\.com$/.test(host);
   const say = (t, err) => {
     let d = document.getElementById('rg-sync-msg');
     if (!d) { d = document.createElement('div'); d.id = 'rg-sync-msg'; d.style.cssText = 'position:fixed;top:12px;right:12px;z-index:2147483647;max-width:380px;background:#0B66C3;color:#fff;padding:12px 16px;border-radius:10px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3);white-space:pre-line;cursor:pointer'; d.onclick = () => d.remove(); document.body.appendChild(d); }
@@ -24,24 +24,35 @@
       if (!/ordenTrabajoList/.test(location.hash)) { location.hash = '#ordenTrabajoList:'; await sleep(5000); }
       let rows = [];
       const grab = () => { rows = rows.concat([...document.querySelectorAll('tr')].filter(tr => /OT\d\d\/\d+/.test(tr.innerText)).map(tr => { const td = [...tr.querySelectorAll('td')].map(t => t.innerText.replace(/\s+/g, ' ').trim()); const code = td[1].split(' ')[0]; const a = tr.querySelector('a[href^="#ordenTrabajo:"]'); return [code, td[1].slice(code.length + 1).slice(0, 60), td[2].replace(/^\(\d+\)\s*/, ''), td[3].replace(/^\(\d\)\s*/, ''), td[4], td[5], td[6], (td[0].split(' OT')[0] || '').trim().split(' ')[0], a ? a.getAttribute('href').split(':')[1] : ''].join('|'); })).filter((l, i, arr) => arr.findIndex(x => x.split('|')[0] === l.split('|')[0]) === i); };
-      for (const n of ['WEB · Bloqueadas OP y PA', 'WEB · Material almacén']) {
-        const chip = [...document.querySelectorAll('a,button,span')].find(e => e.textContent.trim() === n && e.children.length === 0);
-        if (!chip) throw new Error('No encuentro el filtro «' + n + '» en Fixner. Abre el listado de órdenes de trabajo y vuelve a pulsar.');
-        chip.click(); await sleep(5000);
-        for (let i = 0; i < 30; i++) { const m = [...document.querySelectorAll('a')].find(e => /ver más registros/i.test(e.textContent) && e.offsetParent); if (!m) break; m.click(); await sleep(3000); }
-        grab();
+      const more = async () => { for (let i = 0; i < 40; i++) { const m = [...document.querySelectorAll('a,button')].find(e => /ver más registros/i.test(e.textContent) && e.offsetParent); if (!m) break; m.click(); await sleep(3000); } };
+      const chipOf = n => [...document.querySelectorAll('a,button,span')].find(e => e.textContent.trim() === n && e.children.length === 0);
+      const FILTROS = ['WEB · Bloqueadas OP y PA', 'WEB · Material almacén'];
+      let sinFiltros = false;
+      if (FILTROS.every(chipOf)) {
+        for (const n of FILTROS) { chipOf(n).click(); await sleep(5000); await more(); grab(); }
+      } else {
+        /* Este usuario no tiene guardados los filtros «WEB · …»: se lee el listado tal como está y la web se queda solo con las bloqueadas y de material almacén. */
+        sinFiltros = true; say('↻ No tienes los filtros «WEB · …» en Fixner: leo el listado abierto (puede tardar)…');
+        await more(); grab();
+        if (!rows.length) throw new Error('No veo ninguna OT en el listado de Fixner. Abre «Órdenes de trabajo» y vuelve a pulsar.');
       }
+      { const seen = new Set(); rows = rows.filter(r => { const k = String(r).split('|')[0]; if (seen.has(k)) return false; seen.add(k); return true; }); }
       say(`↻ ${rows.length} OT leídas. Enviando a la web…`);
       await readyP;
       win.postMessage({ type: 'rg-fixner', rows }, WEB);
       const r = await wait('rg-done', 'fixner', 120000);
       if (!r.ok) throw new Error(r.error);
-      say(`✓ Fixner sincronizado (${r.leidas} OT).\n` + (r.nuevas.length ? `${r.nuevas.length} pedido(s) nuevo(s):\n· ` + r.nuevas.join('\n· ') : 'No hay OT nuevas.'));
+      say(`✓ Fixner sincronizado (${r.leidas} OT${sinFiltros ? ', sin filtros WEB' : ''}).\n` + (r.nuevas.length ? `${r.nuevas.length} pedido(s) nuevo(s):\n· ` + r.nuevas.join('\n· ') : 'No hay OT nuevas.'));
     } else {
       say('↻ Leyendo el Excel…');
-      const url = "/personal/electrico_fabrica02_garciadepou_com/_api/web/GetFileById('CD8987E5-3CF6-49B5-8285-38FFEED9F8BD')/$value";
-      const resp = await fetch(url, { cache: 'no-store', credentials: 'include' });
-      if (!resp.ok) throw new Error('No puedo abrir el Excel (' + resp.status + ').');
+      if (location.hostname !== 'garciadepou0-my.sharepoint.com') throw new Error('Abre el Excel PEDIDO DE RECAMBIOS en el navegador (desde el enlace de la web de recambios → ↻ Sincronizar) y pulsa aquí. Si lo tienes en la aplicación de Excel, usa en la web «Subir el Excel».');
+      const site = '/personal/electrico_fabrica02_garciadepou_com', GUID = 'CD8987E5-3CF6-49B5-8285-38FFEED9F8BD';
+      let resp = null;
+      for (const u of [`${site}/_api/web/GetFileById('${GUID}')/$value`, `${site}/_layouts/15/download.aspx?UniqueId=${GUID}`]) {
+        try { resp = await fetch(u, { cache: 'no-store', credentials: 'include' }); if (resp.ok && !/text\/html/i.test(resp.headers.get('content-type') || '')) break; } catch (x) {}
+        resp = null;
+      }
+      if (!resp) throw new Error('Tu usuario de Microsoft no puede descargar el Excel (falta permiso). Pide que te lo compartan con permiso de edición, o en la web pulsa ↻ Sincronizar → «Subir el Excel».');
       const buf = new Uint8Array(await resp.arrayBuffer()); const dv = new DataView(buf.buffer);
       let e = buf.length - 22; while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
       const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const files = {};
