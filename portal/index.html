@@ -1730,7 +1730,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795431497';
+var LANG_V='1795433621';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2173,6 +2173,9 @@ function asisMd(s){var h=esc(s);
       else if(/^\s*#{1,4}\s/.test(l))o+='<b>'+l.replace(/^\s*#+\s*/,'')+'</b><br>';else if(l.trim())o+=l+'<br>';else o+='<br>';}});
   if(inl)o+='</ul>';
   return o.replace(/<div class="asis-row">(<span>[\s:-]*<\/span>)+<\/div>/g,'').replace(/(<br>){2,}/g,'<br>').replace(/<br>$/,'');}
+function asisOrg(){try{var out=[];function walk(n,d){if(d>10)return;var nm=String(n.name||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean).join(', ');
+    out.push(new Array(d+1).join('  ')+'- '+(n.title||'(sin cargo)')+': '+(nm||'(sin nombre indicado)')+(n.note?' ('+n.note+')':''));orgKids(n.id).forEach(function(c){walk(c,d+1);});}
+  orgRoots().forEach(function(n){walk(n,0);});return out.join('\n').slice(0,6000);}catch(e){return '';}}
 function asisEl(){var w=document.getElementById('asis');if(w)return w;
   w=document.createElement('div');w.id='asis';w.className='no-tr';document.body.appendChild(w);
   w.addEventListener('click',function(e){var b=e.target.closest('[data-asis]');if(!b)return;e.preventDefault();var a=b.getAttribute('data-asis');
@@ -2201,7 +2204,7 @@ async function asisSend(q){q=String(q||'').trim();if(!q||ASIS.busy)return;var t=
   ASIS.msgs.push({role:'user',content:q});ASIS.busy=true;asisDraw();
   try{
     var r=await realFetch(URL0+'/functions/v1/asistente',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+(AUTH?await token():KEY),'Content-Type':'application/json'},
-      body:JSON.stringify({messages:ASIS.msgs.filter(function(m){return !m.err;}).slice(-8).map(function(m){return {role:m.role,content:m.content};}),role:role(),lang:LANG})});
+      body:JSON.stringify({messages:ASIS.msgs.filter(function(m){return !m.err;}).slice(-8).map(function(m){return {role:m.role,content:m.content};}),role:role(),lang:LANG,org:asisOrg()})});
     var j=null;try{j=await r.json();}catch(e){}
     if(r.ok&&j&&j.answer)ASIS.msgs.push({role:'assistant',content:j.answer});
     else ASIS.msgs.push({role:'assistant',content:(j&&j.error)||t.err,err:true});
