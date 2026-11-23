@@ -1804,7 +1804,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795438686';
+var LANG_V='1795438910';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2394,7 +2394,7 @@ function rpBar(p,max){var w=max>0?Math.min(100,p/max*100):0,c=p>=8?'#c0392b':p>=
 /* --- absentismo del mes por sección --- */
 function rpAbs(ym){var off=vacOffDays(),days=rpDays(ym).filter(function(k){return isWorkDay(k,off);}),nd=days.length,set={};days.forEach(function(k){set[k]=1;});
   var bySec={},emps=S.employees.filter(rpActive),secOf={};
-  emps.forEach(function(e){var s=String(e.center||'').trim()||'(sin sección)';secOf[e.id]=s;var r=bySec[s]||(bySec[s]={sec:s,n:0,baja:0,perm:0,vac:0});r.n++;});
+  emps.forEach(function(e){var s=String(e.center||'').trim()||'(sin sección)',k=secNorm(s);secOf[e.id]=k;var r=bySec[k]||(bySec[k]={sec:s,n:0,baja:0,perm:0,vac:0});if(r.sec===r.sec.toUpperCase()&&s!==s.toUpperCase())r.sec=s;r.n++;});
   S.leaves.forEach(function(l){if(lvStatus(l.status)!=='Aprobada'||l.deleted)return;var s=secOf[l.eid];if(!s)return;var r=bySec[s];
     var d=new Date(l.start+'T12:00:00'),e=new Date((l.end||l.start)+'T12:00:00');for(;d<=e;d.setDate(d.getDate()+1)){var k=isoD(d);if(!set[k])continue;
       if(l.kind==='Vacaciones')r.vac++;else if(l.kind==='Baja médica')r.baja++;else r.perm++;}});
