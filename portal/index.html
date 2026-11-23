@@ -1804,7 +1804,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795438910';
+var LANG_V='1795439927';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2216,7 +2216,7 @@ A.empdata=function(f,form){var e=byId(S.employees,+form.dataset.id);if(!e)return
   var msg=[],oldN=e.name,oldC=e.center;
   if(nm!==oldN){e.name=nm;var o=orgRename(oldN,nm);msg.push('nombre'+(o?' (también en el organigrama)':''));}
   if(cat!==(e.category||'')){e.category=cat;msg.push('categoría');}
-  if(secNorm(cen)!==secNorm(oldC)){e.center=cen;msg.push('sección: '+(oldC||'—')+' → '+(cen||'—'));}
+  if(String(cen||'').trim()!==String(oldC||'').trim()){e.center=cen;msg.push('sección: '+(oldC||'—')+' → '+(cen||'—'));}
   empChanged();
   flash(msg.length?'Guardado ('+msg.join(', ')+'). Ya sale así en Plantilla hoy, turnos, ausencias, sábados y en lo que ve su encargado y su director.':'No había cambios.','success');stay();};
 
