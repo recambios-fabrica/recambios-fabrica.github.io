@@ -148,6 +148,28 @@
 .mobile-more-panel a.is-active{background:#123f70;color:#fff}
 .mobile-more-panel .mobile-logout{grid-column:1/-1;margin-top:2px;padding:8px}
 .mobile-more[open] summary{color:#123f70;text-decoration:underline}
+#asis{position:fixed;right:18px;bottom:18px;z-index:60;font-size:14px}
+.asis-fab{display:flex;align-items:center;gap:6px;background:#123f70;color:#fff;border:0;border-radius:999px;padding:11px 16px;font-size:15px;font-weight:bold;box-shadow:0 6px 18px #0b264a55;cursor:pointer;margin:0}
+.asis-fab:hover{background:#0d3158}
+.asis-panel{width:min(390px,calc(100vw - 24px));height:min(600px,calc(100vh - 40px));background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 40px #0b264a44;display:flex;flex-direction:column;overflow:hidden}
+.asis-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding:12px 14px;background:#123f70;color:#fff}.asis-h small{display:block;font-size:12px;color:#d6e2f1!important;margin-top:2px;line-height:1.3}
+.asis-hb{display:flex;gap:4px}.asis-hb button{background:#ffffff22;color:#fff;border:0;border-radius:8px;width:30px;height:30px;padding:0;margin:0;font-size:15px;cursor:pointer}
+.asis-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f5f8fc}
+.asis-m{max-width:88%;padding:9px 12px;border-radius:12px;line-height:1.45;word-wrap:break-word;overflow-wrap:anywhere}
+.asis-m.me{align-self:flex-end;background:#123f70;color:#fff;border-bottom-right-radius:4px}
+.asis-m.ai{align-self:flex-start;background:#fff;border:1px solid var(--line);color:#172638;border-bottom-left-radius:4px}
+.asis-m.err{background:#fff3f3;border-color:#f2c0c0;color:#8a1c1c}
+.asis-m ul{margin:4px 0;padding-left:18px}.asis-m li{margin:2px 0}
+.asis-row{display:flex;gap:8px;font-size:12px;border-bottom:1px solid #eef1f5;padding:2px 0}.asis-row span{flex:1}
+.asis-sug{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.asis-sug button{background:#fff;border:1px solid #123f7044;color:#123f70;border-radius:999px;padding:6px 12px;font-size:13px;margin:0;text-align:left;cursor:pointer;font-weight:normal}.asis-sug button:hover{background:#eef4fb}
+.asis-warn{margin:0;padding:6px 12px;font-size:11px;color:#6b7686;background:#fff;border-top:1px solid var(--line);line-height:1.3}
+.asis-f{display:flex;gap:6px;padding:8px 10px 10px;background:#fff}.asis-f textarea{flex:1;resize:none;min-height:40px;max-height:110px;font-size:15px;padding:9px 10px;border-radius:10px;margin:0;font-family:inherit}.asis-f button{margin:0;padding:0 14px;border-radius:10px}
+.asis-dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#123f70;margin-right:3px;animation:asisd 1s infinite}.asis-dots i:nth-child(2){animation-delay:.15s}.asis-dots i:nth-child(3){animation-delay:.3s}
+@keyframes asisd{0%,100%{opacity:.25}50%{opacity:1}}
+@media(max-width:720px){#asis{right:10px;bottom:74px}.asis-fab{padding:10px 13px;font-size:14px}.asis-fab span{display:none}
+#asis:has(.asis-panel){left:0;right:0;bottom:0;top:0;background:#0b264a55;display:flex;align-items:flex-end;justify-content:center}
+.asis-panel{width:100vw;height:86vh;border-radius:16px 16px 0 0}}
+@media print{#asis{display:none}}
 .nav-switch{border:1px dashed rgba(255,255,255,.5);border-radius:8px;margin-top:8px}
 .uh-table td{vertical-align:middle}.uh-table .uh-bar{margin-top:4px;max-width:140px}.uh-pos{color:#123f70}.uh-neg{color:#b42318}tr.uh-me{background:#f6f2fc}
 @media (max-width:760px){.chat-wrap{grid-template-columns:1fr}.chat-wrap.has-open .chat-list{display:none}.chat-wrap:not(.has-open) .chat-main{display:none}.chat-back{display:inline-block}.bub{max-width:90%}}
@@ -1708,7 +1730,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795425982';
+var LANG_V='1795431497';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -2125,6 +2147,68 @@ A.empdata=function(f,form){var e=byId(S.employees,+form.dataset.id);if(!e)return
   flash(msg.length?'Guardado ('+msg.join(', ')+'). Ya sale así en Plantilla hoy, turnos, ausencias, sábados y en lo que ve su encargado y su director.':'No había cambios.','success');stay();};
 
 document.addEventListener('click',function(e){var d=document.querySelector('.mobile-more[open]');if(!d)return;if(!d.contains(e.target)||e.target.closest('.mobile-more-panel a'))d.removeAttribute('open');},true);
+/* ===== 28) Asistente con IA (preguntas sobre convenio, portal y procedimientos) ===== */
+var ASIS={open:false,msgs:[],busy:false};
+var ASIS_TX={
+  es:{btn:'Asistente',title:'Asistente del portal',sub:'Pregunta sobre el convenio, el portal o cómo hacer un trámite.',ph:'Escribe tu pregunta…',send:'Enviar',clear:'Nueva conversación',close:'Cerrar',
+      warn:'Respuestas generadas por IA: pueden tener errores. Para tu caso personal (nómina, vacaciones, turnos) pregunta a RR. HH. No escribas datos personales.',
+      think:'Pensando…',err:'No se ha podido conectar con el asistente.',hi:'¡Hola! Soy el asistente del portal. ¿En qué te ayudo?',
+      sug:['¿Cuántos días de vacaciones tengo?','¿Cuándo se cobran las pagas extra?','¿Cómo pido un día de asuntos propios?','¿Cómo adjunto el justificante médico?','¿Cuánto es el plus de nocturnidad?']},
+  ca:{btn:'Assistent',title:'Assistent del portal',sub:'Pregunta sobre el conveni, el portal o com fer un tràmit.',ph:'Escriu la teva pregunta…',send:'Envia',clear:'Conversa nova',close:'Tanca',
+      warn:'Respostes generades per IA: poden tenir errors. Per al teu cas personal (nòmina, vacances, torns) pregunta a RH. No escriguis dades personals.',
+      think:'Pensant…',err:"No s'ha pogut connectar amb l'assistent.",hi:"Hola! Sóc l'assistent del portal. En què et puc ajudar?",
+      sug:['Quants dies de vacances tinc?','Quan es cobren les pagues extra?','Com demano un dia d\'assumptes propis?','Com adjunto el justificant mèdic?','Quant és el plus de nocturnitat?']},
+  en:{btn:'Assistant',title:'Portal assistant',sub:'Ask about the collective agreement, the portal or how to do a procedure.',ph:'Type your question…',send:'Send',clear:'New chat',close:'Close',
+      warn:'AI-generated answers may contain mistakes. For your own case (payslip, holidays, shifts) ask HR. Do not write personal data.',
+      think:'Thinking…',err:'Could not reach the assistant.',hi:"Hi! I'm the portal assistant. How can I help?",
+      sug:['How many days of holiday do I get?','When are the extra payments paid?','How do I request a personal day?','How do I attach a medical note?','How much is the night shift bonus?']}
+};
+function asisT(){return ASIS_TX[LANG]||ASIS_TX[LANG==='ca'?'ca':(LANG==='es'?'es':'en')]||ASIS_TX.es;}
+function asisMd(s){var h=esc(s);
+  h=h.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>');
+  var L=h.split('\n'),o='',inl=false;
+  L.forEach(function(l){var m=l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+    if(m){if(!inl){o+='<ul>';inl=true;}o+='<li>'+m[1]+'</li>';}
+    else{if(inl){o+='</ul>';inl=false;}if(/^\s*\|/.test(l)){o+='<div class="asis-row">'+l.replace(/^\s*\||\|\s*$/g,'').split('|').map(function(c){return '<span>'+c.trim()+'</span>';}).join('')+'</div>';}
+      else if(/^\s*#{1,4}\s/.test(l))o+='<b>'+l.replace(/^\s*#+\s*/,'')+'</b><br>';else if(l.trim())o+=l+'<br>';else o+='<br>';}});
+  if(inl)o+='</ul>';
+  return o.replace(/<div class="asis-row">(<span>[\s:-]*<\/span>)+<\/div>/g,'').replace(/(<br>){2,}/g,'<br>').replace(/<br>$/,'');}
+function asisEl(){var w=document.getElementById('asis');if(w)return w;
+  w=document.createElement('div');w.id='asis';w.className='no-tr';document.body.appendChild(w);
+  w.addEventListener('click',function(e){var b=e.target.closest('[data-asis]');if(!b)return;e.preventDefault();var a=b.getAttribute('data-asis');
+    if(a==='open'){ASIS.open=true;asisDraw();setTimeout(function(){var i=document.getElementById('asis-in');if(i)i.focus();},30);}
+    else if(a==='close'){ASIS.open=false;asisDraw();}
+    else if(a==='clear'){if(ASIS.busy)return;ASIS.msgs=[];asisDraw();}
+    else if(a==='sug'){asisSend(b.textContent);}
+    else if(a==='send'){var i=document.getElementById('asis-in');if(i&&i.value.trim()){var v=i.value;i.value='';asisSend(v);}}});
+  w.addEventListener('keydown',function(e){if(e.target.id==='asis-in'&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();var i=e.target;if(i.value.trim()){var v=i.value;i.value='';asisSend(v);}}
+    if(e.key==='Escape'){ASIS.open=false;asisDraw();}});
+  return w;}
+function asisDraw(){var w=asisEl(),t=asisT(),on=!!(S&&S.session&&MODE!=='loading'&&!S.session.must);
+  w.style.display=on?'':'none';if(!on){ASIS.open=false;}
+  if(!ASIS.open){w.innerHTML='<button class="asis-fab" data-asis="open" aria-label="'+esc(t.title)+'">💬 <span>'+esc(t.btn)+'</span></button>';return;}
+  var list=ASIS.msgs.map(function(m){return '<div class="asis-m '+(m.role==='user'?'me':'ai')+(m.err?' err':'')+'">'+(m.role==='user'?esc(m.content).replace(/\n/g,'<br>'):asisMd(m.content))+'</div>';}).join('');
+  if(!ASIS.msgs.length)list='<div class="asis-m ai">'+esc(t.hi)+'</div><div class="asis-sug">'+t.sug.map(function(s){return '<button data-asis="sug">'+esc(s)+'</button>';}).join('')+'</div>';
+  if(ASIS.busy)list+='<div class="asis-m ai busy"><span class="asis-dots"><i></i><i></i><i></i></span> '+esc(t.think)+'</div>';
+  var keep=document.getElementById('asis-in'),val=keep?keep.value:'';
+  w.innerHTML='<div class="asis-panel" role="dialog" aria-label="'+esc(t.title)+'"><div class="asis-h"><div><b>💬 '+esc(t.title)+'</b><small>'+esc(t.sub)+'</small></div>'+
+    '<div class="asis-hb">'+(ASIS.msgs.length?'<button data-asis="clear" title="'+esc(t.clear)+'">↺</button>':'')+'<button data-asis="close" title="'+esc(t.close)+'" aria-label="'+esc(t.close)+'">✕</button></div></div>'+
+    '<div class="asis-list" id="asis-list">'+list+'</div><p class="asis-warn">'+esc(t.warn)+'</p>'+
+    '<div class="asis-f"><textarea id="asis-in" rows="1" maxlength="800" placeholder="'+esc(t.ph)+'"></textarea><button class="primary" data-asis="send"'+(ASIS.busy?' disabled':'')+'>'+esc(t.send)+'</button></div></div>';
+  var i=document.getElementById('asis-in');if(i){i.value=val;}
+  var l=document.getElementById('asis-list');if(l)l.scrollTop=l.scrollHeight;}
+async function asisSend(q){q=String(q||'').trim();if(!q||ASIS.busy)return;var t=asisT();
+  ASIS.msgs.push({role:'user',content:q});ASIS.busy=true;asisDraw();
+  try{
+    var r=await realFetch(URL0+'/functions/v1/asistente',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+(AUTH?await token():KEY),'Content-Type':'application/json'},
+      body:JSON.stringify({messages:ASIS.msgs.filter(function(m){return !m.err;}).slice(-8).map(function(m){return {role:m.role,content:m.content};}),role:role(),lang:LANG})});
+    var j=null;try{j=await r.json();}catch(e){}
+    if(r.ok&&j&&j.answer)ASIS.msgs.push({role:'assistant',content:j.answer});
+    else ASIS.msgs.push({role:'assistant',content:(j&&j.error)||t.err,err:true});
+  }catch(e){ASIS.msgs.push({role:'assistant',content:t.err,err:true});}
+  ASIS.busy=false;asisDraw();var i=document.getElementById('asis-in');if(i&&ASIS.open&&window.innerWidth>720)i.focus();}
+(function(){var last='';setInterval(function(){var k=(S&&S.session?S.session.eid+'|'+S.session.must:'-')+'|'+MODE+'|'+LANG;if(k!==last){if(last&&last.split('|')[0]!==k.split('|')[0])ASIS.msgs=[];last=k;asisDraw();}},700);})();
+
 boot();
 })();
 </script></body></html>
