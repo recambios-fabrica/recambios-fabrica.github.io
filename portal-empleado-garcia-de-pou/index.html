@@ -655,8 +655,25 @@ async function startSession(){
   S.session={eid:m.eid,role:m.role,realRole:m.role,sup:m.sup||[],dir:m.dir||[],prl:!!m.prl,must:false};(function(){var ch=modeChoices();if(ch.length>1){var md=S.ui.cmode;if(ch.indexOf(md)>=0){S.session.role=md;S.session.mode=md;}else{S.session.role=ch[0];S.session.mode=null;}}else{S.session.mode=ch[0];}})();
   await fullLoad();
   var u=me();S.session.must=!!(u&&u.must);MODE='shared';
-  clearInterval(pollT);pollT=setInterval(poll,8000);
+  clearInterval(pollT);pollT=setInterval(poll,8000);rtStart();
 }
+// Tiempo real: el servidor avisa «hay cambios» (sin datos) y la página los pide al momento con su sesión.
+var RT=null,rtHb=null,rtRef=0,rtWait=1000,rtT=null;
+function rtKick(){clearTimeout(rtT);rtT=setTimeout(function(){if(pending>0){rtKick();return;}poll();},250);}
+function rtStart(){
+  if(RT||!URL0||!KEY||!window.WebSocket)return;
+  try{RT=new WebSocket(URL0.replace(/^http/,'ws')+'/realtime/v1/websocket?apikey='+encodeURIComponent(KEY)+'&vsn=1.0.0');}catch(e){RT=null;return;}
+  var ws=RT;
+  ws.onopen=function(){rtWait=1000;
+    ws.send(JSON.stringify({topic:'realtime:portal-cambios',event:'phx_join',payload:{config:{broadcast:{self:false,ack:false},presence:{key:''},private:false}},ref:String(++rtRef)}));
+    clearInterval(rtHb);rtHb=setInterval(function(){try{ws.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++rtRef)}));}catch(e){}},25000);
+    rtKick();};
+  ws.onmessage=function(m){try{var j=JSON.parse(m.data);if(j.event==='broadcast')rtKick();}catch(e){}};
+  ws.onclose=function(){clearInterval(rtHb);if(RT===ws)RT=null;setTimeout(rtStart,rtWait);rtWait=Math.min(rtWait*2,30000);};
+  ws.onerror=function(){try{ws.close();}catch(e){}};
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&S&&S.session){if(!RT)rtStart();rtKick();}});
+window.addEventListener('online',function(){if(S&&S.session){if(!RT)rtStart();rtKick();}});
 async function poll(){
   if(!S.session||pending>0||document.hidden)return;
   try{
@@ -1913,7 +1930,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795541792';
+var LANG_V='1795596475';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
