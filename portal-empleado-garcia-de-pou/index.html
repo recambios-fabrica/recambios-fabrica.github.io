@@ -514,6 +514,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#2f7de1;box-sh
 @media(max-width:640px){.epc-two{grid-template-columns:1fr}}
 .prl-box{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-left:4px solid #2f8a57}.prl-box p{margin:4px 0 0;max-width:720px}
 .tr-h{margin:22px 0 8px}.act-verif{font-size:11.5px;margin-top:8px}
+.rp2-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.rp2-sec{width:auto;min-width:200px;margin:0}.rp2-h{font-size:15px;margin:18px 0 8px}.rp2-pend td{background:#fbfcfe;font-size:13px;line-height:1.7}.rp2-warn{margin:4px 0 12px}.rp2-empty{padding:14px 0}.rp-kpis .vac-box small small{font-size:inherit}
 </style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Portal empleado"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body><div id="app"></div>
@@ -4496,6 +4497,113 @@ A.psbpub=function(f,form){var B=S.ui.psBulk;if(!B)return;var per=String(f.period
     else{S.ui.psBulk=null;PSB_FILES=[];flash(done+' nóminas de '+per+' publicadas. Cada persona ya puede ver la suya.','success');}
     stay();})();};
 var _vNomPsb=vNominasHr;vNominasHr=function(){var h=_vNomPsb(),k=h.indexOf('<section class="card pay-upload">');return k<0?h+psbCard():h.slice(0,k)+psbCard()+h.slice(k);};
+
+/* ===== 50) Informes: formación, EPIs, firmas, plantilla e incidencias del mes ===== */
+function rp2Sec(){return S.ui.rpSec||'';}
+function rp2InSec(e){var s=rp2Sec();return !s||secNorm(e&&e.center)===secNorm(s);}
+function rp2SecSel(){var s=rp2Sec();return '<select data-chg="rpsec" class="rp2-sec"><option value="">Todas las secciones</option>'+empSections().map(function(x){return '<option'+(secNorm(x)===secNorm(s)?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'</select>';}
+function rp2Head(t,left){return '<div class="rp-head"><div class="rp2-left">'+(left||'')+'</div><button class="primary" data-act="rpxls" data-t="'+t+'">⬇ Descargar Excel</button></div>';}
+function rp2Box(l,v){return '<div class="vac-box"><small>'+l+'</small><b>'+v+'</b></div>';}
+function rp2Emp(id){return byId(S.employees,id)||{};}
+function rp2Iso(x){return String(x||'').slice(0,10);}
+function rp2Fmt(x){x=rp2Iso(x);return /^\d{4}-\d\d-\d\d$/.test(x)?fDMY(x):(x||'');}
+function rp2Today(){return isoD(today());}
+function rp2DaysTo(x){x=rp2Iso(x);if(!/^\d{4}-\d\d-\d\d$/.test(x))return null;return diffDays(new Date(x+'T12:00:00'),new Date(rp2Today()+'T12:00:00'));}
+function rp2Empty(msg){return '<p class="muted rp2-empty">'+msg+'</p>';}
+
+/* --- formación --- */
+function rp2Train(){return (S.trainings||[]).map(function(t){var e=rp2Emp(t.eid),d=rp2DaysTo(t.expires),st=d===null?'Sin caducidad':d<0?'Caducada':d<=90?'Caduca pronto':'Vigente';return {t:t,e:e,d:d,st:st};})
+  .filter(function(r){return r.e.id&&rpActive(r.e)&&rp2InSec(r.e);});}
+function rp2FormView(){var all=rp2Train(),c={cad:0,pr:0,vi:0,sc:0};all.forEach(function(r){if(r.st==='Caducada')c.cad++;else if(r.st==='Caduca pronto')c.pr++;else if(r.st==='Vigente')c.vi++;else c.sc++;});
+  var list=all.filter(function(r){return r.st==='Caducada'||r.st==='Caduca pronto';}).sort(function(a,b){return a.d-b.d;});
+  return rp2Head('form',rp2SecSel())+'<div class="vac-boxes rp-kpis">'+rp2Box('Caducadas',c.cad)+rp2Box('Caducan en 90 días',c.pr)+rp2Box('Vigentes',c.vi)+rp2Box('Sin caducidad',c.sc)+'</div>'+
+    '<h3 class="rp2-h">Formaciones caducadas o que caducan en los próximos 90 días</h3>'+
+    (list.length?'<div class="table-wrap"><table class="vac-table rp-table"><thead><tr><th>Nº</th><th>Nombre</th><th>Sección</th><th>Formación</th><th>Caduca</th><th>Estado</th></tr></thead><tbody>'+
+    list.map(function(r){return '<tr><td>'+esc(r.e.no)+'</td><td>'+esc(r.e.name)+'</td><td>'+esc(r.e.center||'')+'</td><td>'+esc(r.t.title||'')+'</td><td>'+esc(rp2Fmt(r.t.expires))+'</td><td>'+(r.d<0?'<span class="chip chip-no">Caducada hace '+(-r.d)+' días</span>':'<span class="chip chip-pend">'+(r.d===0?'Caduca hoy':'Caduca en '+r.d+' días')+'</span>')+'</td></tr>';}).join('')+'</tbody></table></div>'
+    :rp2Empty(all.length?'Ninguna formación caducada ni a punto de caducar.':'Todavía no hay formaciones registradas.'))+
+    '<p class="muted rp-note">El Excel incluye todas las formaciones registradas, con su estado.</p>';}
+
+/* --- EPIs --- */
+function rp2Epis(){return (S.epis||[]).filter(function(x){return !x.deleted;}).map(function(x){var e=rp2Emp(x.eid);return {x:x,e:e,sec:x.section||e.center||''};}).filter(function(r){var s=rp2Sec();return !s||secNorm(r.sec)===secNorm(s);});}
+function rp2EpiView(){var all=rp2Epis(),c={Pendiente:0,Entregado:0,Recibido:0,Rechazada:0};all.forEach(function(r){c[r.x.status]=(c[r.x.status]||0)+1;});
+  var open=all.filter(function(r){return r.x.status==='Pendiente'||r.x.status==='Entregado';}).sort(function(a,b){return String(a.x.req_at).localeCompare(String(b.x.req_at));});
+  return rp2Head('epi',rp2SecSel())+'<div class="vac-boxes rp-kpis">'+rp2Box('Pendientes de entregar',c.Pendiente)+rp2Box('Entregados sin acuse',c.Entregado)+rp2Box('Recibidos (firmados)',c.Recibido)+rp2Box('No aceptadas',c.Rechazada)+'</div>'+
+    '<h3 class="rp2-h">Peticiones abiertas</h3>'+
+    (open.length?'<div class="table-wrap"><table class="vac-table rp-table"><thead><tr><th>Pedido</th><th>Nº</th><th>Nombre</th><th>Sección</th><th>Material</th><th>Estado</th></tr></thead><tbody>'+
+    open.map(function(r){var d=rp2DaysTo(r.x.req_at);return '<tr><td>'+esc(rp2Fmt(r.x.req_at))+(d!==null&&d<0?'<br><small class="muted">hace '+(-d)+' días</small>':'')+'</td><td>'+esc(r.e.no||'')+'</td><td>'+esc(r.e.name||'')+'</td><td>'+esc(r.sec)+'</td><td>'+esc(epiList(r.x).join(', '))+'</td><td>'+(r.x.status==='Entregado'?'<span class="chip chip-pend">Entregado · falta el acuse</span>':'<span class="chip chip-no">Pendiente de entregar</span>')+'</td></tr>';}).join('')+'</tbody></table></div>'
+    :rp2Empty(all.length?'No hay peticiones de EPIs abiertas.':'Todavía no hay peticiones de EPIs.'))+
+    '<p class="muted rp-note">El Excel incluye todas las peticiones, con las fechas de petición, entrega y acuse.</p>';}
+
+/* --- documentos para firmar --- */
+function rp2DocFor(d,e){if(!d||d.active===0||!e||!rpActive(e))return false;if(d.aud==='secs')return (d.secs||[]).map(secNorm).indexOf(secNorm(e.center))>=0;if(d.aud==='people')return (d.nos||[]).map(noNorm).indexOf(noNorm(e.no))>=0;return true;}
+function rp2Docs(){return (S.sdocs||[]).filter(function(d){return d.active!==0;}).sort(function(a,b){return String(b.created).localeCompare(String(a.created));}).map(function(d){
+  var who=S.employees.filter(function(e){return rp2DocFor(d,e)&&rp2InSec(e);}),pend=who.filter(function(e){return !sdSig(d.id,e.id);});return {d:d,n:who.length,ok:who.length-pend.length,pend:pend};}).filter(function(r){return r.n>0;});}
+function rp2FirmView(){var rows=rp2Docs(),tp=0;rows.forEach(function(r){tp+=r.pend.length;});var op=S.ui.rp2Doc;
+  return rp2Head('firm',rp2SecSel())+'<div class="vac-boxes rp-kpis">'+rp2Box('Documentos activos',rows.length)+rp2Box('Firmas pendientes',tp)+rp2Box('Documentos completos',rows.filter(function(r){return !r.pend.length;}).length)+'</div>'+
+    (rows.length?'<div class="table-wrap"><table class="vac-table rp-table"><thead><tr><th>Documento</th><th>Fecha límite</th><th class="num">Firmadas</th><th>Progreso</th><th></th></tr></thead><tbody>'+
+    rows.map(function(r){var pc=r.n?r.ok/r.n*100:0,late=r.d.deadline&&rp2DaysTo(r.d.deadline)<0&&r.pend.length,isOp=String(op)===String(r.d.id);
+      return '<tr><td><b>'+esc(r.d.title||'')+'</b></td><td>'+(r.d.deadline?esc(rp2Fmt(r.d.deadline))+(late?' <span class="chip chip-no">Vencida</span>':''):'—')+'</td><td class="num">'+r.ok+' de '+r.n+'</td><td class="rp-pc"><span class="rp-bar"><i style="width:'+pc.toFixed(1)+'%;background:'+(pc>=100?'#2f8a57':'#2f7de1')+'"></i></span><b>'+Math.round(pc)+' %</b></td><td>'+(r.pend.length?'<button class="ghost" data-act="rp2doc" data-id="'+r.d.id+'">'+(isOp?'Ocultar':'Ver quién falta')+'</button>':'✅')+'</td></tr>'+
+        (isOp?'<tr class="rp2-pend"><td colspan="5"><b>Faltan '+r.pend.length+':</b> '+r.pend.slice().sort(function(a,b){return String(a.center||'').localeCompare(String(b.center||''))||String(a.name).localeCompare(String(b.name));}).map(function(e){return esc(e.no)+' · '+esc(e.name)+' <small class="muted">('+esc(e.center||'')+')</small>';}).join(', ')+'</td></tr>':'');}).join('')+'</tbody></table></div>'
+    :rp2Empty('No hay documentos activos para firmar'+(rp2Sec()?' en esta sección':'')+'.'))+
+    '<p class="muted rp-note">El Excel tiene una fila por cada persona que aún no ha firmado cada documento.</p>';}
+C.rp2doc=function(b){S.ui.rp2Doc=String(S.ui.rp2Doc)===String(b.dataset.id)?null:b.dataset.id;stay();};
+
+/* --- plantilla --- */
+function rp2Years(e){var s=rp2Iso(e.start);if(!/^\d{4}-\d\d-\d\d$/.test(s))return null;return Math.max(0,(new Date(rp2Today()+'T12:00:00')-new Date(s+'T12:00:00'))/31557600000);}
+var RP2_TR=[['Menos de 1 año',0,1],['1 a 5 años',1,5],['5 a 10 años',5,10],['10 a 20 años',10,20],['Más de 20 años',20,999]];
+function rp2Plant(){var by={},list=S.employees.filter(rpActive).filter(rp2InSec);
+  list.forEach(function(e){var s=String(e.center||'').trim()||'(sin sección)',k=secNorm(s),r=by[k]||(by[k]={sec:s,n:0,sum:0,nk:0,nuevos:0,tr:[0,0,0,0,0],sinf:0}),y=rp2Years(e);r.n++;
+    if(y===null)r.sinf++;else{r.sum+=y;r.nk++;if(y<1)r.nuevos++;for(var i=0;i<RP2_TR.length;i++)if(y>=RP2_TR[i][1]&&y<RP2_TR[i][2]){r.tr[i]++;break;}}});
+  var rows=Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.n-a.n||a.sec.localeCompare(b.sec);});
+  var t={sec:'TOTAL',n:0,sum:0,nk:0,nuevos:0,tr:[0,0,0,0,0],sinf:0};rows.forEach(function(r){t.n+=r.n;t.sum+=r.sum;t.nk+=r.nk;t.nuevos+=r.nuevos;t.sinf+=r.sinf;r.tr.forEach(function(v,i){t.tr[i]+=v;});});
+  return {rows:rows,tot:t,list:list};}
+function rp2Avg(r){return r.nk?rpF1(r.sum/r.nk)+' años':'—';}
+function rp2PlantView(){var P=rp2Plant(),t=P.tot;
+  return rp2Head('plant',rp2SecSel())+'<div class="vac-boxes rp-kpis">'+rp2Box('Personas',t.n)+rp2Box('Secciones',P.rows.length)+rp2Box('Antigüedad media',rp2Avg(t))+rp2Box('Entradas último año',t.nuevos)+'</div>'+
+    (P.rows.length?'<div class="table-wrap"><table class="vac-table rp-table"><thead><tr><th>Sección</th><th class="num">Personas</th><th class="num">Antigüedad media</th>'+RP2_TR.map(function(x){return '<th class="num">'+x[0]+'</th>';}).join('')+'</tr></thead><tbody>'+
+    P.rows.concat([t]).map(function(r){return '<tr'+(r===t?' class="rp-tot"':'')+'><td>'+(r===t?'Total':esc(r.sec))+'</td><td class="num">'+r.n+'</td><td class="num">'+rp2Avg(r)+'</td>'+r.tr.map(function(v){return '<td class="num">'+(v||'·')+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>'
+    :rp2Empty('No hay personas en esta sección.'))+
+    '<p class="muted rp-note">Antigüedad según la fecha de incorporación de cada ficha'+(t.sinf?'. '+t.sinf+' persona'+(t.sinf===1?' no tiene':'s no tienen')+' fecha de incorporación y no cuenta'+(t.sinf===1?'':'n')+' en la media':'')+'. El Excel tiene una fila por persona.</p>';}
+
+/* --- incidencias del mes (para pasar a nóminas) --- */
+function rp2Inc(ym){var off=vacOffDays(),days=rpDays(ym),first=days[0],last=days[days.length-1],out=[],pend=0;
+  S.leaves.forEach(function(l){if(l.deleted||!l.start)return;var en=l.end||l.start;if(en<first||l.start>last)return;var e=rp2Emp(l.eid);if(!e.id||!rp2InSec(e))return;
+    if(lvStatus(l.status)==='Pendiente'){pend++;return;}if(lvStatus(l.status)!=='Aprobada')return;
+    var a=l.start<first?first:l.start,b=en>last?last:en,nat=0,lab=0,d=new Date(a+'T12:00:00'),z=new Date(b+'T12:00:00');for(;d<=z;d.setDate(d.getDate()+1)){nat++;if(isWorkDay(isoD(d),off))lab++;}
+    out.push({e:e,tipo:l.kind||'Otros',desde:a,hasta:b,nat:nat,lab:lab,obs:(l.start<first||en>last?'Ausencia del '+fDMY(l.start)+' al '+fDMY(en):'')});});
+  (S.satreq||[]).forEach(function(x){if(x.deleted||String(x.date||'').slice(0,7)!==ym||satSt(x)!=='Autorizada')return;var e=rp2Emp(x.eid);if(!e.id||!rp2InSec(e))return;
+    out.push({e:e,tipo:'Sábado trabajado',desde:x.date,hasta:x.date,nat:1,lab:0,obs:''});});
+  out.sort(function(a,b){return String(a.e.no).localeCompare(String(b.e.no))||a.desde.localeCompare(b.desde);});return {rows:out,pend:pend};}
+function rp2IncView(){var ym=rpYm(),I=rp2Inc(ym),by={};I.rows.forEach(function(r){var k=r.tipo,o=by[k]||(by[k]={n:0,lab:0,nat:0});o.n++;o.lab+=r.lab;o.nat+=r.nat;});
+  var left='<div class="rp-month"><button class="ghost" data-act="rpmon" data-d="-1">‹</button><b>'+esc(rpMonthName(ym))+'</b><button class="ghost" data-act="rpmon" data-d="1">›</button></div>'+rp2SecSel();
+  return rp2Head('inc',left)+
+    '<div class="vac-boxes rp-kpis">'+rp2Box('Incidencias',I.rows.length)+Object.keys(by).sort().map(function(k){return rp2Box(esc(k),by[k].n+' <small>('+(function(n){return n+(n===1?' día':' días');})(k==='Sábado trabajado'?by[k].nat:by[k].lab)+')</small>');}).join('')+'</div>'+
+    (I.pend?'<p class="flash error rp2-warn">⚠️ Hay <b>'+I.pend+'</b> ausencia'+(I.pend===1?'':'s')+' de este mes pendiente'+(I.pend===1?'':'s')+' de aprobar. No salen en este listado hasta que se aprueben.</p>':'')+
+    (I.rows.length?'<div class="table-wrap"><table class="vac-table rp-table"><thead><tr><th>Nº</th><th>Nombre</th><th>Sección</th><th>Incidencia</th><th>Desde</th><th>Hasta</th><th class="num">Días naturales</th><th class="num">Días laborables</th></tr></thead><tbody>'+
+    I.rows.map(function(r){return '<tr><td>'+esc(r.e.no)+'</td><td>'+esc(r.e.name)+'</td><td>'+esc(r.e.center||'')+'</td><td>'+esc(r.tipo)+(r.obs?'<br><small class="muted">'+esc(r.obs)+'</small>':'')+'</td><td>'+fDMY(r.desde)+'</td><td>'+fDMY(r.hasta)+'</td><td class="num">'+r.nat+'</td><td class="num">'+r.lab+'</td></tr>';}).join('')+'</tbody></table></div>'
+    :rp2Empty('No hay incidencias aprobadas en '+esc(rpMonthName(ym))+'.'))+
+    '<p class="muted rp-note">Ausencias aprobadas y sábados autorizados del mes, cortadas al mes (si una baja empieza antes o acaba después, solo cuentan los días de este mes). Sirve para pasar las incidencias a nóminas. El Excel trae una columna «Código A3» vacía: cuando tengáis la plantilla de importación de A3 se puede rellenar sola.</p>';}
+
+/* --- pestañas y Excel --- */
+var RP2_TABS=[['abs','📉 Absentismo'],['vac','🏖️ Vacaciones'],['inc','🧾 Incidencias del mes'],['plant','👥 Plantilla'],['form','🎓 Formación'],['epi','🦺 EPIs'],['firm','✍️ Firmas'],['uh','⏱️ Horas sindicales'],['sat','📅 Sábados']];
+function vInformes2(){if(role()!=='hr')return '';var t=S.ui.rpTab||'abs';
+  var body=t==='inc'?rp2IncView():t==='plant'?rp2PlantView():t==='form'?rp2FormView():t==='epi'?rp2EpiView():t==='firm'?rp2FirmView():t==='vac'?rpVacView():t==='uh'?rpUhView():t==='sat'?rpSatView():rpAbsView();
+  return '<div class="card-title-row"><div><h1>Informes</h1><p class="muted">Datos de toda la plantilla para RR. HH. Se pueden descargar en Excel.</p></div></div>'+
+    '<div class="tabs rp-tabs">'+RP2_TABS.map(function(x){return '<button data-act="rptab" data-t="'+x[0]+'" class="'+(t===x[0]?'on':'')+'">'+x[1]+'</button>';}).join('')+'</div>'+
+    '<section class="card">'+body+'</section>';}
+VIEWS.informes=[vInformes2,['hr']];
+var _rpxls0=C.rpxls;
+C.rpxls=function(b){var t=b.dataset.t;if(['form','epi','firm','plant','inc'].indexOf(t)<0)return _rpxls0(b);
+  if(typeof XLSX==='undefined'){flash('No se ha podido cargar el generador de Excel. Recarga la página.','error');return stay();}
+  var sec=rp2Sec(),suf=sec?'-'+secNorm(sec).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-'):'',name,data;
+  if(t==='form'){name='formacion';data=rp2Train().sort(function(a,b){return (a.d===null?1e9:a.d)-(b.d===null?1e9:b.d);}).map(function(r){return {'Nº':r.e.no,'Nombre':r.e.name,'Sección':r.e.center||'','Formación':r.t.title||'','Realizada':rp2Fmt(r.t.done),'Caduca':rp2Fmt(r.t.expires),'Estado':r.st,'Días para caducar':r.d===null?'':r.d};});}
+  else if(t==='epi'){name='epis';data=rp2Epis().sort(function(a,b){return String(b.x.req_at).localeCompare(String(a.x.req_at));}).map(function(r){return {'Pedido':rp2Fmt(r.x.req_at),'Nº':r.e.no||'','Nombre':r.e.name||'','Sección':r.sec,'Material':epiList(r.x).join(', '),'Estado':r.x.status||'','Entregado':rp2Fmt(r.x.deliv_at),'Entregado por':r.x.deliv_by||'','Acuse firmado':rp2Fmt(r.x.rec_at)};});}
+  else if(t==='firm'){name='firmas-pendientes';data=[];rp2Docs().forEach(function(r){r.pend.forEach(function(e){data.push({'Documento':r.d.title||'','Fecha límite':rp2Fmt(r.d.deadline),'Nº':e.no,'Nombre':e.name,'Sección':e.center||''});});});}
+  else if(t==='plant'){name='plantilla';data=rp2Plant().list.slice().sort(function(a,b){return String(a.center||'').localeCompare(String(b.center||''))||String(a.name).localeCompare(String(b.name));}).map(function(e){var y=rp2Years(e);return {'Nº':e.no,'Nombre':e.name,'Sección':e.center||'','Categoría':e.category||'','Incorporación':rp2Fmt(e.start),'Antigüedad (años)':y===null?'':Math.round(y*10)/10};});}
+  else{var ym=rpYm();name='incidencias-'+ym;data=rp2Inc(ym).rows.map(function(r){return {'Nº trabajador':r.e.no,'Nombre':r.e.name,'Sección':r.e.center||'','Incidencia':r.tipo,'Código A3':'','Desde':fDMY(r.desde),'Hasta':fDMY(r.hasta),'Días naturales':r.nat,'Días laborables':r.lab,'Observaciones':r.obs};});}
+  if(!data.length){flash('No hay datos para descargar.','error');return stay();}
+  var wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(data);ws['!cols']=Object.keys(data[0]).map(function(k){return {wch:Math.max(10,k.length+2,Math.min(50,Math.max.apply(null,data.map(function(r){return String(r[k]).length;}))+2))};});
+  XLSX.utils.book_append_sheet(wb,ws,'Informe');XLSX.writeFile(wb,'informe-'+name+suf+'.xlsx');};
 
 boot();
 })();
