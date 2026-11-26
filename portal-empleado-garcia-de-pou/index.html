@@ -735,7 +735,7 @@ function audit(){/* en la demo no se guarda auditoría */}
 
 /* ---------- protección de datos ---------- */
 function signatureOf(eid){return S.signatures.filter(function(x){return x.eid===eid&&x.version===PRIVACY_VERSION;})[0]||null;}
-function fechaHora(s){var p=s.split('T'),d=p[0].split('-');return d[2]+'/'+d[1]+'/'+d[0]+' a las '+(p[1]||'');}
+function fechaHora(s){if(!s)return '';var p=String(s).split('T'),d=p[0].split('-');return d[2]+'/'+d[1]+'/'+d[0]+' a las '+(p[1]||'');}
 function privacySummary(){var act=S.employees.filter(function(e){return e.active;}).sort(function(a,b){return a.name<b.name?-1:1;}),pend=act.filter(function(e){return !signatureOf(e.id);});return {total:act.length,signed:act.length-pend.length,pending:pend};}
 function vPrivacy(pub){
   var sig=pub?null:signatureOf(me().id);
@@ -952,7 +952,7 @@ function parsePeriod(p){
 }
 function vNominas(){
   var hr=role()==='hr',rows=hr?S.payslips.slice().reverse():S.payslips.filter(function(p){return p.eid===me().id;});
-  var yearSel=S.ui.payYear,avail={},years={};years[yearSel]=1;years[today().getFullYear()]=1;
+  var yearSel=+S.ui.payYear||today().getFullYear(),avail={},years={};years[yearSel]=1;years[today().getFullYear()]=1;
   rows.forEach(function(r){var pp=parsePeriod(r.period);if(!pp)return;years[pp[0]]=1;if(pp[0]===yearSel&&!avail[pp[1]])avail[pp[1]]=r;});
   var mnames=MONTHS.map(cap),emps=S.employees.filter(function(e){return e.active&&isStaffRole(e.role);});
   return '<div class="pay-heading"><div><span class="eyebrow">DOCUMENTACIÓN PERSONAL</span><h1>'+(hr?'Gestión de nóminas':'Mis nóminas')+'</h1><p class="muted">'+(hr?'Publica las nóminas para que cada trabajador vea únicamente las suyas.':'Elige un año y pulsa directamente sobre el mes que quieras consultar.')+'</p></div>'+(hr?'':'<div class="pay-lock">🔒 Acceso privado</div>')+'</div>'+
@@ -1931,7 +1931,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795704553';
+var LANG_V='1795705438';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
