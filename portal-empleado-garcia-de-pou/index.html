@@ -1931,7 +1931,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795705438';
+var LANG_V='1795706312';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -4678,7 +4678,7 @@ async function trTranslateLang(code){
       if(e.status===429||e.status===502){var w=Math.max(15,Math.min(90,+e.wait||20));TRJ.msg='La IA pide esperar un momento ('+w+' s)…';stay();await trSleep(w*1000);TRJ.msg='';stay();continue;}throw e;}}throw new Error('La IA no responde. Inténtalo más tarde.');}
   if(extra){var mm=await call(ES_M.map(cap).concat(ES_m).concat(ES_D.map(cap)));cur.M=mm.slice(0,12).map(function(x){return String(x).toLowerCase();});cur.m=mm.slice(12,24).map(function(x){return String(x).toLowerCase();});cur.D=mm.slice(24,31).map(function(x){return String(x).toLowerCase();});TRJ.done++;}
   var i=0,since=0;
-  while(i<need.length){var batch=[],len=0;while(i<need.length&&batch.length<40&&len+need[i].length<6000){batch.push(need[i]);len+=need[i].length;i++;}
+  while(i<need.length){var batch=[],len=0;while(i<need.length&&batch.length<25&&len+need[i].length<4000){batch.push(need[i]);len+=need[i].length;i++;}
     var t=await call(batch);batch.forEach(function(k,x){if(t[x])cur.map[k]=t[x];});TRJ.done+=batch.length;since+=batch.length;stay();
     if(since>=400){await trUploadJson(code+'.json',cur);since=0;}}
   await trUploadJson(code+'.json',cur);
