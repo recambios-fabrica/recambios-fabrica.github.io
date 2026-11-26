@@ -1931,7 +1931,7 @@ render=(function(orig){return function(a){
   if(S&&S.session&&!langBusy){var u=me();if(u&&u.lang&&u.lang!==LANG&&LANG_READY.indexOf(u.lang)>=0){try{localStorage.setItem('portal_lang',u.lang);}catch(e){}loadLang(u.lang).then(function(){render(false);});}
     else if(u&&!u.lang&&LANG!=='es'){u.lang=LANG;}}
   orig(a);langDecorate();};})(render);
-var LANG_V='1795706312';
+var LANG_V='1795709252';
 (function(){var l=langSaved();if(l&&l!=='es')loadLang(l).then(function(){try{render(false);}catch(e){}});})();
 
 /* ===== 18) Organigrama de la empresa: lo ven todos; RR. HH. lo edita (cargos y nombres) ===== */
@@ -4656,7 +4656,7 @@ function trPubUrl(f){return URL0+'/storage/v1/object/public/i18n/'+f+'?v='+Date.
 function trLoadIndex(){if(!URL0)return Promise.resolve(null);return realFetch(trPubUrl('index.json')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(j){
   TR_IDX=j||{langs:{}};Object.keys(TR_IDX.langs||{}).forEach(function(c){if((TR_IDX.langs[c]||{}).ready&&LANG_READY.indexOf(c)<0)LANG_READY.push(c);});return TR_IDX;});}
 function i18nFetch(code){
-  if(TR_REMOTE.indexOf(code)<0)return fetch('i18n-'+code+'.json?v='+LANG_V).then(function(r){if(!r.ok)throw new Error('lang');return r.json();});
+  if(['ro','fr','pt','de','it','pl','zh','tl','ar'].indexOf(code)<0)return fetch('i18n-'+code+'.json?v='+LANG_V).then(function(r){if(!r.ok)throw new Error('lang');return r.json();});
   return realFetch(trPubUrl(code+'.json')).then(function(r){if(!r.ok)throw new Error('lang');return r.json();}).then(function(j){var mp=j.map||{};
     return {t:I18N_KEYS.map(function(k){return mp[k[0]]||'';}),M:j.M||ES_M,m:j.m||ES_m,D:j.D||ES_D};});}
 (function(){var want=null;try{want=localStorage.getItem('portal_lang');}catch(e){}
